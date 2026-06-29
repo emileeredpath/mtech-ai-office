@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { CharacterController } from '@/systems/CharacterController';
-import { Navigation } from '@/systems/Navigation';
 
 interface CharacterProps {
   id: string;
@@ -11,9 +10,10 @@ interface CharacterProps {
   position: [number, number, number];
   color: string;
   deskId: string;
+  controller?: CharacterController;
 }
 
-export function Character({ position, color, deskId }: CharacterProps) {
+export function Character({ position, color, controller }: CharacterProps) {
   const groupRef = useRef<THREE.Group>(null);
   const leftArmRef = useRef<THREE.Mesh>(null);
   const rightArmRef = useRef<THREE.Mesh>(null);
@@ -23,13 +23,7 @@ export function Character({ position, color, deskId }: CharacterProps) {
   const headRef = useRef<THREE.Mesh>(null);
 
   const [idleTime, setIdleTime] = useState(0);
-  const controllerRef = useRef<CharacterController | null>(null);
-  const navigationRef = useRef<Navigation | null>(null);
-
-  useEffect(() => {
-    navigationRef.current = new Navigation();
-    controllerRef.current = new CharacterController(deskId, navigationRef.current);
-  }, [deskId]);
+  const controllerRef = useRef<CharacterController | null>(controller || null);
 
   useFrame((_state, deltaTime) => {
     if (!groupRef.current || !controllerRef.current) return;
