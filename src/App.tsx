@@ -3,6 +3,7 @@ import { StatusBar } from '@/components/layout/StatusBar';
 import { OfficeSidebar } from '@/components/layout/OfficeSidebar';
 import { OfficePage } from '@/pages/OfficePage';
 import { EmployeePage } from '@/pages/EmployeePage';
+import { AnalyticsPage } from '@/pages/AnalyticsPage';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<OfficePage />} />
               <Route path="/employee/:id" element={<EmployeePage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
             </Routes>
           </main>
         </div>
