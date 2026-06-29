@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import type { Employee } from '@/types/employee';
 import { DeskAvatar } from './DeskAvatar';
 import { StatusBadge } from './StatusBadge';
@@ -9,17 +10,43 @@ import { Badge } from '@/components/ui/Badge';
 interface DeskCardProps {
   employee: Employee;
   index: number;
+  isDropTarget?: boolean;
+  onDragStart?: (taskId: string, fromEmployeeId: string) => void;
+  onDragEnd?: () => void;
 }
 
-export function DeskCard({ employee, index }: DeskCardProps) {
+export function DeskCard({ employee, index, isDropTarget = false, onDragStart, onDragEnd }: DeskCardProps) {
   const navigate = useNavigate();
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+
+  const handleTaskDragStart = (e: React.DragEvent, taskId: string) => {
+    e.stopPropagation();
+    setDraggingTaskId(taskId);
+    const taskData = {
+      taskId,
+      employeeId: employee.id,
+      employeeName: employee.name,
+    };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify(taskData));
+    onDragStart?.(taskId, employee.id);
+  };
+
+  const handleTaskDragEnd = (e: React.DragEvent) => {
+    e.stopPropagation();
+    setDraggingTaskId(null);
+    onDragEnd?.();
+  };
 
   return (
     <motion.div
-      className="rounded-xl p-5 cursor-pointer relative overflow-hidden"
+      className={`rounded-xl p-5 cursor-pointer relative overflow-hidden transition-all ${
+        isDropTarget ? 'scale-105' : ''
+      }`}
       style={{
         backgroundColor: '#1D2A3A',
-        border: '1px solid #3a4f6a',
+        border: isDropTarget ? '2px solid #F9701F' : '1px solid #3a4f6a',
+        boxShadow: isDropTarget ? 'inset 0 0 12px rgba(249, 112, 31, 0.6)' : undefined,
       }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -66,8 +93,13 @@ export function DeskCard({ employee, index }: DeskCardProps) {
 
       {/* Current task */}
       <div
-        className="rounded-lg p-2.5 mb-3 text-xs min-h-[42px]"
+        className={`rounded-lg p-2.5 mb-3 text-xs min-h-[42px] ${
+          employee.currentTask ? 'cursor-grab active:cursor-grabbing' : ''
+        } ${draggingTaskId === employee.currentTask?.id ? 'opacity-50' : ''}`}
         style={{ backgroundColor: '#243347' }}
+        draggable={!!employee.currentTask}
+        onDragStart={(e) => employee.currentTask && handleTaskDragStart(e as any, employee.currentTask.id)}
+        onDragEnd={handleTaskDragEnd as any}
       >
         {employee.currentTask ? (
           <p className="line-clamp-2 leading-relaxed" style={{ color: '#B4B6B9' }}>
@@ -77,6 +109,27 @@ export function DeskCard({ employee, index }: DeskCardProps) {
           <p className="italic" style={{ color: '#8F9194' }}>No active task</p>
         )}
       </div>
+
+      {/* Queue items preview (first 2) */}
+      {employee.taskQueue.length > 0 && (
+        <div className="space-y-1.5 mb-3">
+          {employee.taskQueue.slice(0, 2).map((task) => (
+            <div
+              key={task.id}
+              className={`rounded-lg p-1.5 text-xs cursor-grab active:cursor-grabbing line-clamp-1 border border-transparent transition-opacity ${
+                draggingTaskId === task.id ? 'opacity-50' : ''
+              }`}
+              style={{ backgroundColor: '#243347', color: '#8F9194' }}
+              draggable
+              onDragStart={(e) => handleTaskDragStart(e as any, task.id)}
+              onDragEnd={handleTaskDragEnd as any}
+              title={task.title}
+            >
+              {task.title}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Workload */}
       <WorkloadBar percent={employee.workloadPercent} accentColor={employee.accentColor} />
