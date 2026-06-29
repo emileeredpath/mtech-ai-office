@@ -7,18 +7,21 @@ import { useEffect, useRef } from 'react';
 import { EmployeeBehavior } from '@/systems/EmployeeBehavior';
 import { Navigation } from '@/systems/Navigation';
 import { globalEventBus } from '@/systems/EventBus';
+import { SandyAgent } from '@/systems/SandyAgent';
 import {
   initializeBehaviorTriggers,
   updateBehaviorTriggers,
 } from '@/systems/BehaviorTriggers';
+import { appearancePresets } from '@/types/character';
 
 export function OfficeScene() {
   const employees = useOfficeStore((state) => state.employees);
   const behaviorRef = useRef<Map<string, EmployeeBehavior>>(new Map());
   const navigationRef = useRef<Navigation | null>(null);
+  const sandyRef = useRef<SandyAgent | null>(null);
 
   useEffect(() => {
-    // Initialize navigation and behaviors
+    // Initialize navigation, behaviors, and Sandy
     navigationRef.current = new Navigation();
     behaviorRef.current.clear();
 
@@ -33,11 +36,16 @@ export function OfficeScene() {
       behaviorRef.current.set(emp.id, behavior);
     });
 
+    // Initialize Sandy
+    sandyRef.current = new SandyAgent('center', navigationRef.current);
+    sandyRef.current.greetUser();
+
     initializeBehaviorTriggers();
 
     return () => {
       behaviorRef.current.clear();
       globalEventBus.clear();
+      sandyRef.current = null;
     };
   }, [employees]);
 
@@ -57,6 +65,8 @@ export function OfficeScene() {
     '8': [6, 0.5, 2],
   };
 
+  const appearanceKeys = Object.keys(appearancePresets);
+
   return (
     <Canvas>
       <Lighting />
@@ -68,18 +78,33 @@ export function OfficeScene() {
         const position = deskPositions[deskId] || [0, 0.5, 0];
         const behavior = behaviorRef.current.get(employee.id);
         const controller = behavior?.getController();
+        const appearanceKey = appearanceKeys[index] || 'marketingDirector';
+        const appearance = appearancePresets[appearanceKey];
+
         return (
           <Character
             key={employee.id}
             id={employee.id}
             name={employee.name}
             position={position}
-            color={employee.accentColor}
             deskId={deskId}
+            appearance={appearance}
             controller={controller}
           />
         );
       })}
+
+      {/* Sandy - will be rendered here */}
+      {sandyRef.current && (
+        <Character
+          id="sandy"
+          name="Sandy"
+          position={[0, 0.5, -2]}
+          deskId="center"
+          appearance={appearancePresets.marketingDirector}
+          controller={sandyRef.current.getController()}
+        />
+      )}
     </Canvas>
   );
 }
