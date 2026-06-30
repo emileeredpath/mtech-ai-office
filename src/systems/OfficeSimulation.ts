@@ -58,7 +58,7 @@ export class OfficeSimulation {
   private simulationLoop(): void {
     if (!this.isRunning) return;
 
-    const deltaTime = this.updateRate / 1000;
+    // const deltaTime = this.updateRate / 1000;
 
     console.log('OfficeSimulation: Loop tick');
 

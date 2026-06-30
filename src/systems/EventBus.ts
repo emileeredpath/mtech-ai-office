@@ -4,7 +4,14 @@ export type EventType =
   | 'taskReassigned'
   | 'taskApproved'
   | 'briefingStarted'
-  | 'briefingEnded';
+  | 'briefingEnded'
+  | 'workflowCreated'
+  | 'workflowStarted'
+  | 'stepStarted'
+  | 'stepCompleted'
+  | 'workflowCompleted'
+  | 'handoffReceived'
+  | 'taskAssigned';
 
 export interface EventPayload {
   taskCreated: { employeeId: string; taskId: string };
@@ -13,6 +20,13 @@ export interface EventPayload {
   taskApproved: { employeeId: string; taskId: string; approverId: string };
   briefingStarted: Record<string, never>;
   briefingEnded: Record<string, never>;
+  workflowCreated: { workflowId: string; description: string; assignedEmployees: string[]; steps: any[] };
+  workflowStarted: { workflowId: string };
+  stepStarted: { workflowId: string; stepIndex: number; step: any };
+  stepCompleted: { workflowId: string; stepIndex: number; step: any };
+  workflowCompleted: { workflowId: string; workflow: any };
+  handoffReceived: { fromEmployeeId: string; toEmployeeId: string; description: string };
+  taskAssigned: { employeeId: string; employeeName: string; taskId: string; description: string };
 }
 
 type EventCallback<T extends EventType> = (payload: EventPayload[T]) => void;
@@ -82,8 +96,19 @@ export class EventBus {
     });
   }
 
-  off<T extends EventType>(event: T) {
-    this.listeners.delete(event);
+  off<T extends EventType>(event: T, callback?: EventCallback<T>) {
+    if (!callback) {
+      this.listeners.delete(event);
+      return;
+    }
+
+    const list = this.listeners.get(event);
+    if (list) {
+      const index = list.findIndex((l) => l.callback === callback);
+      if (index > -1) {
+        list.splice(index, 1);
+      }
+    }
   }
 
   clear() {

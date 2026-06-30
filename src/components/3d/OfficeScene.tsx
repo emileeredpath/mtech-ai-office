@@ -1,7 +1,7 @@
 import { Canvas } from './Canvas';
 import { Lighting } from './Lighting';
 import { Environment } from './Environment';
-import { Character } from './Character';
+// import { Character } from './Character';
 import { useOfficeStore } from '@/store/officeStore';
 import { useEffect, useRef } from 'react';
 import { Navigation } from '@/systems/Navigation';
@@ -12,7 +12,7 @@ import {
   initializeBehaviorTriggers,
   updateBehaviorTriggers,
 } from '@/systems/BehaviorTriggers';
-import { appearancePresets, personalityPresets } from '@/types/character';
+import { personalityPresets } from '@/types/character';
 
 export function OfficeScene() {
   const employees = useOfficeStore((state) => state.employees);
@@ -73,18 +73,18 @@ export function OfficeScene() {
   }, []);
 
   console.log('OfficeScene: Render starting');
-  const appearanceKeys = Object.keys(appearancePresets);
+  // const appearanceKeys = Object.keys(appearancePresets);
 
-  const deskPositions: Record<string, [number, number, number]> = {
-    '1': [-6, 0.5, -6],
-    '2': [-2, 0.5, -6],
-    '3': [2, 0.5, -6],
-    '4': [6, 0.5, -6],
-    '5': [-6, 0.5, 2],
-    '6': [-2, 0.5, 2],
-    '7': [2, 0.5, 2],
-    '8': [6, 0.5, 2],
-  };
+  // const deskPositions: Record<string, [number, number, number]> = {
+  //   '1': [-6, 0.5, -6],
+  //   '2': [-2, 0.5, -6],
+  //   '3': [2, 0.5, -6],
+  //   '4': [6, 0.5, -6],
+  //   '5': [-6, 0.5, 2],
+  //   '6': [-2, 0.5, 2],
+  //   '7': [2, 0.5, 2],
+  //   '8': [6, 0.5, 2],
+  // };
 
   console.log('OfficeScene: Building character list');
   console.log('OfficeScene: Rendering Canvas');
