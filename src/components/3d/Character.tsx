@@ -1,9 +1,11 @@
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { CharacterController } from '@/systems/CharacterController';
+import { Navigation } from '@/systems/Navigation';
 import { CharacterModel } from './CharacterModel';
 import { CharacterAppearance } from '@/types/character';
+import { globalCharacterMovement } from '@/systems/CharacterMovement';
 
 interface CharacterProps {
   id: string;
@@ -11,13 +13,25 @@ interface CharacterProps {
   position: [number, number, number];
   deskId: string;
   appearance: CharacterAppearance;
-  controller?: CharacterController;
 }
 
-export function Character({ position, appearance, controller }: CharacterProps) {
+export function Character({ id, position, appearance, deskId }: CharacterProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const controllerRef = useRef<CharacterController | null>(controller || null);
+  const controllerRef = useRef<CharacterController | null>(null);
   const idleTimeRef = useRef(0);
+
+  // Initialize controller on mount
+  useEffect(() => {
+    if (!controllerRef.current) {
+      const navigation = new Navigation();
+      controllerRef.current = new CharacterController(deskId, navigation);
+      globalCharacterMovement.registerCharacter(id, controllerRef.current);
+    }
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, [id, deskId]);
 
   useFrame((_state, deltaTime) => {
     if (!groupRef.current || !controllerRef.current) return;

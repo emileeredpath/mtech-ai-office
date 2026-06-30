@@ -67,8 +67,6 @@ export function BoardRoomScene() {
       {/* Characters seated around table */}
       {employees.map((employee, index) => {
         const position = chairPositions[index] || [0, 0.5, 0];
-        const behavior = behaviorRef.current.get(employee.id);
-        const controller = behavior?.getController();
         const appearanceKey = Object.keys(appearancePresets)[index] || 'marketingDirector';
         const appearance = appearancePresets[appearanceKey];
         return (
@@ -79,7 +77,6 @@ export function BoardRoomScene() {
             position={position}
             deskId="center"
             appearance={appearance}
-            controller={controller}
           />
         );
       })}
