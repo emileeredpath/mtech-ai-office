@@ -156,5 +156,5 @@ export class CharacterMovement {
 }
 
 export const globalCharacterMovement = new CharacterMovement(
-  new (require('./Navigation').Navigation)()
+  new Navigation()
 );
