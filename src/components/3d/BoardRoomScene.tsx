@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { EmployeeBehavior } from '@/systems/EmployeeBehavior';
 import { Navigation } from '@/systems/Navigation';
 import { globalEventBus } from '@/systems/EventBus';
+import { appearancePresets } from '@/types/character';
 
 export function BoardRoomScene() {
   const employees = useOfficeStore((state) => state.employees);
@@ -66,17 +67,16 @@ export function BoardRoomScene() {
       {/* Characters seated around table */}
       {employees.map((employee, index) => {
         const position = chairPositions[index] || [0, 0.5, 0];
-        const behavior = behaviorRef.current.get(employee.id);
-        const controller = behavior?.getController();
+        const appearanceKey = Object.keys(appearancePresets)[index] || 'marketingDirector';
+        const appearance = appearancePresets[appearanceKey];
         return (
           <Character
             key={employee.id}
             id={employee.id}
             name={employee.name}
             position={position}
-            color={employee.accentColor}
             deskId="center"
-            controller={controller}
+            appearance={appearance}
           />
         );
       })}
