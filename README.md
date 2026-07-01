@@ -1,1 +1,6 @@
-IyBhaS1vZmZpY2UKCkFJIE9mZmljZSBpcyBhIFNhbmR5LW9yY2hlc3RyYXRlZCB3b3JrZmxvdyBkYXNoYm9hcmQuIFlvdSBzcGVhayB0byBTYW5keSwgU2FuZHkKcm91dGVzIHdvcmsgdG8gdGhlIHJpZ2h0IHRlYW0gbWVtYmVyLCBhbmQgdGhlIG9mZmljZSB1cGRhdGVzIGF1dG9tYXRpY2FsbHkuCgpMaXZlIGF0OiBodHRwczovL2VtaWxlZXJlZHBhdGguZ2l0aHViLmlvL2FpLW9mZmljZS8K
+# ai-office
+
+AI Office is a Sandy-orchestrated workflow dashboard. You speak to Sandy, Sandy
+routes work to the right team member, and the office updates automatically.
+
+Live at: https://emileeredpath.github.io/ai-office/
