@@ -6,7 +6,7 @@ import { AnalyticsPage } from '@/pages/AnalyticsPage';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/mtech-ai-office">
       <Routes>
         <Route path="/" element={<SandyInterface />} />
         <Route path="/office" element={<OfficePage />} />
