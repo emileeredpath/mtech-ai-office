@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { OfficeScene } from '@/components/3d/OfficeScene';
+import { SandyResponsePanel } from '@/components/SandyResponsePanel';
 import { Send } from 'lucide-react';
-import { globalWorkflowOrchestrator } from '@/systems/WorkflowOrchestrator';
+import { globalWorkflowOrchestrator, WorkflowTask } from '@/systems/WorkflowOrchestrator';
 
 export function SandyInterface() {
   const [taskInput, setTaskInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [activeWorkflow, setActiveWorkflow] = useState<WorkflowTask | null>(null);
 
   const handleAskSandy = async () => {
     if (!taskInput.trim() || isProcessing) return;
@@ -16,6 +18,7 @@ export function SandyInterface() {
       const workflow = globalWorkflowOrchestrator.createWorkflow(taskInput);
       globalWorkflowOrchestrator.executeWorkflow(workflow.id);
 
+      setActiveWorkflow(workflow);
       setTaskInput('');
       setTimeout(() => setIsProcessing(false), 500);
     } catch (error) {
@@ -33,6 +36,9 @@ export function SandyInterface() {
 
   return (
     <div className="w-full h-screen flex flex-col" style={{ backgroundColor: '#111B26' }}>
+      {/* Sandy Response Panel */}
+      <SandyResponsePanel workflow={activeWorkflow} onClose={() => setActiveWorkflow(null)} />
+
       {/* 3D Office Scene - Full Viewport */}
       <div className="flex-1 relative">
         <OfficeScene />
