@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { OfficeFloorCards } from '@/components/office/OfficeFloorCards';
 import { BoardRoomPanel } from '@/components/BoardRoomPanel';
 import { SandyAgent } from '@/components/SandyAgent';
+import { WorkflowTrail } from '@/components/WorkflowTrail';
+import { SandyResponse } from '@/components/SandyResponse';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Send } from 'lucide-react';
 import { useOfficeStore } from '@/store/officeStore';
 import { RoutingEngine } from '@/systems/RoutingEngine';
-import { WorkflowEngine, type WorkflowEvent } from '@/systems/WorkflowEngine';
+import { WorkflowEngine } from '@/systems/WorkflowEngine';
+import type { RoutingResult } from '@/systems/RoutingEngine';
 
 export function SandyInterface() {
   const [taskInput, setTaskInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [sandyMessage, setSandyMessage] = useState<string | undefined>();
-  const [workflowEvents, setWorkflowEvents] = useState<WorkflowEvent[]>([]);
+  const [assigningEmployeeId, setAssigningEmployeeId] = useState<string | undefined>();
+  const [currentRouting, setCurrentRouting] = useState<RoutingResult | undefined>();
+  const [currentRequest, setCurrentRequest] = useState<string>('');
+  const [taskCount, setTaskCount] = useState(0);
+  const [showResponse, setShowResponse] = useState(false);
 
   const employees = useOfficeStore((state) => state.employees);
   const addTask = useOfficeStore((state) => state.addTask);
@@ -21,32 +27,28 @@ export function SandyInterface() {
     if (!taskInput.trim() || isProcessing) return;
 
     setIsProcessing(true);
-    setWorkflowEvents([]);
+    setShowResponse(false);
+    setCurrentRequest(taskInput);
 
     try {
       // Route the request
       const routingEngine = new RoutingEngine(employees);
       const routing = routingEngine.route(taskInput, employees);
+      setCurrentRouting(routing);
+
+      // Show primary assignee highlight
+      setAssigningEmployeeId(routing.primaryAssignee.id);
 
       // Create workflow
       const workflowEngine = new WorkflowEngine();
       const campaign = workflowEngine.createCampaign(taskInput, routing, employees);
 
-      // Listen for workflow events
-      workflowEngine.onEvent((event) => {
-        setWorkflowEvents((prev) => [...prev, event]);
-        setSandyMessage(event.message);
-      });
+      // Simulate task assignment with delay for visual effect
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Assign tasks
-      const tasks = workflowEngine.assignTasks(
-        campaign.id,
-        campaign.routing.taskBreakdown,
-        employees
-      );
-
-      // Add tasks to employees in the store
-      campaign.routing.taskBreakdown.forEach((item) => {
+      let totalTasks = 0;
+      routing.taskBreakdown.forEach((item) => {
         item.subtasks.forEach((subtask, idx) => {
           const task = {
             id: `task-${campaign.id}-${item.assignee.id}-${idx}`,
@@ -55,18 +57,24 @@ export function SandyInterface() {
             createdAt: new Date().toISOString(),
           };
           addTask(item.assignee.id, task);
+          totalTasks++;
         });
       });
 
-      // Generate Sandy's response
-      const sandyResponse = workflowEngine.generateSandyResponse(campaign);
-      setSandyMessage(sandyResponse);
-
+      setTaskCount(totalTasks);
+      setShowResponse(true);
       setTaskInput('');
-      setTimeout(() => setIsProcessing(false), 2000);
+
+      // Auto-hide response after 6 seconds
+      setTimeout(() => {
+        setShowResponse(false);
+        setAssigningEmployeeId(undefined);
+        setCurrentRouting(undefined);
+      }, 6000);
+
+      setIsProcessing(false);
     } catch (error) {
       console.error('Error creating workflow:', error);
-      setSandyMessage('Error processing request. Please try again.');
       setIsProcessing(false);
     }
   };
@@ -80,16 +88,21 @@ export function SandyInterface() {
 
   return (
     <MainLayout rightPanel={<BoardRoomPanel />}>
+      {/* Workflow Trail */}
+      {currentRouting && <WorkflowTrail routing={currentRouting} isActive={!showResponse} />}
 
       {/* Office Floor with Employee Desks */}
       <div className="w-full h-full flex flex-col relative">
         <div className="flex-1 relative overflow-hidden">
-          <OfficeFloorCards
-            onEmployeeAction={(employeeId, action) => {
-              console.log(`Employee action: ${employeeId} - ${action}`);
-            }}
-          />
+          <OfficeFloorCards assigningEmployeeId={assigningEmployeeId} />
         </div>
+
+        {/* Sandy Response Display */}
+        {showResponse && currentRouting && (
+          <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-40 w-full max-w-2xl px-6 pointer-events-none">
+            <SandyResponse routing={currentRouting} taskCount={taskCount} originalRequest={currentRequest} />
+          </div>
+        )}
 
         {/* Sandy Interaction Panel - Bottom Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-6 pointer-events-none">
@@ -100,7 +113,7 @@ export function SandyInterface() {
                 className="w-8 h-8 rounded-full flex items-center justify-center text-lg"
                 style={{ backgroundColor: '#F9701F' }}
               >
-                🎯
+                🧠
               </div>
               <label htmlFor="sandy-input" className="text-sm font-medium text-[#F0F4F8]">
                 Ask Sandy
@@ -114,7 +127,7 @@ export function SandyInterface() {
                 value={taskInput}
                 onChange={(e) => setTaskInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Tell Sandy what needs to happen... (e.g., 'Create a social media campaign proposal')"
+                placeholder="Tell Sandy what needs to happen..."
                 className="flex-1 px-4 py-3 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#F9701F] transition-all"
                 style={{
                   backgroundColor: '#1D2A3A',
@@ -136,9 +149,7 @@ export function SandyInterface() {
                 }}
               >
                 {isProcessing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  </>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <Send size={16} />
@@ -147,15 +158,10 @@ export function SandyInterface() {
                 )}
               </button>
             </div>
-
-            {/* Helper Text */}
-            <div className="mt-2 text-xs text-[#8F9194]">
-              Sandy will analyze the request, assign the right team members, and manage the workflow
-            </div>
           </div>
         </div>
 
-        {/* Gradient Fade for Visual Hierarchy */}
+        {/* Gradient Fade */}
         <div
           className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none"
           style={{
@@ -164,8 +170,8 @@ export function SandyInterface() {
         />
       </div>
 
-      {/* Sandy Agent - Always visible */}
-      <SandyAgent activeMessage={sandyMessage || (workflowEvents[workflowEvents.length - 1]?.message)} />
+      {/* Sandy Agent */}
+      <SandyAgent activeMessage={isProcessing ? '🧠 Analyzing your request...' : undefined} />
     </MainLayout>
   );
 }

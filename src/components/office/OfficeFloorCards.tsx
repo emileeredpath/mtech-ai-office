@@ -1,13 +1,11 @@
-import { EmployeeDeskCard } from './EmployeeDeskCard';
-import { CollaborationPaths } from './CollaborationPaths';
+import { PersonCard } from './PersonCard';
 import { useOfficeStore } from '@/store/officeStore';
 
 interface OfficeFloorCardsProps {
-  showCollaborationPaths?: boolean;
-  onEmployeeAction?: (employeeId: string, action: 'chat' | 'share' | 'help') => void;
+  assigningEmployeeId?: string;
 }
 
-export function OfficeFloorCards({ showCollaborationPaths = false, onEmployeeAction }: OfficeFloorCardsProps) {
+export function OfficeFloorCards({ assigningEmployeeId }: OfficeFloorCardsProps) {
   const employees = useOfficeStore((state) => state.employees);
 
   return (
@@ -26,74 +24,23 @@ export function OfficeFloorCards({ showCollaborationPaths = false, onEmployeeAct
 
       {/* Employees Grid */}
       <div className="flex-1 overflow-auto p-6 relative">
-        {/* Collaboration Paths Overlay */}
-        <CollaborationPaths />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max pt-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-max">
           {employees.map((emp) => (
-            <EmployeeDeskCard
+            <PersonCard
               key={emp.id}
-              emoji={emp.emoji}
-              name={emp.name}
-              role={emp.role}
-              status={emp.status}
-              currentTask={emp.currentTask}
-              workload={emp.workloadPercent}
-              onChat={() => {
-                console.log(`Chat with ${emp.name}`);
-                onEmployeeAction?.(emp.id, 'chat');
-              }}
-              onShare={() => {
-                console.log(`Share with ${emp.name}`);
-                onEmployeeAction?.(emp.id, 'share');
-              }}
-              onHelp={() => {
-                console.log(`Ask help from ${emp.name}`);
-                onEmployeeAction?.(emp.id, 'help');
-              }}
+              employee={emp}
+              isAssigning={assigningEmployeeId === emp.id}
             />
           ))}
         </div>
       </div>
 
-      {/* Quick Collaboration Footer */}
+      {/* Status Footer */}
       <div
-        className="px-6 py-4 border-t border-[#2E3B4A] flex-shrink-0 flex gap-3"
+        className="px-6 py-4 border-t border-[#2E3B4A] flex-shrink-0 text-center text-sm text-[#8F9194]"
         style={{ backgroundColor: '#111B26' }}
       >
-        <div className="flex-1 text-xs text-[#8F9194]">
-          <p className="font-medium text-[#F0F4F8] mb-1">Quick Collaboration</p>
-          <p className="text-xs">Use buttons above to chat, share updates, or ask for help</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-2 text-sm font-medium rounded transition-all"
-            style={{
-              backgroundColor: '#2E3B4A',
-              color: '#F0F4F8',
-            }}
-          >
-            Team Chat
-          </button>
-          <button
-            className="px-3 py-2 text-sm font-medium rounded transition-all"
-            style={{
-              backgroundColor: '#F9701F',
-              color: '#FFFFFF',
-            }}
-          >
-            Share Update
-          </button>
-          <button
-            className="px-3 py-2 text-sm font-medium rounded transition-all"
-            style={{
-              backgroundColor: '#2E3B4A',
-              color: '#F0F4F8',
-            }}
-          >
-            Ask for Help
-          </button>
-        </div>
+        Everyone is waiting for Sandy's direction
       </div>
     </div>
   );
