@@ -1,0 +1,280 @@
+import { useState } from 'react';
+import { Upload, X, Check } from 'lucide-react';
+import { useOfficeStore } from '@/store/officeStore';
+import type { Task } from '@/types/employee';
+
+interface SandyUpdate {
+  employeeName: string;
+  currentTask?: string;
+  taskQueue: string[];
+  priority: string;
+  workload: number;
+  status: 'available' | 'busy' | 'in-review' | 'idle' | 'offline';
+}
+
+export function SandySyncPanel() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [pastedContent, setPastedContent] = useState('');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
+  const employees = useOfficeStore((state) => state.employees);
+  const addTask = useOfficeStore((state) => state.addTask);
+  const updateStatus = useOfficeStore((state) => state.updateStatus);
+  const setWorkload = useOfficeStore((state) => state.setWorkload);
+
+  const parseSandyUpdate = (text: string): SandyUpdate[] => {
+    // Parse Sandy's task assignments from pasted content
+    // Format expected:
+    // Employee: Name
+    // Status: working/available
+    // Task: title
+    // Todo: item1, item2
+    // Workload: 50%
+
+    const updates: SandyUpdate[] = [];
+    const sections = text.split(/Employee:|---/g).filter((s) => s.trim());
+
+    sections.forEach((section) => {
+      const lines = section.split('\n').filter((l) => l.trim());
+      if (lines.length === 0) return;
+
+      const update: SandyUpdate = {
+        employeeName: '',
+        taskQueue: [],
+        priority: 'medium',
+        workload: 0,
+        status: 'available',
+      };
+
+      lines.forEach((line) => {
+        const [key, ...valueParts] = line.split(':');
+        const value = valueParts.join(':').trim().toLowerCase();
+
+        if (key.includes('Name') || key.trim() === '') {
+          const name = line.replace('Name:', '').trim();
+          if (name) update.employeeName = name;
+        }
+        if (key.includes('Status')) {
+          if (value.includes('busy') || value.includes('working'))
+            update.status = 'busy';
+          else if (value.includes('review')) update.status = 'in-review';
+          else if (value.includes('idle')) update.status = 'idle';
+          else update.status = 'available';
+        }
+        if (key.includes('Task') && !key.includes('Todo')) {
+          const task = line.replace(/Task:?/i, '').trim();
+          if (task && !task.startsWith('-')) update.currentTask = task;
+        }
+        if (key.includes('Todo') || key.includes('Queue')) {
+          const items = value.split(',').map((s) => s.trim());
+          update.taskQueue = items.filter((s) => s.length > 0);
+        }
+        if (key.includes('Workload') || key.includes('Load')) {
+          const num = parseInt(value);
+          if (!isNaN(num)) update.workload = Math.min(100, num);
+        }
+        if (key.includes('Priority')) {
+          if (value.includes('high')) update.priority = 'high';
+          else if (value.includes('low')) update.priority = 'low';
+          else update.priority = 'medium';
+        }
+      });
+
+      if (update.employeeName) {
+        updates.push(update);
+      }
+    });
+
+    return updates;
+  };
+
+  const handleSync = () => {
+    try {
+      setSyncStatus('idle');
+
+      if (!pastedContent.trim()) {
+        setStatusMessage('Please paste Sandy update content');
+        setSyncStatus('error');
+        return;
+      }
+
+      const updates = parseSandyUpdate(pastedContent);
+
+      if (updates.length === 0) {
+        setStatusMessage('Could not parse any employee updates');
+        setSyncStatus('error');
+        return;
+      }
+
+      // Apply updates to store
+      let successCount = 0;
+      updates.forEach((update) => {
+        const employee = employees.find(
+          (e) => e.name.toLowerCase() === update.employeeName.toLowerCase()
+        );
+
+        if (employee) {
+          // Update status
+          updateStatus(employee.id, update.status);
+
+          // Update workload
+          setWorkload(employee.id, update.workload);
+
+          // Add current task
+          if (update.currentTask) {
+            const currentTask: Task = {
+              id: `task-sandy-${Date.now()}-${employee.id}`,
+              title: update.currentTask,
+              priority: (update.priority as 'low' | 'medium' | 'high') || 'medium',
+              createdAt: new Date().toISOString(),
+            };
+            addTask(employee.id, currentTask);
+          }
+
+          // Add queue tasks
+          update.taskQueue.forEach((taskTitle, idx) => {
+            const queueTask: Task = {
+              id: `task-queue-${Date.now()}-${employee.id}-${idx}`,
+              title: taskTitle,
+              priority: 'medium',
+              createdAt: new Date().toISOString(),
+            };
+            addTask(employee.id, queueTask);
+          });
+
+          successCount++;
+        }
+      });
+
+      setSyncStatus('success');
+      setStatusMessage(`✅ Synced ${successCount} employees from Sandy`);
+      setPastedContent('');
+
+      setTimeout(() => {
+        setSyncStatus('idle');
+      }, 3000);
+    } catch (error) {
+      setSyncStatus('error');
+      setStatusMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 left-6 z-30 p-3 rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+        style={{
+          backgroundColor: '#2E3B4A',
+          color: '#F0F4F8',
+          border: '1px solid #3a4f6a',
+        }}
+        title="Sync updates from Sandy"
+      >
+        <Upload size={18} />
+        <span className="text-sm font-medium">Sync from Sandy</span>
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className="fixed bottom-6 left-6 z-40 w-96 rounded-lg shadow-2xl p-6 border"
+      style={{
+        backgroundColor: '#1D2A3A',
+        borderColor: '#3a4f6a',
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="font-bold text-[#F0F4F8]">Sync from Sandy</h3>
+          <p className="text-xs text-[#8F9194]">Paste task updates from Claude</p>
+        </div>
+        <button
+          onClick={() => setIsOpen(false)}
+          className="p-1 hover:bg-[#2E3B4A] rounded"
+        >
+          <X size={18} className="text-[#8F9194]" />
+        </button>
+      </div>
+
+      {/* Textarea */}
+      <textarea
+        value={pastedContent}
+        onChange={(e) => setPastedContent(e.target.value)}
+        placeholder="Paste Sandy's task assignment here...
+
+Example format:
+Employee: Sarah
+Status: working
+Task: Update website prices
+Todo: Research competitor pricing, Update database, Test checkout flow
+Workload: 75%
+
+Employee: Tisha
+Status: busy
+Task: Announce product update
+Todo: Create social post, Schedule email
+Workload: 60%"
+        className="w-full h-40 p-3 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#F9701F] mb-4"
+        style={{
+          backgroundColor: '#111B26',
+          color: '#F0F4F8',
+          borderColor: '#3a4f6a',
+          border: '1px solid #3a4f6a',
+        }}
+      />
+
+      {/* Status Message */}
+      {syncStatus !== 'idle' && (
+        <div
+          className="mb-4 p-3 rounded text-sm flex items-center gap-2"
+          style={{
+            backgroundColor:
+              syncStatus === 'success'
+                ? 'rgba(76, 175, 80, 0.2)'
+                : 'rgba(255, 107, 107, 0.2)',
+            color: syncStatus === 'success' ? '#4CAF50' : '#FF6B6B',
+          }}
+        >
+          {syncStatus === 'success' ? (
+            <Check size={16} />
+          ) : (
+            <X size={16} />
+          )}
+          {statusMessage}
+        </div>
+      )}
+
+      {/* Buttons */}
+      <div className="flex gap-2">
+        <button
+          onClick={handleSync}
+          className="flex-1 px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: '#F9701F',
+            color: '#FFFFFF',
+          }}
+        >
+          <Upload size={16} />
+          Sync Tasks
+        </button>
+        <button
+          onClick={() => {
+            setPastedContent('');
+            setIsOpen(false);
+          }}
+          className="flex-1 px-4 py-2 rounded-lg font-medium transition-all"
+          style={{
+            backgroundColor: '#2E3B4A',
+            color: '#F0F4F8',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}

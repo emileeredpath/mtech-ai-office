@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { OfficeFloorCards } from '@/components/office/OfficeFloorCards';
 import { BoardRoomPanel } from '@/components/BoardRoomPanel';
 import { SandyAgent } from '@/components/SandyAgent';
+import { SandySyncPanel } from '@/components/SandySyncPanel';
 import { WorkflowTrail } from '@/components/WorkflowTrail';
 import { SandyResponse } from '@/components/SandyResponse';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -172,6 +173,9 @@ export function SandyInterface() {
 
       {/* Sandy Agent */}
       <SandyAgent activeMessage={isProcessing ? '🧠 Analyzing your request...' : undefined} />
+
+      {/* Sandy Sync Panel */}
+      <SandySyncPanel />
     </MainLayout>
   );
 }
