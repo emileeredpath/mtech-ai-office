@@ -8,29 +8,41 @@ interface OfficeDeskProps {
 
 export function OfficeDesk({ employee, isSelected, isActive }: OfficeDeskProps) {
   return (
-    <div className="flex flex-col items-center gap-1 transition-all duration-300 hover:scale-105">
+    <div
+      className="transition-all duration-300"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '4px',
+      }}
+    >
       {/* Wooden Desk */}
       <div
-        className="relative rounded-sm overflow-hidden transition-all duration-300 cursor-pointer"
         style={{
-          width: '90px',
-          height: '60px',
-          background: isSelected
-            ? 'linear-gradient(135deg, #A0826D 0%, #B8945F 50%, #9A7E52 100%)'
-            : 'linear-gradient(135deg, #8B6F47 0%, #A0826D 50%, #8B7355 100%)',
-          border: `2px solid ${isSelected ? 'var(--accent-orange)' : 'rgba(0,0,0,0.2)'}`,
+          position: 'relative',
+          width: '100px',
+          height: '70px',
+          backgroundColor: '#A0826D',
+          background: 'linear-gradient(135deg, #B8945F 0%, #A0826D 50%, #8B7355 100%)',
+          border: isSelected ? '3px solid #F97021' : '2px solid rgba(0,0,0,0.3)',
+          borderRadius: '4px',
           boxShadow: isSelected
-            ? `0 0 16px var(--accent-orange), inset 0 0 8px rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.3)`
-            : 'inset 0 0 6px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.2)',
+            ? '0 0 16px rgba(249,112,31,0.6), inset 0 0 8px rgba(255,255,255,0.1)'
+            : 'inset 0 0 6px rgba(0,0,0,0.3), 0 3px 8px rgba(0,0,0,0.25)',
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          transform: isSelected ? 'scale(1.08)' : 'scale(1)',
         }}
       >
-        {/* Wood grain texture */}
+        {/* Wood texture */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)`,
+            backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 6px)`,
             opacity: 0.5,
+            pointerEvents: 'none',
           }}
         />
 
@@ -38,89 +50,141 @@ export function OfficeDesk({ employee, isSelected, isActive }: OfficeDeskProps) 
         <div
           style={{
             position: 'absolute',
-            top: '10px',
-            right: '8px',
-            width: '28px',
-            height: '22px',
-            backgroundColor: '#0f0f1e',
+            top: '12px',
+            right: '10px',
+            width: '32px',
+            height: '26px',
+            backgroundColor: '#1a1a2e',
             borderRadius: '2px',
-            border: `1px solid ${employee.accentColor}`,
-            boxShadow: `0 0 8px ${employee.accentColor}88, inset 0 0 4px ${employee.accentColor}44`,
+            border: `2px solid ${employee.accentColor}`,
+            boxShadow: `0 0 10px ${employee.accentColor}cc, inset 0 0 6px ${employee.accentColor}44`,
           }}
         />
 
-        {/* Seated figure on chair */}
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}>
+        {/* Person sitting at desk */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '12px',
+            top: '18px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1px',
+          }}
+        >
           {/* Head */}
           <div
             style={{
-              width: '12px',
-              height: '12px',
+              width: '13px',
+              height: '13px',
               borderRadius: '50%',
               backgroundColor: '#D2B48C',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
-              marginBottom: '2px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
             }}
           />
           {/* Torso (seated) */}
           <div
             style={{
-              width: '10px',
-              height: '10px',
+              width: '11px',
+              height: '11px',
               backgroundColor: employee.accentColor,
-              borderRadius: '1px',
-              opacity: 0.8,
+              borderRadius: '2px',
+              opacity: 0.85,
             }}
           />
         </div>
       </div>
 
-      {/* Job Title Label */}
+      {/* Desk Card - Black Header with Job Title */}
       <div
-        className="text-xs font-semibold text-center px-2 py-1 rounded transition-colors duration-300"
         style={{
-          backgroundColor: isSelected ? 'var(--accent-orange)' : 'transparent',
-          color: isSelected ? '#fff' : 'var(--text-primary)',
+          width: '100px',
+          backgroundColor: '#fff',
+          border: '1px solid #ddd',
+          borderRadius: '4px',
+          overflow: 'hidden',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          fontSize: '11px',
+          transition: 'all 0.2s ease',
         }}
       >
-        {employee.role}
+        {/* Black header bar */}
+        <div
+          style={{
+            backgroundColor: '#2c2c2c',
+            color: '#fff',
+            padding: '6px 6px',
+            fontWeight: 'bold',
+            fontSize: '9px',
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+            minHeight: '24px',
+          }}
+        >
+          {/* Status dot */}
+          <div
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: '#10B981',
+              boxShadow: '0 0 4px #10B981',
+            }}
+          />
+          <div style={{ flex: 1 }}>{employee.role}</div>
+        </div>
+
+        {/* Job title (also in body) */}
+        <div
+          style={{
+            padding: '6px 6px',
+            borderBottom: '1px solid #eee',
+            fontSize: '10px',
+            fontWeight: '600',
+            color: '#333',
+            textAlign: 'center',
+            lineHeight: '1.3',
+          }}
+        >
+          {employee.role}
+        </div>
+
+        {/* Today's Tasks */}
+        <div style={{ padding: '4px 6px' }}>
+          <div
+            style={{
+              fontSize: '8px',
+              fontWeight: 'bold',
+              color: '#666',
+              marginBottom: '3px',
+            }}
+          >
+            Today
+          </div>
+          <div style={{ fontSize: '8px', color: '#999', lineHeight: '1.4' }}>
+            {employee.tasks && employee.tasks.length > 0 ? (
+              <>
+                {employee.tasks.slice(0, 2).map((task, idx) => (
+                  <div key={idx} style={{ marginBottom: '2px' }}>
+                    ☐ {task.title.substring(0, 18)}...
+                  </div>
+                ))}
+                {employee.tasks.length > 2 && (
+                  <div style={{ marginTop: '2px', fontSize: '7px', color: '#bbb' }}>
+                    +{employee.tasks.length - 2} more
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{ fontStyle: 'italic', color: '#ccc' }}>No tasks</div>
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Task card indicator */}
-      {employee.tasks && employee.tasks.length > 0 && (
-        <div
-          className="text-xs px-2 py-0.5 rounded"
-          style={{
-            backgroundColor: 'rgba(249,112,31,0.2)',
-            border: '1px solid var(--accent-orange)',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          {employee.tasks.length} task{employee.tasks.length !== 1 ? 's' : ''}
-        </div>
-      )}
-
-      {/* Active indicator */}
-      {isActive && (
-        <div
-          className="text-xs font-semibold px-1.5 py-0.5 rounded"
-          style={{
-            backgroundColor: 'rgba(34,197,94,0.2)',
-            border: '1px solid #10B981',
-            color: '#10B981',
-          }}
-        >
-          Active
-        </div>
-      )}
     </div>
   );
 }
