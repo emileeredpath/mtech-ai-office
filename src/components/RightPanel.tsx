@@ -33,8 +33,11 @@ export function RightPanel() {
 
   return (
     <div
-      className="w-80 flex-shrink-0 h-full flex flex-col overflow-hidden border-l"
-      style={{ backgroundColor: '#0B0F16', borderColor: '#1E2733' }}
+      className="w-80 flex-shrink-0 h-full flex flex-col overflow-hidden border-l transition-colors duration-300"
+      style={{
+        backgroundColor: 'var(--bg-secondary)',
+        borderColor: 'var(--border-color)',
+      }}
     >
       <div className="flex-1 overflow-y-auto">
         {/* Today's To-Do */}
@@ -45,18 +48,21 @@ export function RightPanel() {
             todaysTodos.map((t) => (
               <div
                 key={t.id}
-                className="p-2 rounded border-l-2 mb-1.5"
-                style={{ backgroundColor: '#141C28', borderColor: TASK_STATUS_COLORS[t.status] }}
+                className="p-2 rounded border-l-2 mb-1.5 transition-colors duration-300"
+                style={{
+                  backgroundColor: 'var(--bg-tertiary)',
+                  borderColor: TASK_STATUS_COLORS[t.status],
+                }}
               >
-                <p className="text-xs font-medium line-clamp-2" style={{ color: '#E8ECF1' }}>
+                <p className="text-xs font-medium line-clamp-2 transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>
                   {t.title}
                 </p>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-xs" style={{ color: '#5C6879' }}>
-                    {t.employeeEmoji} {t.employee}
+                  <span className="text-xs transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
+                    {t.employee}
                   </span>
                   <span
-                    className="text-xs px-1.5 py-0.5 rounded"
+                    className="text-xs px-1.5 py-0.5 rounded transition-colors duration-300"
                     style={{
                       backgroundColor: `${TASK_STATUS_COLORS[t.status]}22`,
                       color: TASK_STATUS_COLORS[t.status],
@@ -83,11 +89,11 @@ export function RightPanel() {
               const pct = Math.min(100, active * 25);
               return (
                 <div key={emp.id}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span style={{ color: '#E8ECF1' }}>{emp.name}</span>
-                    <span style={{ color: '#5C6879' }}>{active} active</span>
+                  <div className="flex items-center justify-between text-xs mb-1 transition-colors duration-300">
+                    <span style={{ color: 'var(--text-primary)' }}>{emp.name}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{active} active</span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full" style={{ backgroundColor: '#1A2330' }}>
+                  <div className="w-full h-1.5 rounded-full transition-colors duration-300" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
                     <div
                       className="h-1.5 rounded-full transition-all"
                       style={{
@@ -99,7 +105,7 @@ export function RightPanel() {
                 </div>
               );
             })}
-            <div className="text-xs pt-1" style={{ color: '#5C6879' }}>
+            <div className="text-xs pt-1 transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
               Average load: {avgWorkload} active task{avgWorkload !== 1 ? 's' : ''} / person
             </div>
           </div>
@@ -111,7 +117,7 @@ export function RightPanel() {
             <EmptyRow text="No insights yet" />
           ) : (
             insights.map((insight, i) => (
-              <p key={i} className="text-xs mb-1.5 leading-relaxed" style={{ color: '#8B96A5' }}>
+              <p key={i} className="text-xs mb-1.5 leading-relaxed transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
                 {insight}
               </p>
             ))
@@ -124,8 +130,8 @@ export function RightPanel() {
             <EmptyRow text="Nothing waiting on review" />
           ) : (
             waitingForApproval.map((t) => (
-              <div key={t.id} className="text-xs mb-1.5" style={{ color: '#E8ECF1' }}>
-                {t.title} <span style={{ color: '#5C6879' }}>— {t.employee}</span>
+              <div key={t.id} className="text-xs mb-1.5 transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>
+                {t.title} <span style={{ color: 'var(--text-secondary)' }}>— {t.employee}</span>
               </div>
             ))
           )}
@@ -137,8 +143,8 @@ export function RightPanel() {
             <EmptyRow text="Nothing waiting on John" />
           ) : (
             waitingForJohn.map((t) => (
-              <div key={t.id} className="text-xs mb-1.5" style={{ color: '#E8ECF1' }}>
-                {t.title} <span style={{ color: '#5C6879' }}>— {t.employee}</span>
+              <div key={t.id} className="text-xs mb-1.5 transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>
+                {t.title} <span style={{ color: 'var(--text-secondary)' }}>— {t.employee}</span>
               </div>
             ))
           )}
@@ -148,12 +154,23 @@ export function RightPanel() {
   );
 }
 
-function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function Section({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="px-5 py-4 border-b" style={{ borderColor: '#1A2330' }}>
+    <div
+      className="px-5 py-4 border-b transition-colors duration-300"
+      style={{ borderColor: 'var(--border-color)' }}
+    >
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <h3 className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#E8ECF1' }}>
+        <h3 className="text-xs font-semibold uppercase tracking-wide transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>
           {title}
         </h3>
       </div>
@@ -164,7 +181,7 @@ function Section({ icon, title, children }: { icon: React.ReactNode; title: stri
 
 function EmptyRow({ text }: { text: string }) {
   return (
-    <p className="text-xs text-center py-2" style={{ color: '#5C6879' }}>
+    <p className="text-xs text-center py-2 transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
       {text}
     </p>
   );

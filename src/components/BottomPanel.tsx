@@ -20,8 +20,12 @@ export function BottomPanel() {
 
   return (
     <div
-      className="flex-shrink-0 border-t transition-all"
-      style={{ backgroundColor: '#0B0F16', borderColor: '#1E2733', height: isOpen ? 200 : 40 }}
+      className="flex-shrink-0 border-t transition-all duration-300"
+      style={{
+        backgroundColor: 'var(--bg-secondary)',
+        borderColor: 'var(--border-color)',
+        height: isOpen ? 200 : 40,
+      }}
     >
       {/* Header / tabs */}
       <div className="h-10 flex items-center justify-between px-4 flex-shrink-0">
@@ -39,9 +43,9 @@ export function BottomPanel() {
                 setTab(key);
                 setIsOpen(true);
               }}
-              className="px-3 py-1.5 rounded text-xs font-medium transition-all"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-all duration-300"
               style={{
-                color: tab === key && isOpen ? '#F9701F' : '#8B96A5',
+                color: tab === key && isOpen ? 'var(--accent-orange)' : 'var(--text-secondary)',
                 backgroundColor: tab === key && isOpen ? 'rgba(249, 112, 31, 0.12)' : 'transparent',
               }}
             >
@@ -51,8 +55,10 @@ export function BottomPanel() {
         </div>
         <button
           onClick={() => setIsOpen((v) => !v)}
-          className="p-1 rounded hover:bg-[#141C28] transition-colors"
-          style={{ color: '#5C6879' }}
+          className="p-1 rounded transition-all duration-300 hover:bg-[#141C28]"
+          style={{
+            color: 'var(--text-secondary)',
+          }}
         >
           {isOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
         </button>
@@ -73,18 +79,18 @@ export function BottomPanel() {
           {tab === 'activity' && (
             <div className="space-y-1.5">
               {activityLog.length === 0 ? (
-                <p className="text-xs py-4 text-center" style={{ color: '#5C6879' }}>
+                <p className="text-xs py-4 text-center transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
                   Activity will appear here once Sandy starts routing work.
                 </p>
               ) : (
                 [...activityLog]
                   .reverse()
                   .map((entry) => (
-                    <div key={entry.id} className="flex items-start gap-2 text-xs">
-                      <span style={{ color: '#5C6879' }} className="flex-shrink-0">
+                    <div key={entry.id} className="flex items-start gap-2 text-xs transition-colors duration-300">
+                      <span style={{ color: 'var(--text-secondary)' }} className="flex-shrink-0">
                         {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      <span style={{ color: '#C7CEDA' }}>{entry.message}</span>
+                      <span style={{ color: 'var(--text-primary)' }}>{entry.message}</span>
                     </div>
                   ))
               )}
@@ -105,7 +111,7 @@ function TaskGrid({
 }) {
   if (tasks.length === 0) {
     return (
-      <p className="text-xs py-4 text-center" style={{ color: '#5C6879' }}>
+      <p className="text-xs py-4 text-center transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
         {emptyText}
       </p>
     );
@@ -116,18 +122,18 @@ function TaskGrid({
       {tasks.map((t) => (
         <div
           key={t.id}
-          className="p-2 rounded border-l-2"
+          className="p-2 rounded border-l-2 transition-colors duration-300"
           style={{
-            backgroundColor: '#141C28',
+            backgroundColor: 'var(--bg-tertiary)',
             borderColor: TASK_STATUS_COLORS[t.status as keyof typeof TASK_STATUS_COLORS],
           }}
         >
-          <p className="text-xs font-medium line-clamp-1" style={{ color: '#E8ECF1' }}>
+          <p className="text-xs font-medium line-clamp-1 transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>
             {t.title}
           </p>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-xs" style={{ color: '#5C6879' }}>
-              {t.employeeEmoji} {t.employee}
+            <span className="text-xs transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
+              {t.employee}
             </span>
             <span
               className="text-xs px-1.5 py-0.5 rounded"
