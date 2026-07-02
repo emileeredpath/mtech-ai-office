@@ -227,14 +227,13 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
             </div>
           </div>
 
-          {/* Characters/People positioning areas */}
+          {/* Characters/People positioning areas - seated at desks */}
           <div style={{ position: 'absolute', inset: '0' }}>
-            {employees.slice(0, 4).map((emp, idx) => {
+            {employees.slice(0, 2).map((emp, idx) => {
+              // Only show 1-2 people per room, seated at desks
               const positions = [
-                { left: '20%', top: '25%' },
-                { left: '75%', top: '25%' },
-                { left: '35%', top: '60%' },
-                { left: '60%', top: '60%' },
+                { left: '25%', top: '35%' }, // Left desk
+                { left: '75%', top: '35%' }, // Right desk
               ];
               const pos = positions[idx] || positions[0];
 
@@ -248,12 +247,12 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
                     transform: 'translate(-50%, -50%)',
                   }}
                 >
-                  {/* Simple character figure */}
+                  {/* Person sitting at desk - larger and more visible */}
                   <div
                     style={{
                       position: 'relative',
-                      width: '20px',
-                      height: '30px',
+                      width: '24px',
+                      height: '32px',
                     }}
                   >
                     {/* Head */}
@@ -263,37 +262,49 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
                         top: 0,
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        width: '8px',
-                        height: '8px',
+                        width: '10px',
+                        height: '10px',
                         borderRadius: '50%',
                         backgroundColor: '#D2B48C',
-                        boxShadow: '0 0 2px rgba(0,0,0,0.3)',
+                        boxShadow: '0 0 3px rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(0,0,0,0.2)',
                       }}
                     />
-                    {/* Torso */}
+                    {/* Torso - seated position */}
                     <div
                       style={{
                         position: 'absolute',
-                        top: '8px',
+                        top: '10px',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        width: '10px',
-                        height: '12px',
-                        backgroundColor: '#3B82F6',
+                        width: '12px',
+                        height: '14px',
+                        backgroundColor: '#60A5FA',
+                        borderRadius: '2px',
+                        boxShadow: '0 0 3px rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(96,165,250,0.5)',
+                      }}
+                    />
+                    {/* Arms */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        left: '2px',
+                        width: '4px',
+                        height: '8px',
+                        backgroundColor: '#D2B48C',
                         borderRadius: '1px',
-                        boxShadow: '0 0 2px rgba(0,0,0,0.3)',
                       }}
                     />
-                    {/* Legs */}
                     <div
                       style={{
                         position: 'absolute',
-                        top: '20px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: '8px',
-                        height: '10px',
-                        backgroundColor: '#1F2937',
+                        top: '12px',
+                        right: '2px',
+                        width: '4px',
+                        height: '8px',
+                        backgroundColor: '#D2B48C',
                         borderRadius: '1px',
                       }}
                     />
@@ -389,9 +400,9 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
           />
         </div>
 
-        {/* Top label/header */}
+        {/* Top label/header - show room name and job title */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 top-1 px-3 py-1 rounded text-xs font-bold transition-all duration-300 z-10"
+          className="absolute left-1/2 -translate-x-1/2 top-1 px-3 py-1.5 rounded text-xs font-bold transition-all duration-300 z-10 whitespace-nowrap"
           style={{
             backgroundColor: 'var(--bg-card)',
             color: 'var(--text-primary)',
@@ -399,10 +410,12 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
             textShadow: `0 0 2px ${config.accentColor}44`,
           }}
         >
-          {room.name}
-          <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            {employees.length} {employees.length === 1 ? 'person' : 'people'}
-          </span>
+          <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{room.name}</div>
+          {(room as any).title && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              {(room as any).title}
+            </div>
+          )}
         </div>
 
         {/* Glow effect when active */}

@@ -28,7 +28,7 @@ export const employees: Employee[] = [
   {
     id: 'website-auditor',
     name: 'Sarah',
-    role: 'Website Auditor',
+    role: 'Website Manager',
     emoji: '👩‍🔬',
     deskNumber: 3,
     status: 'available',
