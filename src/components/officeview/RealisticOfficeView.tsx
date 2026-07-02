@@ -1,7 +1,6 @@
 import { useOfficeStore } from '@/store/officeStore';
-import { rooms } from '@/data/rooms';
 import type { Employee } from '@/types/employee';
-import { OfficeFloor } from './OfficeFloor';
+import { OfficeRoom } from './OfficeRoom';
 import { OfficeRightSidebar } from './OfficeRightSidebar';
 import { OfficeBottomBar } from './OfficeBottomBar';
 
@@ -32,12 +31,11 @@ export function RealisticOfficeView({
     >
       {/* Main office area: floor + right sidebar */}
       <div className="flex-1 flex gap-4 p-6 overflow-hidden">
-        {/* Office Floor - main center area */}
+        {/* Office Room - main center area */}
         <div className="flex-1 overflow-hidden">
-          <OfficeFloor
+          <OfficeRoom
             employees={employees}
             activeRoomIds={activeRoomIds}
-            sandyThinking={sandyThinking}
             sandyMessage={sandyMessage}
             selectedRoomId={selectedRoomId}
             onSelectRoom={onSelectRoom}
