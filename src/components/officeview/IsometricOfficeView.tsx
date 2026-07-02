@@ -26,10 +26,10 @@ export function IsometricOfficeView({
 
   return (
     <div
-      className="w-full h-full relative p-6 overflow-hidden"
+      className="w-full h-full relative p-6 overflow-hidden transition-colors duration-300"
       style={{
         background:
-          'radial-gradient(circle at 50% 15%, rgba(139,92,246,0.08), transparent 55%), radial-gradient(circle at 50% 85%, rgba(249,112,31,0.06), transparent 55%), #05070C',
+          'radial-gradient(circle at 50% 15%, var(--glow-purple), transparent 55%), radial-gradient(circle at 50% 85%, var(--glow-orange), transparent 55%), var(--bg-primary)',
       }}
     >
       <div

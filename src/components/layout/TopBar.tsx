@@ -1,3 +1,5 @@
+import { ThemeToggle } from '@/components/ThemeToggle';
+
 export type TopTab = 'office' | 'board-room' | 'reports' | 'analytics' | 'settings' | 'tasks';
 
 interface TopBarProps {
@@ -16,11 +18,14 @@ const TABS: { key: TopTab; label: string }[] = [
 export function TopBar({ active, onSelect }: TopBarProps) {
   return (
     <div
-      className="h-14 flex items-center justify-between px-6 flex-shrink-0 border-b"
-      style={{ backgroundColor: '#0D131C', borderColor: '#1E2733' }}
+      className="h-14 flex items-center justify-between px-6 flex-shrink-0 border-b transition-colors duration-300"
+      style={{
+        backgroundColor: 'var(--bg-secondary)',
+        borderColor: 'var(--border-color)',
+      }}
     >
       <div>
-        <h1 className="text-base font-bold tracking-tight" style={{ color: '#E8ECF1' }}>
+        <h1 className="text-base font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           AI Office
         </h1>
       </div>
@@ -34,7 +39,7 @@ export function TopBar({ active, onSelect }: TopBarProps) {
               onClick={() => onSelect(tab.key)}
               className="px-4 py-2 rounded-md text-sm font-medium transition-all"
               style={{
-                color: isActive ? '#F9701F' : '#8B96A5',
+                color: isActive ? 'var(--accent-orange)' : 'var(--text-secondary)',
                 backgroundColor: isActive ? 'rgba(249, 112, 31, 0.12)' : 'transparent',
               }}
             >
@@ -44,12 +49,13 @@ export function TopBar({ active, onSelect }: TopBarProps) {
         })}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
         <div className="text-right hidden sm:block">
-          <p className="text-xs font-medium" style={{ color: '#E8ECF1' }}>
+          <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
             Emilee
           </p>
-          <p className="text-xs" style={{ color: '#5C6879' }}>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
             Marketing Director
           </p>
         </div>
