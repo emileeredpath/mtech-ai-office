@@ -1,7 +1,9 @@
 import type { Employee } from '@/types/employee';
 import { rooms } from '@/data/rooms';
+import { OfficeBackground } from './OfficeBackground';
 import { OfficeDesk } from './OfficeDesk';
 import { SpeechBubble } from './SpeechBubble';
+import { Plant, WaterCooler, Whiteboard, MeetingTable, Windows } from './OfficeFurniture';
 
 interface OfficeFloorProps {
   employees: Employee[];
@@ -12,26 +14,49 @@ interface OfficeFloorProps {
   onSelectRoom: (roomId: string | null) => void;
 }
 
-const DESK_POSITIONS = [
-  { x: 8, y: 25, employeeId: 'marketing-director' },
-  { x: 22, y: 20, employeeId: 'website-auditor' },
-  { x: 36, y: 25, employeeId: 'proposal-writer' },
-  { x: 50, y: 20, employeeId: 'case-study-writer' },
-  { x: 64, y: 25, employeeId: 'email-marketing-manager' },
-  { x: 78, y: 20, employeeId: 'seo-ppc-manager' },
-  { x: 8, y: 65, employeeId: 'social-media-manager' },
-  { x: 36, y: 70, employeeId: 'funding-rewards-manager' },
+// Department groupings - organized by function with multiple people
+const DEPARTMENT_CLUSTERS = [
+  {
+    name: 'Strategy',
+    position: { x: 6, y: 20 },
+    employees: ['marketing-director'],
+  },
+  {
+    name: 'Digital',
+    position: { x: 20, y: 18 },
+    employees: ['website-auditor'],
+  },
+  {
+    name: 'Content',
+    position: { x: 35, y: 22 },
+    employees: ['proposal-writer', 'case-study-writer'],
+  },
+  {
+    name: 'Growth',
+    position: { x: 55, y: 20 },
+    employees: ['email-marketing-manager', 'seo-ppc-manager'],
+  },
+  {
+    name: 'Social',
+    position: { x: 75, y: 25 },
+    employees: ['social-media-manager'],
+  },
+  {
+    name: 'Funding',
+    position: { x: 12, y: 65 },
+    employees: ['funding-rewards-manager'],
+  },
 ];
 
 const SPEECH_BUBBLES: Record<string, string> = {
-  'marketing-director': 'Great work on the campaign',
-  'website-auditor': 'Found issues to review',
-  'proposal-writer': 'Working on client deck',
-  'case-study-writer': 'Finalizing case study',
+  'marketing-director': 'Great work this week!',
+  'website-auditor': 'Found a bug to fix',
+  'proposal-writer': 'Finalizing the deck',
+  'case-study-writer': 'Case study ready',
   'email-marketing-manager': 'Launching Q4 campaign',
-  'seo-ppc-manager': 'Keyword research ongoing',
-  'social-media-manager': 'Trending topic alert',
-  'funding-rewards-manager': 'Processing new leads',
+  'seo-ppc-manager': 'Metrics are strong',
+  'social-media-manager': 'Trending now!',
+  'funding-rewards-manager': 'New opportunities',
 };
 
 export function OfficeFloor({
@@ -46,111 +71,52 @@ export function OfficeFloor({
     return rooms.find((r) => r.employeeIds.includes(employeeId));
   };
 
+  const getDesksInCluster = (employeeIds: string[]) => {
+    return employeeIds.map((id, idx) => ({
+      employeeId: id,
+      offsetX: idx * 25,
+      offsetY: idx * 8,
+    }));
+  };
+
   return (
     <div
-      className="w-full h-full relative rounded-lg overflow-hidden"
       style={{
-        backgroundColor: '#E8DCC8',
-        background: 'linear-gradient(180deg, #F0E8D8 0%, #E8DCC8 100%)',
-        backgroundImage: `
-          linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.05) 50%, transparent 100%),
-          linear-gradient(180deg, #F0E8D8 0%, #E8DCC8 100%)
-        `,
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        backgroundColor: '#f5f3f0',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
       }}
     >
-      {/* Floor texture/perspective */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: `
-            repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,0,0,0.02) 40px, rgba(0,0,0,0.02) 80px),
-            repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.01) 40px, rgba(0,0,0,0.01) 80px)
-          `,
-          pointerEvents: 'none',
-        }}
-      />
+      {/* Office background with depth */}
+      <OfficeBackground />
 
-      {/* Top back wall */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '35%',
-          background: 'linear-gradient(180deg, #E5D5C0 0%, #D9CCC0 100%)',
-          boxShadow: 'inset 0 20px 40px rgba(0,0,0,0.08)',
-        }}
-      />
+      {/* Office furniture - fixed positions */}
+      <Windows />
+      <Whiteboard x={4} y={8} />
+      <Plant x={78} y={12} />
+      <WaterCooler x={10} y={72} />
+      <Plant x={88} y={68} />
+      <MeetingTable x={40} y={50} />
 
-      {/* Windows on right side */}
+      {/* Marketing Team sign */}
       <div
         style={{
           position: 'absolute',
-          top: '10%',
-          right: '2%',
-          width: '12%',
-          height: '60%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-        }}
-      >
-        {[1, 2, 3].map((i) => (
-          <div
-            key={`window-${i}`}
-            style={{
-              flex: 1,
-              backgroundColor: 'rgba(135,206,250,0.4)',
-              border: '2px solid rgba(135,206,250,0.6)',
-              borderRadius: '4px',
-              boxShadow: 'inset 0 0 12px rgba(135,206,250,0.3), 0 2px 6px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, rgba(200,230,255,0.3), rgba(135,206,250,0.2))',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Whiteboard with team goals */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '8%',
-          left: '4%',
-          width: '22%',
-          height: '28%',
-          backgroundColor: '#F5F5F5',
-          border: '3px solid #8B5435',
-          borderRadius: '2px',
-          padding: '12px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-        }}
-      >
-        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#333', marginBottom: '8px' }}>
-          Team Goals
-        </div>
-        <div style={{ fontSize: '10px', color: '#555', lineHeight: '1.6' }}>
-          <div>✓ Q4 Campaign</div>
-          <div>✓ Website Update</div>
-          <div>✓ Lead Growth</div>
-        </div>
-      </div>
-
-      {/* Marketing Team wall sign */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '42%',
+          top: '6%',
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: '#2c2c2c',
+          backgroundColor: '#1a1a1a',
           color: '#fff',
           padding: '8px 20px',
-          borderRadius: '4px',
+          borderRadius: '6px',
           fontSize: '14px',
-          fontWeight: 'bold',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          fontWeight: '700',
+          letterSpacing: '0.5px',
+          boxShadow: '0 8px 16px rgba(0,0,0,0.25)',
           pointerEvents: 'none',
           zIndex: 5,
         }}
@@ -158,231 +124,95 @@ export function OfficeFloor({
         Marketing Team
       </div>
 
-      {/* Round rug in center */}
+      {/* Sandy - Chief of Staff (central floating area) */}
       <div
         style={{
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '200px',
-          height: '140px',
-          backgroundColor: 'rgba(220,180,140,0.4)',
-          border: '2px solid rgba(160,120,90,0.3)',
-          borderRadius: '50%',
-          boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1)',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
-
-      {/* Central meeting area - placeholder */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '48%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '60px',
-          height: '50px',
-          pointerEvents: 'none',
-          zIndex: 2,
+          bottom: '12%',
+          right: '6%',
+          zIndex: 8,
+          fontSize: '11px',
+          color: '#fff',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          padding: '6px 10px',
+          borderRadius: '6px',
+          maxWidth: '120px',
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
         }}
       >
-        {/* Small round table */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '40px',
-            height: '40px',
-            backgroundColor: '#8B6F47',
-            borderRadius: '50%',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-            border: '1px solid rgba(0,0,0,0.2)',
-          }}
-        />
+        {sandyMessage || '🤖 Sandy Ready'}
       </div>
 
-      {/* Plant - back left */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '8%',
-          left: '3%',
-          width: '50px',
-          height: '70px',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '35px',
-            height: '25px',
-            backgroundColor: '#8B6F47',
-            borderRadius: '0 0 3px 3px',
-            border: '1px solid #6B5435',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '45px',
-            height: '55px',
-            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-            borderRadius: '50% 50% 35% 35%',
-            opacity: 0.8,
-          }}
-        />
-      </div>
-
-      {/* Plant - back right */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '8%',
-          right: '3%',
-          width: '50px',
-          height: '70px',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '35px',
-            height: '25px',
-            backgroundColor: '#8B6F47',
-            borderRadius: '0 0 3px 3px',
-            border: '1px solid #6B5435',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '45px',
-            height: '55px',
-            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-            borderRadius: '50% 50% 35% 35%',
-            opacity: 0.8,
-          }}
-        />
-      </div>
-
-      {/* Water cooler - back left lower */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '10%',
-          left: '14%',
-          width: '30px',
-          height: '45px',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '20px',
-            height: '15px',
-            backgroundColor: 'rgba(135,206,250,0.6)',
-            borderRadius: '50%',
-            border: '1px solid rgba(100,180,220,0.8)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '24px',
-            height: '28px',
-            backgroundColor: '#E8DCC8',
-            border: '2px solid #999',
-            borderRadius: '2px',
-          }}
-        />
-      </div>
-
-      {/* Desks */}
+      {/* Department Clusters with Desks */}
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-        {DESK_POSITIONS.map((pos) => {
-          const employee = employees.find((e) => e.id === pos.employeeId);
-          const room = getRoom(pos.employeeId);
-          if (!employee) return null;
-
-          const isSelected = selectedRoomId === room?.id;
-          const isActive = room && activeRoomIds.includes(room.id);
+        {DEPARTMENT_CLUSTERS.map((cluster) => {
+          const desks = getDesksInCluster(cluster.employees);
 
           return (
-            <div key={pos.employeeId} style={{ position: 'relative', width: '100%', height: '100%' }}>
-              {/* Speech bubble */}
-              {isSelected && (
-                <SpeechBubble
-                  text={SPEECH_BUBBLES[pos.employeeId] || ''}
-                  x={pos.x}
-                  y={pos.y - 15}
-                />
-              )}
-
-              {/* Desk */}
+            <div key={cluster.name} style={{ position: 'relative', width: '100%', height: '100%' }}>
+              {/* Department label (subtle) */}
               <div
                 style={{
                   position: 'absolute',
-                  left: `${pos.x}%`,
-                  top: `${pos.y}%`,
-                  cursor: 'pointer',
+                  left: `${cluster.position.x}%`,
+                  top: `${cluster.position.y - 8}%`,
+                  fontSize: '9px',
+                  fontWeight: '600',
+                  color: 'rgba(0,0,0,0.3)',
+                  pointerEvents: 'none',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
                 }}
-                onClick={() => onSelectRoom(isSelected ? null : room?.id || null)}
               >
-                <OfficeDesk
-                  employee={employee}
-                  isSelected={isSelected}
-                  isActive={isActive}
-                />
+                {cluster.name}
               </div>
+
+              {/* Desks in cluster */}
+              {desks.map((desk) => {
+                const employee = employees.find((e) => e.id === desk.employeeId);
+                const room = getRoom(desk.employeeId);
+                if (!employee) return null;
+
+                const isSelected = selectedRoomId === room?.id;
+                const isActive = room && activeRoomIds.includes(room.id);
+                const deskX = cluster.position.x + desk.offsetX / 100;
+                const deskY = cluster.position.y + desk.offsetY / 100;
+
+                return (
+                  <div key={desk.employeeId} style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    {/* Speech bubble on selection */}
+                    {isSelected && (
+                      <SpeechBubble
+                        text={SPEECH_BUBBLES[desk.employeeId] || 'Working...'}
+                        x={deskX}
+                        y={deskY - 8}
+                      />
+                    )}
+
+                    {/* Desk positioned in cluster */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: `${deskX}%`,
+                        top: `${deskY}%`,
+                        cursor: 'pointer',
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <OfficeDesk
+                        employee={employee}
+                        isSelected={isSelected}
+                        isActive={isActive}
+                        onClick={() => onSelectRoom(isSelected ? null : room?.id || null)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
-      </div>
-
-      {/* Sandy control overlay - top right */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '4px',
-          right: '4px',
-          zIndex: 20,
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          padding: '8px 12px',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: '#fff',
-          maxWidth: '150px',
-          textAlign: 'center',
-        }}
-      >
-        {sandyMessage ? (
-          <div>{sandyMessage}</div>
-        ) : (
-          <div style={{ color: 'rgba(255,255,255,0.7)' }}>Sandy Ready</div>
-        )}
       </div>
     </div>
   );
