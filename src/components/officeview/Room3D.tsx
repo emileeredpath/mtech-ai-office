@@ -66,6 +66,19 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
           transform: 'rotateX(8deg) rotateY(-2deg)',
         }}
       >
+        {/* Floor lighting glow - warm ambient light */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: '50% 5% 2% 5%',
+            clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+            background: `radial-gradient(ellipse at center, rgba(255,159,64,0.2), transparent 70%)`,
+            filter: 'blur(8px)',
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
+        />
+
         {/* Floor (isometric base) */}
         <div
           className="absolute transition-all duration-300"
@@ -74,8 +87,8 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
             background: `linear-gradient(135deg, ${config.floorColor}ff 0%, ${config.floorColor}dd 100%)`,
             clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
             boxShadow: isActive
-              ? `inset 0 0 40px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.3)`
-              : 'inset 0 0 20px rgba(0,0,0,0.3)',
+              ? `inset 0 0 40px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.3), inset 0 0 30px rgba(255,159,64,0.15)`
+              : 'inset 0 0 20px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,159,64,0.1)',
             zIndex: 2,
           }}
         >
@@ -112,9 +125,10 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
                   top: '30%',
                   width: '40%',
                   height: '35%',
-                  backgroundColor: '#1a1a2e',
+                  backgroundColor: '#0f0f1e',
                   borderRadius: '2px',
-                  boxShadow: `0 0 12px ${config.accentColor}77`,
+                  boxShadow: `0 0 8px ${config.accentColor}88, inset 0 0 8px ${config.accentColor}44`,
+                  border: `1px solid ${config.accentColor}66`,
                 }}
               />
               {/* Chair */}
@@ -153,9 +167,10 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
                     top: '30%',
                     width: '40%',
                     height: '35%',
-                    backgroundColor: '#1a1a2e',
+                    backgroundColor: '#0f0f1e',
                     borderRadius: '2px',
-                    boxShadow: `0 0 12px ${config.accentColor}77`,
+                    boxShadow: `0 0 8px ${config.accentColor}88, inset 0 0 8px ${config.accentColor}44`,
+                    border: `1px solid ${config.accentColor}66`,
                   }}
                 />
                 {/* Chair */}
@@ -289,6 +304,21 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
           </div>
         </div>
 
+        {/* Ceiling light glow - warm accent from above */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '8%',
+            left: '5%',
+            width: '90%',
+            height: '35%',
+            background: `radial-gradient(ellipse at top center, rgba(255,159,64,0.25), transparent 60%)`,
+            filter: 'blur(12px)',
+            zIndex: 0,
+            borderRadius: '4px 4px 0 0',
+          }}
+        />
+
         {/* Back wall */}
         <div
           className="absolute transition-all duration-300"
@@ -300,8 +330,8 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
             background: `linear-gradient(to bottom, ${config.wallColor}ff 0%, ${config.wallColor}dd 100%)`,
             borderRadius: '4px 4px 0 0',
             boxShadow: isActive
-              ? `0 0 30px ${config.accentColor}44, inset 0 0 30px rgba(0,0,0,0.3)`
-              : 'inset 0 0 20px rgba(0,0,0,0.2)',
+              ? `0 0 30px ${config.accentColor}44, inset 0 0 30px rgba(0,0,0,0.3), inset 0 0 40px rgba(255,159,64,0.12)`
+              : 'inset 0 0 20px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,159,64,0.08)',
             zIndex: 1,
           }}
         >
@@ -316,6 +346,45 @@ export function Room3D({ room, employees, isActive, onSelect }: Room3DProps) {
               border: `2px solid ${config.accentColor}44`,
               borderRadius: '2px',
               backgroundColor: 'rgba(255,255,255,0.05)',
+            }}
+          />
+
+          {/* Ceiling lights (3 warm lights) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '5%',
+              left: '15%',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#FFB346',
+              boxShadow: '0 0 12px rgba(255,179,70,0.6)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '5%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#FFB346',
+              boxShadow: '0 0 12px rgba(255,179,70,0.6)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '5%',
+              right: '15%',
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: '#FFB346',
+              boxShadow: '0 0 12px rgba(255,179,70,0.6)',
             }}
           />
         </div>
