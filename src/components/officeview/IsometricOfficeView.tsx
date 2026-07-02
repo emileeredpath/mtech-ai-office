@@ -1,6 +1,6 @@
 import { useOfficeStore } from '@/store/officeStore';
 import { rooms } from '@/data/rooms';
-import { RoomBox } from './RoomBox';
+import { Room3D } from './Room3D';
 import { SandyDais } from './SandyDais';
 import { FloorCollabPaths } from './FloorCollabPaths';
 
@@ -55,7 +55,7 @@ export function IsometricOfficeView({
           const roomEmployees = employees.filter((e) => room.employeeIds.includes(e.id));
           return (
             <div key={room.id} style={{ zIndex: 6 }}>
-              <RoomBox
+              <Room3D
                 room={room}
                 employees={roomEmployees}
                 isActive={activeRoomIds.includes(room.id) || selectedRoomId === room.id}
