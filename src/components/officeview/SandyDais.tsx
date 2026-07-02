@@ -5,38 +5,58 @@ interface SandyDaisProps {
 
 export function SandyDais({ isThinking, message }: SandyDaisProps) {
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center">
+    <div className="relative w-full h-full flex flex-col items-center justify-center transition-colors duration-300">
       {message && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 -translate-y-full w-56 z-30 pointer-events-none">
           <div
-            className="px-3 py-2 rounded-lg text-xs text-center shadow-lg"
-            style={{ backgroundColor: 'rgba(10,14,20,0.95)', color: '#E8ECF1', border: '1px solid rgba(249,112,31,0.5)' }}
+            className="px-3 py-2 rounded-lg text-xs text-center shadow-lg transition-colors duration-300"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--accent-orange)',
+            }}
           >
             {message}
           </div>
         </div>
       )}
 
-      {/* Glow ring on the floor */}
+      {/* Outer glow ring */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 140,
+          height: 54,
+          bottom: '16%',
+          background: 'radial-gradient(ellipse at center, var(--glow-orange), transparent 75%)',
+          filter: 'blur(8px)',
+          animation: isThinking ? 'daisGlow 1.1s ease-in-out infinite' : 'daisGlow 3.5s ease-in-out infinite',
+          opacity: 0.6,
+        }}
+      />
+
+      {/* Inner glow ring */}
       <div
         className="absolute rounded-full"
         style={{
           width: 120,
           height: 46,
           bottom: '18%',
-          background: 'radial-gradient(ellipse at center, rgba(249,112,31,0.35), rgba(139,92,246,0.15) 60%, transparent 75%)',
+          background: 'radial-gradient(ellipse at center, rgba(249,112,31,0.35), var(--glow-purple) 60%, transparent 75%)',
           filter: 'blur(2px)',
           animation: isThinking ? 'daisGlow 1.1s ease-in-out infinite' : 'daisGlow 3.5s ease-in-out infinite',
         }}
       />
+
+      {/* Platform circle */}
       <div
-        className="absolute rounded-full"
+        className="absolute rounded-full transition-all duration-300"
         style={{
           width: 100,
           height: 38,
           bottom: '20%',
-          border: '2px solid rgba(249,112,31,0.6)',
-          boxShadow: '0 0 20px rgba(249,112,31,0.5)',
+          border: '2px solid var(--accent-orange)',
+          boxShadow: '0 0 20px var(--accent-orange), 0 0 40px rgba(249,112,31,0.3)',
         }}
       />
 
@@ -64,30 +84,30 @@ export function SandyDais({ isThinking, message }: SandyDaisProps) {
             width: 34,
             height: 32,
             marginTop: -2,
-            background: 'linear-gradient(160deg, #1D2A3A, #0F1620)',
+            background: 'linear-gradient(160deg, var(--bg-tertiary), var(--bg-secondary))',
             clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)',
-            border: '1px solid rgba(249,112,31,0.4)',
+            border: '1px solid var(--accent-orange)',
           }}
         />
         {/* Brain badge */}
         <div
-          className="absolute rounded-full flex items-center justify-center"
+          className="absolute rounded-full flex items-center justify-center transition-all duration-300"
           style={{
             top: 22,
             width: 16,
             height: 16,
-            background: 'linear-gradient(135deg, #F9701F, #FFB067)',
-            boxShadow: '0 0 8px rgba(249,112,31,0.7)',
+            background: 'linear-gradient(135deg, var(--accent-orange), #FFB067)',
+            boxShadow: '0 0 8px var(--accent-orange)',
           }}
         >
-          <span style={{ fontSize: 9 }}>🧠</span>
+          <span style={{ fontSize: 9 }}>✨</span>
         </div>
       </div>
 
-      <p className="text-sm font-semibold" style={{ color: '#E8ECF1' }}>
+      <p className="text-sm font-semibold transition-colors duration-300" style={{ color: 'var(--text-primary)' }}>
         Sandy
       </p>
-      <p className="text-xs" style={{ color: '#8B96A5' }}>
+      <p className="text-xs transition-colors duration-300" style={{ color: 'var(--text-secondary)' }}>
         Chief of Staff
       </p>
     </div>

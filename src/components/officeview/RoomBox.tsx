@@ -36,29 +36,29 @@ export function RoomBox({ room, employees, isActive, onSelect }: RoomBoxProps) {
 
       {/* Back walls (glass, angled) */}
       <div
-        className="absolute rounded-t-md"
+        className="absolute rounded-t-md transition-all duration-300"
         style={{
           top: 0,
           left: '4%',
           width: '46%',
           height: '38%',
-          background: `linear-gradient(160deg, ${room.color}22, rgba(15,20,28,0.6))`,
-          borderTop: `2px solid ${room.color}66`,
-          borderLeft: `1px solid ${room.color}33`,
+          background: `linear-gradient(160deg, ${room.color}22, rgba(15,20,28,0.4))`,
+          borderTop: `2px solid var(--accent-secondary)`,
+          borderLeft: `1px solid var(--border-color)`,
           transform: 'skewY(-6deg)',
           transformOrigin: 'bottom left',
         }}
       />
       <div
-        className="absolute rounded-t-md"
+        className="absolute rounded-t-md transition-all duration-300"
         style={{
           top: 0,
           right: '4%',
           width: '46%',
           height: '38%',
-          background: `linear-gradient(200deg, ${room.color}22, rgba(15,20,28,0.6))`,
-          borderTop: `2px solid ${room.color}66`,
-          borderRight: `1px solid ${room.color}33`,
+          background: `linear-gradient(200deg, ${room.color}22, rgba(15,20,28,0.4))`,
+          borderTop: `2px solid var(--accent-secondary)`,
+          borderRight: `1px solid var(--border-color)`,
           transform: 'skewY(6deg)',
           transformOrigin: 'bottom right',
         }}
