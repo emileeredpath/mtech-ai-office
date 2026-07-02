@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IsometricOfficeView } from '@/components/officeview/IsometricOfficeView';
+import { RealisticOfficeView } from '@/components/officeview/RealisticOfficeView';
 import { RoomDetailDrawer } from '@/components/office3d/RoomDetailDrawer';
 import { BoardRoomPanel } from '@/components/BoardRoomPanel';
 import { RightPanel } from '@/components/RightPanel';
@@ -150,7 +150,7 @@ export function SandyInterface() {
 
             <div className="flex-1 relative overflow-hidden">
               {topTab === 'office' && (
-                <IsometricOfficeView
+                <RealisticOfficeView
                   activeRoomIds={activeRoomIds}
                   sandyThinking={isProcessing}
                   sandyMessage={sandyMessage}
