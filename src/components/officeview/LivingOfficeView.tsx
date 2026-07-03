@@ -15,14 +15,14 @@ interface LivingOfficeViewProps {
 
 // Custom desk positions for better layout
 const CUSTOM_DESK_POSITIONS: Record<string, { x: number; y: number }> = {
-  'marketing-director': { x: 10, y: 18 },
-  'website-auditor': { x: 50, y: 16 },
-  'seo-ppc-manager': { x: 32, y: 20 },
-  'email-marketing-manager': { x: 50, y: 65 },
-  'proposal-writer': { x: 70, y: 22 },
-  'social-media-manager': { x: 12, y: 60 },
-  'case-study-writer': { x: 68, y: 60 },
-  'funding-rewards-manager': { x: 88, y: 50 },
+  'marketing-director': { x: 10, y: 20 },
+  'website-auditor': { x: 50, y: 15 },
+  'seo-ppc-manager': { x: 32, y: 22 },
+  'email-marketing-manager': { x: 50, y: 68 },
+  'proposal-writer': { x: 70, y: 24 },
+  'social-media-manager': { x: 14, y: 62 },
+  'case-study-writer': { x: 66, y: 62 },
+  'funding-rewards-manager': { x: 86, y: 48 },
 };
 
 export function LivingOfficeView({
@@ -57,20 +57,20 @@ export function LivingOfficeView({
         flexDirection: 'column',
       }}
     >
-      {/* Top wall area */}
+      {/* Top wall area - warmer */}
       <div
         style={{
           height: '36px',
-          backgroundColor: '#DCC8B8',
-          backgroundImage: 'linear-gradient(180deg, #E8DCC8 0%, #DCC8B8 100%)',
-          borderBottom: '2px solid #C4B5A0',
+          backgroundColor: '#E0D4C4',
+          backgroundImage: 'linear-gradient(180deg, #F0E8D8 0%, #E0D4C4 100%)',
+          borderBottom: '2px solid #D0C4B4',
           display: 'flex',
           alignItems: 'center',
           paddingLeft: '20px',
-          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.1)',
+          boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.12)',
         }}
       >
-        <div style={{ fontSize: '13px', fontWeight: '700', color: '#555' }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#666' }}>
           Marketing Office
         </div>
       </div>
@@ -82,13 +82,13 @@ export function LivingOfficeView({
           position: 'relative',
           overflow: 'hidden',
           background: `
-            linear-gradient(180deg, #B89570 0%, #A68560 50%, #9B7A50 100%),
-            radial-gradient(ellipse 200% 100% at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 70%)
+            linear-gradient(180deg, #B89A7F 0%, #AA8566 40%, #9B7A55 100%),
+            radial-gradient(ellipse 200% 100% at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 70%)
           `,
           backgroundSize: '100% 100%, 100% 100%',
         }}
       >
-        {/* Right wall with windows */}
+        {/* Right wall with windows - warmer with glow */}
         <div
           style={{
             position: 'absolute',
@@ -96,15 +96,15 @@ export function LivingOfficeView({
             top: '36px',
             width: '50px',
             height: 'calc(100% - 36px)',
-            backgroundColor: '#DCC8B8',
-            backgroundImage: 'linear-gradient(90deg, #E8DCC8 0%, #DCC8B8 100%)',
-            borderLeft: '2px solid #C4B5A0',
+            backgroundColor: '#E0D4C4',
+            backgroundImage: 'linear-gradient(90deg, #F0E8D8 0%, #E0D4C4 100%)',
+            borderLeft: '2px solid #D0C4B4',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
             gap: '10px',
             padding: '10px 6px',
-            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.05)',
+            boxShadow: 'inset 2px 0 6px rgba(0,0,0,0.08)',
           }}
         >
           {/* Windows */}
@@ -117,13 +117,13 @@ export function LivingOfficeView({
                 backgroundColor: '#A8D8FF',
                 borderRadius: '3px',
                 border: '1px solid #7AC5FF',
-                boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.1)',
+                boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.5), 0 2px 6px rgba(100,150,200,0.2)',
               }}
             />
           ))}
         </div>
 
-        {/* Bottom wall/skirting with plants */}
+        {/* Bottom wall/skirting with plants - warmer */}
         <div
           style={{
             position: 'absolute',
@@ -131,14 +131,14 @@ export function LivingOfficeView({
             left: 0,
             right: '50px',
             height: '45px',
-            backgroundColor: '#C4B5A0',
-            borderTop: '2px solid #D4C4B0',
+            backgroundColor: '#D4C8B8',
+            borderTop: '2px solid #E4D8C8',
             display: 'flex',
             alignItems: 'flex-end',
             paddingBottom: '4px',
             paddingLeft: '12px',
             gap: '14px',
-            boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.1)',
+            boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.12)',
           }}
         >
           {/* Corner plants */}
@@ -162,6 +162,8 @@ export function LivingOfficeView({
           const pos = CUSTOM_DESK_POSITIONS[employee.id];
           if (!pos) return null;
 
+          const isEmployeeActive = isActive(employee.id);
+
           return (
             <div
               key={employee.id}
@@ -175,12 +177,72 @@ export function LivingOfficeView({
               <OfficeDesk
                 employee={employee}
                 isSelected={isSelected(employee.id)}
-                isActive={isActive(employee.id)}
+                isActive={isEmployeeActive}
                 onSelect={() => {
                   selectEmployee(employee.id);
                   onSelectRoom(employee.id);
                 }}
               />
+
+              {/* Speech bubble for active employees */}
+              {isEmployeeActive && employee.status === 'working' && employee.tasks?.[0] && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-28px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '100px',
+                    zIndex: 20,
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #999',
+                      borderRadius: '6px',
+                      padding: '5px 7px',
+                      fontSize: '9px',
+                      color: '#333',
+                      fontWeight: '500',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      position: 'relative',
+                    }}
+                  >
+                    {employee.tasks[0].title}
+                    {/* Tail */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-5px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderLeft: '5px solid transparent',
+                        borderRight: '5px solid transparent',
+                        borderTop: '5px solid #fff',
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: '-6px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderLeft: '5px solid transparent',
+                        borderRight: '5px solid transparent',
+                        borderTop: '5px solid #999',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -197,7 +259,7 @@ export function LivingOfficeView({
             backgroundColor: '#F5F1E8',
             borderRadius: '4px',
             border: '2px solid #999',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
             padding: '8px',
             display: 'flex',
             flexDirection: 'column',

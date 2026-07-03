@@ -21,9 +21,9 @@ export function DeskTaskCard({ employee, isActive }: DeskTaskCardProps) {
         padding: '6px 8px',
         fontSize: '10px',
         transition: 'all 0.2s ease',
-        boxShadow: isActive ? '0 3px 10px rgba(0,0,0,0.12)' : '0 1px 4px rgba(0,0,0,0.08)',
-        maxWidth: '100px',
-        minWidth: '90px',
+        boxShadow: isActive ? '0 4px 12px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.1)',
+        maxWidth: '106px',
+        minWidth: '106px',
       }}
     >
       {/* Status with dot and count */}

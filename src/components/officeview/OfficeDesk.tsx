@@ -21,38 +21,55 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '4px',
+        gap: '2px',
         transition: 'all 0.2s ease',
+        position: 'relative',
       }}
     >
-      {/* Desk workstation */}
+      {/* Shadow under desk */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '-3px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '108px',
+          height: '6px',
+          background: 'radial-gradient(ellipse 108px 6px at center, rgba(0,0,0,0.2), transparent)',
+          borderRadius: '50%',
+          zIndex: 0,
+        }}
+      />
+
+      {/* Desk workstation - larger */}
       <div
         style={{
           position: 'relative',
-          width: '90px',
-          height: '68px',
+          width: '106px',
+          height: '76px',
           backgroundColor: '#A0826D',
           backgroundImage: `linear-gradient(135deg, #B89570 0%, #A0826D 50%, #8B6F47 100%)`,
-          borderRadius: '4px',
-          border: '1px solid rgba(0,0,0,0.25)',
-          boxShadow: `${isSelected ? '0 0 12px rgba(212, 165, 116, 0.6), ' : ''}0 6px 16px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.15)`,
-          padding: '6px',
+          borderRadius: '5px',
+          border: '1px solid rgba(0,0,0,0.3)',
+          boxShadow: `${isSelected ? '0 0 14px rgba(212, 165, 116, 0.7), ' : ''}0 8px 20px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.2)`,
+          padding: '7px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
-          gap: '3px',
+          gap: '4px',
           overflow: 'hidden',
+          zIndex: 1,
         }}
       >
         {/* Monitor */}
         <div
           style={{
-            width: '32px',
-            height: '24px',
+            width: '36px',
+            height: '28px',
             backgroundColor: '#0a0a0a',
             borderRadius: '2px',
             border: `2px solid ${employee.accentColor}`,
-            boxShadow: `0 2px 6px rgba(0,0,0,0.4), 0 0 6px ${employee.accentColor}55`,
+            boxShadow: `0 2px 6px rgba(0,0,0,0.4), 0 0 8px ${employee.accentColor}66`,
             margin: '0 auto',
           }}
         />
@@ -64,7 +81,7 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
             justifyContent: 'space-between',
             alignItems: 'center',
             width: '100%',
-            height: '12px',
+            height: '13px',
             gap: '2px',
           }}
         >
@@ -72,31 +89,34 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
           <div
             style={{
               flex: 1,
-              height: '8px',
+              height: '9px',
               backgroundColor: '#1a1a1a',
               borderRadius: '1px',
               border: '0.5px solid #0a0a0a',
+              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5)',
             }}
           />
 
           {/* Mug */}
           <div
             style={{
-              width: '10px',
-              height: '10px',
+              width: '11px',
+              height: '12px',
               backgroundColor: '#8B4513',
-              borderRadius: '1px',
+              borderRadius: '2px',
               border: '0.5px solid #5C2E0F',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
             }}
           />
 
           {/* Plant */}
           <div
             style={{
-              width: '8px',
-              height: '10px',
+              width: '9px',
+              height: '12px',
               backgroundColor: '#2ba876',
               borderRadius: '1px 1px 0 0',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
             }}
           />
         </div>
@@ -105,19 +125,37 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
         <div
           style={{
             width: '100%',
-            height: '6px',
+            height: '7px',
             backgroundColor: '#F5F1E8',
             borderRadius: '1px',
-            opacity: 0.7,
+            opacity: 0.75,
+            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)',
           }}
         />
       </div>
+
+      {/* Chair behind person */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '48px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '32px',
+          height: '28px',
+          backgroundColor: '#7A6F5D',
+          borderRadius: '4px',
+          border: '1px solid rgba(0,0,0,0.3)',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          zIndex: 8,
+        }}
+      />
 
       {/* Employee character - sitting at desk */}
       <div
         style={{
           position: 'relative',
-          marginTop: '-8px',
+          marginTop: '-4px',
           zIndex: 10,
         }}
       >
@@ -131,16 +169,24 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
           fontWeight: '600',
           color: 'var(--text-primary)',
           textAlign: 'center',
-          width: '90px',
-          lineHeight: '1.2',
-          marginTop: '4px',
+          width: '106px',
+          lineHeight: '1.25',
+          marginTop: '6px',
+          zIndex: 1,
         }}
       >
         {roleLabel}
       </div>
 
-      {/* Task card */}
-      <div style={{ marginTop: '2px', width: '100%' }}>
+      {/* Task card - with better shadow */}
+      <div
+        style={{
+          marginTop: '4px',
+          width: '100%',
+          zIndex: 1,
+          filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))',
+        }}
+      >
         <DeskTaskCard employee={employee} isActive={isActive} />
       </div>
 
@@ -149,23 +195,24 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
         <div
           style={{
             position: 'absolute',
-            top: '-8px',
+            top: '-12px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '100px',
-            height: '100px',
-            background: `radial-gradient(circle, rgba(249,112,31,0.15) 0%, rgba(249,112,31,0) 70%)`,
+            width: '120px',
+            height: '110px',
+            background: `radial-gradient(circle, rgba(249,112,31,0.2) 0%, rgba(249,112,31,0) 70%)`,
             borderRadius: '50%',
             pointerEvents: 'none',
             animation: 'glow-pulse 2s ease-in-out infinite',
+            zIndex: 0,
           }}
         />
       )}
 
       <style>{`
         @keyframes glow-pulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 0.65; }
         }
       `}</style>
     </div>
