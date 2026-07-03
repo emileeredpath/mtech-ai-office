@@ -17,13 +17,13 @@ export function DeskTaskCard({ employee, isActive }: DeskTaskCardProps) {
       style={{
         backgroundColor: 'var(--bg-secondary)',
         border: `1px solid var(--border-color)`,
-        borderRadius: '7px',
-        padding: '8px 10px',
+        borderRadius: '8px',
+        padding: '9px 11px',
         fontSize: '10px',
         transition: 'all 0.2s ease',
-        boxShadow: isActive ? '0 4px 14px rgba(0,0,0,0.18)' : '0 2px 7px rgba(0,0,0,0.14)',
-        maxWidth: '140px',
-        minWidth: '140px',
+        boxShadow: isActive ? '0 4px 14px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.16)',
+        maxWidth: '156px',
+        minWidth: '156px',
       }}
     >
       {/* Status with dot and count */}
