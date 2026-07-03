@@ -7,21 +7,21 @@ interface EmployeeCharacterProps {
 
 export function EmployeeCharacter({ employee, size = 'medium' }: EmployeeCharacterProps) {
   const colors = {
-    'marketing-director': { hair: '#8B4513', skin: '#F0DCC8', shirt: '#D84C45', shirtDark: '#9B3230', accent: '#F5D4B8' },
-    'website-auditor': { hair: '#2F4F4F', skin: '#F0DCC8', shirt: '#2BA876', shirtDark: '#1a6b4f', accent: '#D4F1E4' },
-    'seo-ppc-manager': { hair: '#1a1a2e', skin: '#F0DCC8', shirt: '#1E5A9F', shirtDark: '#0f3a66', accent: '#D6E8F7' },
-    'email-marketing-manager': { hair: '#8B7355', skin: '#F0DCC8', shirt: '#00A0C6', shirtDark: '#0070a0', accent: '#D4EEF7' },
-    'proposal-writer': { hair: '#6B4423', skin: '#F0DCC8', shirt: '#5C4ADE', shirtDark: '#3e2d9a', accent: '#E8DFF7' },
-    'social-media-manager': { hair: '#7A1C1C', skin: '#F0DCC8', shirt: '#D84B8A', shirtDark: '#9a2f5f', accent: '#F5D9E8' },
-    'case-study-writer': { hair: '#1C1C1C', skin: '#F0DCC8', shirt: '#9C6ADE', shirtDark: '#6b4a9a', accent: '#E8D9F5' },
-    'funding-rewards-manager': { hair: '#556B2F', skin: '#F0DCC8', shirt: '#2BA876', shirtDark: '#1a6b4f', accent: '#D4F1E4' },
+    'marketing-director': { hair: '#8B4513', skin: '#F2D9C4', shirt: '#D84C45', shirtDark: '#8B2F25', accent: '#FFF0E0' },
+    'website-auditor': { hair: '#2F4F4F', skin: '#F2D9C4', shirt: '#2BA876', shirtDark: '#1a5c4a', accent: '#E8F5F0' },
+    'seo-ppc-manager': { hair: '#1a1a2e', skin: '#F2D9C4', shirt: '#1E5A9F', shirtDark: '#0d3a64', accent: '#E8F0F8' },
+    'email-marketing-manager': { hair: '#8B7355', skin: '#F2D9C4', shirt: '#00A0C6', shirtDark: '#00699a', accent: '#E0F4FF' },
+    'proposal-writer': { hair: '#6B4423', skin: '#F2D9C4', shirt: '#5C4ADE', shirtDark: '#3d2e9a', accent: '#F0E8FF' },
+    'social-media-manager': { hair: '#7A1C1C', skin: '#F2D9C4', shirt: '#D84B8A', shirtDark: '#933060', accent: '#FFE8F5' },
+    'case-study-writer': { hair: '#1C1C1C', skin: '#F2D9C4', shirt: '#9C6ADE', shirtDark: '#6b4aaa', accent: '#F5E8FF' },
+    'funding-rewards-manager': { hair: '#556B2F', skin: '#F2D9C4', shirt: '#2BA876', shirtDark: '#1a5c4a', accent: '#E8F5F0' },
   };
 
-  const palette = colors[employee.id] || { hair: '#333333', skin: '#F0DCC8', shirt: '#666666', shirtDark: '#444444', accent: '#E8E8E8' };
+  const palette = colors[employee.id] || { hair: '#333333', skin: '#F2D9C4', shirt: '#666666', shirtDark: '#444444', accent: '#F0F0F0' };
 
   const sizeMap = {
-    small: { width: 44, height: 56 },
-    medium: { width: 72, height: 92 },
+    small: { width: 48, height: 60 },
+    medium: { width: 80, height: 104 },
   };
 
   const dims = sizeMap[size];
@@ -30,153 +30,153 @@ export function EmployeeCharacter({ employee, size = 'medium' }: EmployeeCharact
     <svg
       width={dims.width}
       height={dims.height}
-      viewBox="0 0 72 92"
+      viewBox="0 0 80 104"
       style={{ overflow: 'visible' }}
     >
       <defs>
-        <filter id="person-shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="3" stdDeviation="2" floodOpacity="0.35" />
+        <filter id="person-shadow" x="-60%" y="-60%" width="220%" height="220%">
+          <feDropShadow dx="0" dy="4" stdDeviation="2.5" floodOpacity="0.4" />
         </filter>
         <linearGradient id="shirt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor={palette.shirt} />
-          <stop offset="40%" stopColor={palette.shirt} />
+          <stop offset="35%" stopColor={palette.shirt} />
           <stop offset="100%" stopColor={palette.shirtDark} />
         </linearGradient>
         <linearGradient id="skin-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FAECD5" />
+          <stop offset="0%" stopColor="#FFF5E6" />
           <stop offset="100%" stopColor={palette.skin} />
         </linearGradient>
         <linearGradient id="hair-grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor={palette.hair} />
-          <stop offset="100%" stopColor={`${palette.hair}cc`} />
+          <stop offset="100%" stopColor={`${palette.hair}dd`} />
         </linearGradient>
       </defs>
 
-      {/* Ground shadow */}
-      <ellipse cx="36" cy="88" rx="22" ry="3" fill="rgba(0,0,0,0.32)" />
+      {/* Ground shadow - enhanced */}
+      <ellipse cx="40" cy="100" rx="26" ry="3.5" fill="rgba(0,0,0,0.38)" />
 
       <g filter="url(#person-shadow)">
-        {/* Torso - wider, more realistic */}
+        {/* Torso - realistic proportions */}
         <path
-          d="M 16 52 Q 14 48 16 44 L 20 36 Q 22 34 36 34 Q 50 34 52 36 L 56 44 Q 58 48 56 52 L 54 72 Q 54 76 50 76 L 22 76 Q 18 76 18 72 Z"
+          d="M 18 62 Q 16 56 18 50 L 24 40 Q 26 38 40 38 Q 54 38 56 40 L 62 50 Q 64 56 62 62 L 60 88 Q 60 92 56 92 L 24 92 Q 20 92 20 88 Z"
           fill="url(#shirt-grad)"
         />
 
-        {/* Shirt collar fold left */}
-        <path d="M 32 34 L 28 42 L 28 44 L 32 38 Z" fill={palette.shirtDark} opacity="0.4" />
-        {/* Shirt collar fold right */}
-        <path d="M 40 34 L 44 42 L 44 44 L 40 38 Z" fill={palette.shirtDark} opacity="0.4" />
+        {/* Shirt collar folds - more realistic */}
+        <path d="M 36 38 L 32 48 L 32 50 L 36 44 Z" fill={palette.shirtDark} opacity="0.45" />
+        <path d="M 44 38 L 48 48 L 48 50 L 44 44 Z" fill={palette.shirtDark} opacity="0.45" />
 
-        {/* Shirt highlight - left shoulder */}
+        {/* Shirt button line */}
+        <line x1="40" y1="50" x2="40" y2="80" stroke={palette.shirtDark} strokeWidth="0.6" opacity="0.3" />
+
+        {/* Shirt front panel highlight */}
         <path
-          d="M 18 44 Q 16 48 16 60 L 16 70 Q 18 75 22 75 L 28 75 Q 27 70 27 60 L 27 44 Q 26 36 18 44"
-          fill="rgba(255,255,255,0.28)"
+          d="M 20 50 Q 18 56 18 72 L 18 86 Q 20 91 24 91 L 32 91 Q 31 86 31 72 L 31 50 Q 30 40 20 50"
+          fill="rgba(255,255,255,0.32)"
         />
 
-        {/* Shirt shadow - right side */}
+        {/* Shirt right shadow */}
         <path
-          d="M 54 44 Q 56 48 56 60 L 56 70 Q 54 75 50 75 L 44 75 Q 45 70 45 60 L 45 44 Q 46 36 54 44"
-          fill="rgba(0,0,0,0.12)"
+          d="M 60 50 Q 62 56 62 72 L 62 86 Q 60 91 56 91 L 48 91 Q 49 86 49 72 L 49 50 Q 50 40 60 50"
+          fill="rgba(0,0,0,0.14)"
         />
 
-        {/* Sleeves - better definition */}
-        <path
-          d="M 16 48 Q 12 46 6 44 Q 5 44 5 45 Q 5 47 6 47 Q 12 49 16 51 Z"
-          fill={palette.skin}
-        />
-        <path
-          d="M 56 48 Q 60 46 66 44 Q 67 44 67 45 Q 67 47 66 47 Q 60 49 56 51 Z"
-          fill={palette.skin}
-        />
+        {/* Shoulders/sleeves */}
+        <path d="M 18 56 Q 14 54 6 52 Q 5 52 5 54 Q 5 56 6 56 Q 14 58 18 60 Z" fill={palette.skin} />
+        <path d="M 62 56 Q 66 54 74 52 Q 75 52 75 54 Q 75 56 74 56 Q 66 58 62 60 Z" fill={palette.skin} />
 
-        {/* Hands - better detail */}
-        <g>
-          <circle cx="5" cy="45" r="3.2" fill={palette.skin} />
-          <line x1="2.5" y1="43" x2="1" y2="40" stroke={palette.skin} strokeWidth="1" strokeLinecap="round" />
-        </g>
-        <g>
-          <circle cx="67" cy="45" r="3.2" fill={palette.skin} />
-          <line x1="69.5" y1="43" x2="71" y2="40" stroke={palette.skin} strokeWidth="1" strokeLinecap="round" />
-        </g>
+        {/* Hands */}
+        <circle cx="5" cy="55" r="3.6" fill={palette.skin} />
+        <circle cx="75" cy="55" r="3.6" fill={palette.skin} />
 
         {/* Neck */}
-        <rect x="33" y="32" width="6" height="5" fill={palette.skin} rx="1" />
+        <rect x="37" y="36" width="6" height="6" fill={palette.skin} rx="2" />
 
-        {/* Head - larger, better proportions */}
-        <circle cx="36" cy="20" r="15.5" fill="url(#skin-grad)" />
+        {/* Head - best proportions */}
+        <circle cx="40" cy="22" r="17.5" fill="url(#skin-grad)" />
 
-        {/* Head contour shadow */}
-        <circle cx="36" cy="20" r="15.5" fill="rgba(0,0,0,0.1)" />
+        {/* Head shadow/dimension */}
+        <circle cx="40" cy="22" r="17.5" fill="rgba(0,0,0,0.12)" />
 
-        {/* Hair - very detailed */}
+        {/* Hair - extremely detailed */}
         <g>
           {/* Main hair volume */}
           <path
-            d="M 18 20 Q 18 0 36 -4 Q 54 0 54 20 Q 54 12 52 6 Q 50 -2 36 -3 Q 22 -2 20 6 Q 18 12 18 20"
+            d="M 20 22 Q 20 -2 40 -8 Q 60 -2 60 22 Q 60 10 58 2 Q 56 -6 40 -7 Q 24 -6 22 2 Q 20 10 20 22"
             fill="url(#hair-grad)"
           />
 
-          {/* Hair texture - top highlight */}
+          {/* Hair top highlight */}
           <path
-            d="M 20 2 Q 26 -2 36 -4 Q 46 -2 52 5"
-            stroke="rgba(255,255,255,0.25)"
-            strokeWidth="2.2"
+            d="M 22 0 Q 30 -5 40 -8 Q 50 -5 58 2"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="2.5"
             fill="none"
             strokeLinecap="round"
           />
 
-          {/* Hair side definition */}
-          <path d="M 18 6 Q 18 2 19 -2" stroke="rgba(0,0,0,0.18)" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-          <path d="M 54 6 Q 54 2 53 -2" stroke="rgba(0,0,0,0.18)" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+          {/* Hair side strands */}
+          <path d="M 20 4 Q 20 -1 21 -5" stroke="rgba(0,0,0,0.2)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+          <path d="M 60 4 Q 60 -1 59 -5" stroke="rgba(0,0,0,0.2)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
         </g>
 
-        {/* Ears - better detail */}
-        <ellipse cx="19" cy="22" rx="2.8" ry="4.5" fill={palette.skin} />
-        <ellipse cx="53" cy="22" rx="2.8" ry="4.5" fill={palette.skin} />
-        <ellipse cx="19" cy="22" rx="1.6" ry="2.8" fill={palette.accent} opacity="0.8" />
-        <ellipse cx="53" cy="22" rx="1.6" ry="2.8" fill={palette.accent} opacity="0.8" />
+        {/* Ears - very visible */}
+        <ellipse cx="21" cy="24" rx="3.2" ry="5.2" fill={palette.skin} />
+        <ellipse cx="59" cy="24" rx="3.2" ry="5.2" fill={palette.skin} />
+        <ellipse cx="21" cy="24" rx="1.8" ry="3.2" fill={palette.accent} opacity="0.85" />
+        <ellipse cx="59" cy="24" rx="1.8" ry="3.2" fill={palette.accent} opacity="0.85" />
 
-        {/* Eyes - very detailed and expressive */}
+        {/* Eyes - extremely expressive and detailed */}
         <g>
-          {/* Left eye */}
-          <ellipse cx="28" cy="18" rx="2.4" ry="2.8" fill="#ffffff" />
-          <circle cx="28.4" cy="19" r="1.4" fill="#8B6F47" />
-          <circle cx="28.7" cy="18.5" r="0.8" fill="#000" />
-          <circle cx="29.4" cy="17.6" r="0.8" fill="#fff" />
+          {/* Left eye white */}
+          <ellipse cx="30" cy="20" rx="2.8" ry="3.2" fill="#ffffff" />
+          {/* Left iris */}
+          <circle cx="30.5" cy="21" r="1.6" fill="#8B6F47" />
+          {/* Left pupil */}
+          <circle cx="30.8" cy="20.5" r="0.95" fill="#000" />
+          {/* Left shine - important for life */}
+          <circle cx="31.6" cy="19.6" r="0.95" fill="#fff" />
 
-          {/* Right eye */}
-          <ellipse cx="44" cy="18" rx="2.4" ry="2.8" fill="#ffffff" />
-          <circle cx="43.6" cy="19" r="1.4" fill="#8B6F47" />
-          <circle cx="43.3" cy="18.5" r="0.8" fill="#000" />
-          <circle cx="42.6" cy="17.6" r="0.8" fill="#fff" />
+          {/* Right eye white */}
+          <ellipse cx="50" cy="20" rx="2.8" ry="3.2" fill="#ffffff" />
+          {/* Right iris */}
+          <circle cx="49.5" cy="21" r="1.6" fill="#8B6F47" />
+          {/* Right pupil */}
+          <circle cx="49.2" cy="20.5" r="0.95" fill="#000" />
+          {/* Right shine */}
+          <circle cx="48.4" cy="19.6" r="0.95" fill="#fff" />
 
-          {/* Eyebrows - expressive */}
-          <path d="M 25.5 14.5 Q 28 13.5 30.5 14.5" stroke="#6B5344" strokeWidth="1.1" fill="none" strokeLinecap="round" />
-          <path d="M 41.5 14.5 Q 44 13.5 46.5 14.5" stroke="#6B5344" strokeWidth="1.1" fill="none" strokeLinecap="round" />
+          {/* Eyebrows - very expressive */}
+          <path d="M 27.5 16 Q 30 14.8 32.5 16" stroke="#6B5344" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+          <path d="M 47.5 16 Q 50 14.8 52.5 16" stroke="#6B5344" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+
+          {/* Eye outline for depth */}
+          <ellipse cx="30" cy="20" rx="2.8" ry="3.2" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="0.4" />
+          <ellipse cx="50" cy="20" rx="2.8" ry="3.2" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="0.4" />
         </g>
 
-        {/* Nose - dimension */}
+        {/* Nose - dimension and depth */}
         <g>
-          <path d="M 36 18 L 36 24" stroke={palette.accent} strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="33.5" y1="24" x2="33.5" y2="25" stroke="rgba(0,0,0,0.16)" strokeWidth="0.8" strokeLinecap="round" />
-          <line x1="38.5" y1="24" x2="38.5" y2="25" stroke="rgba(0,0,0,0.16)" strokeWidth="0.8" strokeLinecap="round" />
+          <path d="M 40 20 L 40 27.5" stroke={palette.accent} strokeWidth="1.4" strokeLinecap="round" />
+          <line x1="37" y1="27.5" x2="37" y2="28.5" stroke="rgba(0,0,0,0.18)" strokeWidth="1" strokeLinecap="round" />
+          <line x1="43" y1="27.5" x2="43" y2="28.5" stroke="rgba(0,0,0,0.18)" strokeWidth="1" strokeLinecap="round" />
         </g>
 
-        {/* Mouth - friendly smile */}
+        {/* Mouth - warm and friendly */}
         <g>
-          <path d="M 31 28 Q 36 30.2 41 28" stroke="#E07070" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-          <path d="M 31 28 Q 36 29.5 41 28 Q 36 28.8 31 28" fill="rgba(224,112,112,0.22)" />
+          <path d="M 34 34 Q 40 36.5 46 34" stroke="#E88080" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M 34 34 Q 40 35.8 46 34 Q 40 34.8 34 34" fill="rgba(232,128,128,0.25)" />
         </g>
 
-        {/* Cheeks - blush */}
-        <ellipse cx="21" cy="22" rx="4.2" ry="2.8" fill="rgba(245,140,120,0.25)" />
-        <ellipse cx="51" cy="22" rx="4.2" ry="2.8" fill="rgba(245,140,120,0.25)" />
+        {/* Cheeks - prominent blush */}
+        <ellipse cx="22" cy="24" rx="5" ry="3.2" fill="rgba(255,140,120,0.28)" />
+        <ellipse cx="58" cy="24" rx="5" ry="3.2" fill="rgba(255,140,120,0.28)" />
       </g>
 
       <style>{`
         @keyframes idle-breath {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-0.8px); }
+          50% { transform: translateY(-1px); }
         }
       `}</style>
     </svg>
