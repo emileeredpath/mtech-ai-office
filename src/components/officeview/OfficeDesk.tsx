@@ -21,75 +21,76 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '4px',
-        transition: 'all 0.2s ease',
+        gap: '5px',
+        transition: 'all 0.3s ease',
         position: 'relative',
       }}
     >
-      {/* Premium shadow under desk */}
+      {/* Deep shadow under desk */}
       <div
         style={{
           position: 'absolute',
-          bottom: '-10px',
+          bottom: '-14px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '180px',
-          height: '12px',
+          width: '220px',
+          height: '16px',
           background: `
-            radial-gradient(ellipse 180px 12px at center,
-              rgba(0,0,0,0.42) 0%,
-              rgba(0,0,0,0.18) 45%,
+            radial-gradient(ellipse 220px 16px at center,
+              rgba(0,0,0,0.5) 0%,
+              rgba(0,0,0,0.2) 50%,
               transparent 100%)
           `,
           borderRadius: '50%',
           zIndex: 0,
-          filter: 'blur(1.5px)',
+          filter: 'blur(2px)',
         }}
       />
 
-      {/* Desk workstation - premium wood appearance */}
+      {/* Desk workstation - premium quality */}
       <div
         style={{
           position: 'relative',
-          width: '176px',
-          height: '128px',
-          backgroundColor: '#E0C4A0',
+          width: '200px',
+          height: '148px',
+          backgroundColor: '#E8C8A0',
           backgroundImage: `
-            linear-gradient(90deg,
-              #F0D9BC 0%,
-              #E8C8A4 6%,
-              #DDB890 18%,
-              #D2A878 35%,
-              #C69860 52%,
-              #B8865C 70%,
-              #A87454 88%,
-              #9C6A48 100%),
+            linear-gradient(100deg,
+              #F5D9B8 0%,
+              #F0CEA4 5%,
+              #E8C4A0 12%,
+              #DDB890 25%,
+              #CFA878 40%,
+              #BF9570 58%,
+              #AD8560 72%,
+              #9B7350 88%,
+              #8B6340 100%),
             repeating-linear-gradient(
               90deg,
               transparent 0px,
-              transparent 1.5px,
-              rgba(0,0,0,0.025) 1.5px,
-              rgba(0,0,0,0.025) 3px),
+              transparent 2px,
+              rgba(0,0,0,0.03) 2px,
+              rgba(0,0,0,0.03) 4px),
             repeating-linear-gradient(
               0deg,
               transparent 0px,
-              transparent 3px,
-              rgba(139,111,78,0.03) 3px,
-              rgba(139,111,78,0.03) 6px),
+              transparent 4px,
+              rgba(139,111,78,0.02) 4px,
+              rgba(139,111,78,0.02) 8px),
             linear-gradient(135deg,
-              rgba(255,255,255,0.15) 0%,
+              rgba(255,255,255,0.2) 0%,
               transparent 50%,
-              rgba(0,0,0,0.2) 100%)
+              rgba(0,0,0,0.25) 100%)
           `,
           borderRadius: '1px',
-          border: '1px solid rgba(0,0,0,0.45)',
+          border: '1px solid rgba(0,0,0,0.5)',
           boxShadow: `
-            ${isSelected ? '0 0 26px rgba(240, 200, 160, 0.95), ' : ''}
-            0 18px 48px rgba(0,0,0,0.52),
-            inset 0 1px 6px rgba(255,255,255,0.35),
-            inset 0 -3px 12px rgba(0,0,0,0.35)
+            ${isSelected ? '0 0 32px rgba(255, 200, 150, 1), ' : ''}
+            0 20px 56px rgba(0,0,0,0.56),
+            inset 0 1px 8px rgba(255,255,255,0.4),
+            inset 0 -4px 16px rgba(0,0,0,0.4)
           `,
-          padding: '14px',
+          padding: '16px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -98,254 +99,252 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
         }}
       >
         {/* Monitor section */}
-        <div style={{ display: 'flex', justifyContent: 'center', height: '54px', position: 'relative', marginBottom: '6px' }}>
-          {/* Monitor stand base - premium */}
+        <div style={{ display: 'flex', justifyContent: 'center', height: '62px', position: 'relative', marginBottom: '8px' }}>
+          {/* Monitor stand - wood */}
           <div
             style={{
               position: 'absolute',
               bottom: '0',
-              width: '64px',
-              height: '14px',
-              backgroundColor: '#6B5E50',
+              width: '72px',
+              height: '16px',
+              backgroundColor: '#704A38',
               backgroundImage: `
-                linear-gradient(90deg,
-                  #7A7060 0%,
-                  #6B5E50 50%,
-                  #5C5045 100%),
+                linear-gradient(100deg,
+                  #7A5A48 0%,
+                  #704A38 50%,
+                  #684240 100%),
                 repeating-linear-gradient(
                   90deg,
                   transparent 0px,
                   transparent 2px,
-                  rgba(0,0,0,0.06) 2px,
-                  rgba(0,0,0,0.06) 4px)
+                  rgba(0,0,0,0.08) 2px,
+                  rgba(0,0,0,0.08) 4px)
               `,
-              borderRadius: '1px 1px 5px 5px',
+              borderRadius: '1px 1px 6px 6px',
               boxShadow: `
-                0 5px 10px rgba(0,0,0,0.48),
-                inset 0 1px 2px rgba(255,255,255,0.14),
-                inset 0 -1px 4px rgba(0,0,0,0.35)
+                0 6px 14px rgba(0,0,0,0.52),
+                inset 0 1px 3px rgba(255,255,255,0.16),
+                inset 0 -2px 6px rgba(0,0,0,0.4)
               `,
-              border: '1px solid rgba(0,0,0,0.55)',
+              border: '1px solid rgba(0,0,0,0.6)',
             }}
           />
-          {/* Monitor frame */}
+          {/* Monitor */}
           <div
             style={{
               position: 'absolute',
               top: '4px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '60px',
-              height: '44px',
-              backgroundColor: '#1f1f1f',
-              borderRadius: '3px',
-              border: `3.5px solid ${employee.accentColor}`,
+              width: '68px',
+              height: '52px',
+              backgroundColor: '#1a1a1a',
+              borderRadius: '4px',
+              border: `4px solid ${employee.accentColor}`,
               boxShadow: `
-                0 6px 14px rgba(0,0,0,0.55),
-                0 0 18px ${employee.accentColor}BB,
-                inset 0 1px 5px rgba(255,255,255,0.18),
-                inset 0 -2px 5px rgba(0,0,0,0.35)
+                0 8px 18px rgba(0,0,0,0.6),
+                0 0 22px ${employee.accentColor}DD,
+                inset 0 1px 6px rgba(255,255,255,0.2),
+                inset 0 -3px 8px rgba(0,0,0,0.4)
               `,
             }}
           />
         </div>
 
-        {/* Keyboard and accessories section */}
+        {/* Keyboard and accessories */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
             width: '100%',
-            height: '24px',
-            gap: '6px',
-            marginBottom: '6px',
+            height: '28px',
+            gap: '8px',
+            marginBottom: '8px',
           }}
         >
-          {/* Keyboard - premium */}
+          {/* Keyboard */}
           <div
             style={{
               flex: 1,
-              height: '14px',
-              backgroundColor: '#2f2f2f',
-              borderRadius: '2px',
-              border: '0.7px solid #1a1a1a',
+              height: '16px',
+              backgroundColor: '#313131',
+              borderRadius: '3px',
+              border: '0.8px solid #1a1a1a',
               boxShadow: `
-                inset 0 1px 4px rgba(0,0,0,0.85),
-                0 4px 6px rgba(0,0,0,0.50),
-                inset 0 -0.5px 1px rgba(255,255,255,0.12)
+                inset 0 2px 6px rgba(0,0,0,0.9),
+                0 5px 8px rgba(0,0,0,0.55),
+                inset 0 -0.5px 2px rgba(255,255,255,0.14)
               `,
             }}
           />
 
-          {/* Mug - ceramic premium */}
+          {/* Mug */}
           <div
             style={{
               position: 'relative',
-              width: '20px',
-              height: '22px',
-              backgroundColor: '#C4956B',
-              borderRadius: '2px 2px 4px 4px',
-              border: '1px solid #9A7050',
+              width: '24px',
+              height: '26px',
+              backgroundColor: '#C9956B',
+              borderRadius: '2px 2px 5px 5px',
+              border: '1.2px solid #9A7050',
               boxShadow: `
-                0 5px 8px rgba(0,0,0,0.45),
-                inset 0 1px 3px rgba(0,0,0,0.35),
-                inset -2px 0 3px rgba(255,255,255,0.2)
+                0 6px 10px rgba(0,0,0,0.50),
+                inset 0 1px 4px rgba(0,0,0,0.4),
+                inset -3px 0 4px rgba(255,255,255,0.22)
               `,
             }}
           >
-            {/* Mug handle */}
             <div
               style={{
                 position: 'absolute',
-                right: '-6px',
-                top: '3px',
-                width: '6px',
-                height: '12px',
-                border: '1px solid #9A7050',
+                right: '-8px',
+                top: '4px',
+                width: '8px',
+                height: '14px',
+                border: '1.2px solid #9A7050',
                 borderLeft: 'none',
-                borderRadius: '0 5px 5px 0',
+                borderRadius: '0 6px 6px 0',
                 backgroundColor: 'transparent',
               }}
             />
           </div>
 
-          {/* Plant pot - ceramic with leaves */}
+          {/* Plant pot */}
           <div
             style={{
               position: 'relative',
-              width: '18px',
-              height: '22px',
+              width: '22px',
+              height: '26px',
               backgroundColor: '#D4A574',
-              borderRadius: '2px 2px 4px 4px',
-              border: '1px solid #B89060',
+              borderRadius: '2px 2px 5px 5px',
+              border: '1.2px solid #B89060',
               boxShadow: `
-                0 5px 8px rgba(0,0,0,0.40),
-                inset 0 1px 2px rgba(0,0,0,0.25)
+                0 6px 10px rgba(0,0,0,0.48),
+                inset 0 1px 3px rgba(0,0,0,0.3)
               `,
             }}
           >
-            {/* Plant leaves - green */}
             <div
               style={{
                 position: 'absolute',
-                top: '-14px',
+                top: '-16px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '12px',
-                height: '14px',
+                width: '14px',
+                height: '16px',
                 backgroundColor: '#3BB877',
-                borderRadius: '3px 3px 0 0',
+                borderRadius: '4px 4px 0 0',
                 boxShadow: `
-                  0 4px 5px rgba(0,0,0,0.35),
-                  inset 0 1px 2px rgba(255,255,255,0.25)
+                  0 4px 6px rgba(0,0,0,0.40),
+                  inset 0 1px 2px rgba(255,255,255,0.28)
                 `,
               }}
             />
           </div>
         </div>
 
-        {/* Workspace surface */}
+        {/* Desk surface */}
         <div
           style={{
             width: '100%',
-            height: '14px',
-            backgroundColor: '#FAF6EF',
+            height: '16px',
+            backgroundColor: '#FEFAF4',
             borderRadius: '2px',
-            opacity: 0.88,
+            opacity: 0.9,
             boxShadow: `
-              inset 0 1px 3px rgba(0,0,0,0.18),
-              0 2px 3px rgba(0,0,0,0.20)
+              inset 0 1px 4px rgba(0,0,0,0.2),
+              0 2px 4px rgba(0,0,0,0.22)
             `,
           }}
         />
       </div>
 
-      {/* Chair - premium office chair */}
+      {/* Chair */}
       <div
         style={{
           position: 'absolute',
-          top: '64px',
+          top: '78px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '56px',
-          height: '50px',
-          backgroundColor: '#76756B',
+          width: '64px',
+          height: '58px',
+          backgroundColor: '#7A7970',
           backgroundImage: `
-            linear-gradient(135deg, #86857B 0%, #76756B 50%, #665F57 100%),
+            linear-gradient(135deg, #8A8980 0%, #7A7970 50%, #6A6960 100%),
             repeating-linear-gradient(
               90deg,
               transparent 0px,
-              transparent 2px,
-              rgba(0,0,0,0.07) 2px,
-              rgba(0,0,0,0.07) 4px)
+              transparent 3px,
+              rgba(0,0,0,0.08) 3px,
+              rgba(0,0,0,0.08) 6px)
           `,
-          borderRadius: '2px 2px 7px 7px',
-          border: '1px solid rgba(0,0,0,0.55)',
+          borderRadius: '2px 2px 8px 8px',
+          border: '1px solid rgba(0,0,0,0.6)',
           boxShadow: `
-            0 6px 12px rgba(0,0,0,0.40),
-            inset 0 1px 3px rgba(255,255,255,0.14),
-            inset 0 -1px 5px rgba(0,0,0,0.35)
+            0 7px 14px rgba(0,0,0,0.45),
+            inset 0 1px 3px rgba(255,255,255,0.16),
+            inset 0 -1px 6px rgba(0,0,0,0.4)
           `,
           zIndex: 8,
         }}
       />
 
-      {/* Employee character - sitting */}
+      {/* Character */}
       <div
         style={{
           position: 'relative',
-          marginTop: '-12px',
+          marginTop: '-16px',
           zIndex: 10,
         }}
       >
         <EmployeeCharacter employee={employee} size="medium" />
       </div>
 
-      {/* Role title - premium styling */}
+      {/* Role title */}
       <div
         style={{
-          fontSize: '12px',
+          fontSize: '13px',
           fontWeight: '900',
           color: 'var(--text-primary)',
           textAlign: 'center',
-          width: '176px',
-          lineHeight: '1.15',
-          marginTop: '12px',
+          width: '200px',
+          lineHeight: '1.1',
+          marginTop: '14px',
           zIndex: 1,
-          letterSpacing: '0.5px',
+          letterSpacing: '0.6px',
           textTransform: 'uppercase',
         }}
       >
         {roleLabel}
       </div>
 
-      {/* Task card - premium */}
+      {/* Task card */}
       <div
         style={{
-          marginTop: '8px',
-          width: '176px',
+          marginTop: '10px',
+          width: '200px',
           zIndex: 1,
-          filter: 'drop-shadow(0 5px 14px rgba(0,0,0,0.28))',
+          filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.32))',
         }}
       >
         <DeskTaskCard employee={employee} isActive={isActive} />
       </div>
 
-      {/* Active indicator glow - enhanced */}
+      {/* Active glow */}
       {isActive && (
         <div
           style={{
             position: 'absolute',
-            top: '-28px',
+            top: '-36px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '224px',
-            height: '180px',
-            background: `radial-gradient(circle, rgba(249,112,31,0.38) 0%, rgba(249,112,31,0) 68%)`,
+            width: '280px',
+            height: '220px',
+            background: `radial-gradient(circle, rgba(249,112,31,0.42) 0%, rgba(249,112,31,0) 65%)`,
             borderRadius: '50%',
             pointerEvents: 'none',
-            animation: 'glow-pulse 3s ease-in-out infinite',
+            animation: 'glow-pulse 3.2s ease-in-out infinite',
             zIndex: 0,
           }}
         />
@@ -353,8 +352,8 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
 
       <style>{`
         @keyframes glow-pulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 0.85; }
+          0%, 100% { opacity: 0.55; }
+          50% { opacity: 0.9; }
         }
       `}</style>
     </div>

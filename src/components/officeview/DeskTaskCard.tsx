@@ -18,12 +18,12 @@ export function DeskTaskCard({ employee, isActive }: DeskTaskCardProps) {
         backgroundColor: 'var(--bg-secondary)',
         border: `1px solid var(--border-color)`,
         borderRadius: '8px',
-        padding: '10px 12px',
+        padding: '11px 13px',
         fontSize: '10px',
         transition: 'all 0.2s ease',
-        boxShadow: isActive ? '0 5px 16px rgba(0,0,0,0.24)' : '0 3px 9px rgba(0,0,0,0.18)',
-        maxWidth: '176px',
-        minWidth: '176px',
+        boxShadow: isActive ? '0 6px 18px rgba(0,0,0,0.28)' : '0 3px 10px rgba(0,0,0,0.2)',
+        maxWidth: '200px',
+        minWidth: '200px',
       }}
     >
       {/* Status with dot and count */}
