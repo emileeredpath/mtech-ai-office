@@ -1,5 +1,5 @@
 import { useOfficeStore } from '@/store/officeStore';
-import { LivingOfficeView } from './LivingOfficeView';
+import { LivingOffice } from './LivingOffice';
 import { OfficeRightSidebar } from './OfficeRightSidebar';
 import { OfficeBottomBar } from './OfficeBottomBar';
 
@@ -30,9 +30,9 @@ export function RealisticOfficeView({
     >
       {/* Main office area: floor + right sidebar */}
       <div className="flex-1 flex gap-4 p-6 overflow-hidden">
-        {/* Living Office View - main center area */}
-        <div className="flex-1 overflow-hidden">
-          <LivingOfficeView
+        {/* Living Office - premium office scene */}
+        <div className="flex-1 overflow-hidden rounded-lg">
+          <LivingOffice
             sandyThinking={sandyThinking}
             sandyMessage={sandyMessage}
             selectedRoomId={selectedRoomId}
