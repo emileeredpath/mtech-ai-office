@@ -1,5 +1,5 @@
 import type { Employee } from '@/types/employee';
-import { EmployeeAvatar } from './EmployeeAvatar';
+import { EmployeeCharacter } from './EmployeeCharacter';
 import { DeskTaskCard } from './DeskTaskCard';
 import { ROLE_DISPLAY_NAMES } from './OfficeProps';
 
@@ -21,115 +21,151 @@ export function OfficeDesk({ employee, isSelected, isActive, onSelect }: OfficeD
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '8px',
-        padding: '12px',
-        borderRadius: '8px',
+        gap: '4px',
         transition: 'all 0.2s ease',
-        backgroundColor: isSelected ? 'var(--bg-secondary)' : 'transparent',
-        border: isSelected ? '2px solid var(--accent-color)' : '1px solid transparent',
       }}
     >
-      {/* Desk surface */}
+      {/* Desk workstation */}
       <div
         style={{
-          width: '100%',
-          height: '60px',
-          backgroundColor: '#8B6F47',
-          backgroundImage: `linear-gradient(135deg, #A0826D 0%, #8B6F47 50%, #6B5435 100%)`,
-          borderRadius: '6px',
-          border: '1px solid rgba(0,0,0,0.2)',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)',
           position: 'relative',
+          width: '90px',
+          height: '68px',
+          backgroundColor: '#A0826D',
+          backgroundImage: `linear-gradient(135deg, #B89570 0%, #A0826D 50%, #8B6F47 100%)`,
+          borderRadius: '4px',
+          border: '1px solid rgba(0,0,0,0.25)',
+          boxShadow: `${isSelected ? '0 0 12px rgba(212, 165, 116, 0.6), ' : ''}0 6px 16px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.15)`,
+          padding: '6px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          gap: '3px',
           overflow: 'hidden',
         }}
       >
-        {/* Desk content area */}
+        {/* Monitor */}
         <div
           style={{
-            position: 'absolute',
-            inset: '4px',
+            width: '32px',
+            height: '24px',
+            backgroundColor: '#0a0a0a',
+            borderRadius: '2px',
+            border: `2px solid ${employee.accentColor}`,
+            boxShadow: `0 2px 6px rgba(0,0,0,0.4), 0 0 6px ${employee.accentColor}55`,
+            margin: '0 auto',
+          }}
+        />
+
+        {/* Keyboard and mouse area */}
+        <div
+          style={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '6px',
-            paddingRight: '8px',
+            alignItems: 'center',
+            width: '100%',
+            height: '12px',
+            gap: '2px',
           }}
         >
-          {/* Monitor */}
-          <div
-            style={{
-              width: '28px',
-              height: '22px',
-              backgroundColor: '#1a1a2e',
-              borderRadius: '3px',
-              border: `2px solid ${employee.accentColor}`,
-              boxShadow: `0 2px 6px rgba(0,0,0,0.3), 0 0 8px ${employee.accentColor}66`,
-              flexShrink: 0,
-            }}
-          />
-
           {/* Keyboard */}
           <div
             style={{
-              width: '18px',
+              flex: 1,
               height: '8px',
               backgroundColor: '#1a1a1a',
-              borderRadius: '2px',
+              borderRadius: '1px',
               border: '0.5px solid #0a0a0a',
-              flexShrink: 0,
             }}
           />
 
-          {/* Small plant or mug */}
+          {/* Mug */}
           <div
             style={{
               width: '10px',
-              height: '12px',
+              height: '10px',
+              backgroundColor: '#8B4513',
+              borderRadius: '1px',
+              border: '0.5px solid #5C2E0F',
+            }}
+          />
+
+          {/* Plant */}
+          <div
+            style={{
+              width: '8px',
+              height: '10px',
               backgroundColor: '#2ba876',
-              borderRadius: '2px 2px 0 0',
-              flexShrink: 0,
+              borderRadius: '1px 1px 0 0',
             }}
           />
         </div>
+
+        {/* Papers/notebook */}
+        <div
+          style={{
+            width: '100%',
+            height: '6px',
+            backgroundColor: '#F5F1E8',
+            borderRadius: '1px',
+            opacity: 0.7,
+          }}
+        />
       </div>
 
-      {/* Employee avatar and name */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
-        <EmployeeAvatar employee={employee} size="small" />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-primary)' }}>
-            {roleLabel}
-          </div>
-          <div style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>
-            {employee.name}
-          </div>
-        </div>
+      {/* Employee character - sitting at desk */}
+      <div
+        style={{
+          position: 'relative',
+          marginTop: '-8px',
+          zIndex: 10,
+        }}
+      >
+        <EmployeeCharacter employee={employee} size="medium" />
+      </div>
+
+      {/* Role title */}
+      <div
+        style={{
+          fontSize: '11px',
+          fontWeight: '600',
+          color: 'var(--text-primary)',
+          textAlign: 'center',
+          width: '90px',
+          lineHeight: '1.2',
+          marginTop: '4px',
+        }}
+      >
+        {roleLabel}
       </div>
 
       {/* Task card */}
-      <DeskTaskCard employee={employee} isActive={isActive} />
+      <div style={{ marginTop: '2px', width: '100%' }}>
+        <DeskTaskCard employee={employee} isActive={isActive} />
+      </div>
 
-      {/* Active indicator */}
+      {/* Active indicator glow */}
       {isActive && (
         <div
           style={{
             position: 'absolute',
-            top: '8px',
-            right: '8px',
-            width: '8px',
-            height: '8px',
+            top: '-8px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '100px',
+            height: '100px',
+            background: `radial-gradient(circle, rgba(249,112,31,0.15) 0%, rgba(249,112,31,0) 70%)`,
             borderRadius: '50%',
-            backgroundColor: '#F9701F',
-            boxShadow: '0 0 8px rgba(249,112,31,0.6)',
-            animation: 'pulse-indicator 2s ease-in-out infinite',
+            pointerEvents: 'none',
+            animation: 'glow-pulse 2s ease-in-out infinite',
           }}
         />
       )}
 
       <style>{`
-        @keyframes pulse-indicator {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.2); }
+        @keyframes glow-pulse {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
         }
       `}</style>
     </div>

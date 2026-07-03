@@ -1,10 +1,9 @@
 import { useOfficeStore } from '@/store/officeStore';
 import type { Employee } from '@/types/employee';
 import { OfficeDesk } from './OfficeDesk';
-import { CollaborationArea } from './CollaborationArea';
 import { SandyDock } from './SandyDock';
 import { SpeechBubble } from './SpeechBubble';
-import { DESK_POSITIONS, OFFICE_COLORS } from './OfficeProps';
+import { ROLE_DISPLAY_NAMES } from './OfficeProps';
 
 interface LivingOfficeViewProps {
   sandyThinking: boolean;
@@ -13,6 +12,18 @@ interface LivingOfficeViewProps {
   onSelectRoom: (roomId: string | null) => void;
   onAskSandy?: () => void;
 }
+
+// Custom desk positions for better layout
+const CUSTOM_DESK_POSITIONS: Record<string, { x: number; y: number }> = {
+  'marketing-director': { x: 10, y: 18 },
+  'website-auditor': { x: 50, y: 16 },
+  'seo-ppc-manager': { x: 32, y: 20 },
+  'email-marketing-manager': { x: 50, y: 65 },
+  'proposal-writer': { x: 70, y: 22 },
+  'social-media-manager': { x: 12, y: 60 },
+  'case-study-writer': { x: 68, y: 60 },
+  'funding-rewards-manager': { x: 88, y: 50 },
+};
 
 export function LivingOfficeView({
   sandyThinking,
@@ -25,16 +36,8 @@ export function LivingOfficeView({
   const selectedEmployeeId = useOfficeStore((state) => state.selectedEmployeeId);
   const selectEmployee = useOfficeStore((state) => state.selectEmployee);
 
-  // Map desk positions by employee ID for easy lookup
-  const deskPositions = new Map(DESK_POSITIONS.map((pos) => [pos.employeeId, pos]));
-
-  // Get the selected employee
-  const selectedEmployee = employees.find((e) => e.id === selectedEmployeeId);
-
-  // Find employees in order of DESK_POSITIONS
-  const visibleEmployees = DESK_POSITIONS.map((pos) => employees.find((e) => e.id === pos.employeeId)).filter(
-    (e): e is Employee => e !== undefined
-  );
+  const isSelected = (id: string) => selectedEmployeeId === id;
+  const isActive = (id: string) => selectedRoomId === id || employees.find((e) => e.id === id)?.status === 'working';
 
   return (
     <div
@@ -42,8 +45,13 @@ export function LivingOfficeView({
         position: 'relative',
         width: '100%',
         height: '100%',
-        backgroundColor: OFFICE_COLORS.floorWood,
-        backgroundImage: `linear-gradient(135deg, ${OFFICE_COLORS.floorLight} 0%, ${OFFICE_COLORS.floorWood} 50%, ${OFFICE_COLORS.floorWood} 100%)`,
+        backgroundColor: '#A68560',
+        backgroundImage: `
+          linear-gradient(180deg, #DCC8B8 0%, #B89570 30%, #A68560 60%, #9B7A50 100%),
+          repeating-linear-gradient(90deg, #B89570 0px, #B89570 2px, #A68560 2px, #A68560 4px)
+        `,
+        backgroundSize: '100% 100%, 4px 100%',
+        backgroundPosition: '0 0, 0 0',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
@@ -52,16 +60,18 @@ export function LivingOfficeView({
       {/* Top wall area */}
       <div
         style={{
-          height: '40px',
-          backgroundColor: OFFICE_COLORS.wallWarm,
-          borderBottom: `1px solid ${OFFICE_COLORS.wallMid}`,
+          height: '36px',
+          backgroundColor: '#DCC8B8',
+          backgroundImage: 'linear-gradient(180deg, #E8DCC8 0%, #DCC8B8 100%)',
+          borderBottom: '2px solid #C4B5A0',
           display: 'flex',
           alignItems: 'center',
-          paddingLeft: '16px',
+          paddingLeft: '20px',
+          boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.1)',
         }}
       >
-        <div style={{ fontSize: '13px', fontWeight: '600', color: '#666' }}>
-          Living Office — Marketing Team
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#555' }}>
+          Marketing Office
         </div>
       </div>
 
@@ -71,96 +81,86 @@ export function LivingOfficeView({
           flex: 1,
           position: 'relative',
           overflow: 'hidden',
-          background: `linear-gradient(to right, ${OFFICE_COLORS.floorWood} 0%, ${OFFICE_COLORS.floorLight} 50%, ${OFFICE_COLORS.floorWood} 100%)`,
+          background: `
+            linear-gradient(180deg, #B89570 0%, #A68560 50%, #9B7A50 100%),
+            radial-gradient(ellipse 200% 100% at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 70%)
+          `,
+          backgroundSize: '100% 100%, 100% 100%',
         }}
       >
-        {/* Right wall/windows area */}
+        {/* Right wall with windows */}
         <div
           style={{
             position: 'absolute',
             right: 0,
-            top: 0,
-            width: '60px',
-            height: '100%',
-            backgroundColor: OFFICE_COLORS.wallWarm,
-            borderLeft: `2px solid ${OFFICE_COLORS.wallMid}`,
+            top: '36px',
+            width: '50px',
+            height: 'calc(100% - 36px)',
+            backgroundColor: '#DCC8B8',
+            backgroundImage: 'linear-gradient(90deg, #E8DCC8 0%, #DCC8B8 100%)',
+            borderLeft: '2px solid #C4B5A0',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
-            padding: '12px',
-            boxShadow: 'inset -4px 0 12px rgba(0,0,0,0.1)',
+            justifyContent: 'flex-start',
+            gap: '10px',
+            padding: '10px 6px',
+            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.05)',
           }}
         >
           {/* Windows */}
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2, 3].map((i) => (
             <div
               key={`window-${i}`}
               style={{
-                width: '100%',
-                height: '40px',
-                backgroundColor: '#87CEEB',
-                borderRadius: '4px',
-                border: '1px solid #5a9bd4',
-                boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.3)',
+                width: '38px',
+                height: '28px',
+                backgroundColor: '#A8D8FF',
+                borderRadius: '3px',
+                border: '1px solid #7AC5FF',
+                boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.1)',
               }}
             />
           ))}
         </div>
 
-        {/* Bottom wall/plants area */}
+        {/* Bottom wall/skirting with plants */}
         <div
           style={{
             position: 'absolute',
             bottom: 0,
             left: 0,
-            right: '60px',
-            height: '50px',
-            backgroundColor: OFFICE_COLORS.wallMid,
-            borderTop: `2px solid ${OFFICE_COLORS.wallWarm}`,
+            right: '50px',
+            height: '45px',
+            backgroundColor: '#C4B5A0',
+            borderTop: '2px solid #D4C4B0',
             display: 'flex',
             alignItems: 'flex-end',
-            padding: '8px 16px',
-            gap: '12px',
-            overflow: 'hidden',
+            paddingBottom: '4px',
+            paddingLeft: '12px',
+            gap: '14px',
+            boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.1)',
           }}
         >
-          {/* Decorative plants */}
-          {[0, 1, 2, 3].map((i) => (
+          {/* Corner plants */}
+          {[0, 1, 2, 3, 4].map((i) => (
             <div
               key={`plant-${i}`}
               style={{
-                width: '16px',
-                height: '24px',
+                width: '14px',
+                height: '28px',
                 backgroundColor: '#2ba876',
-                borderRadius: '3px 3px 0 0',
+                borderRadius: '2px 2px 0 0',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
                 flexShrink: 0,
               }}
             />
           ))}
         </div>
 
-        {/* Water cooler (bottom-right corner) */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '60px',
-            right: '70px',
-            width: '32px',
-            height: '48px',
-            backgroundColor: '#b3d9ff',
-            borderRadius: '4px',
-            border: '2px solid #5a9bd4',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
-          }}
-        />
-
         {/* Desks positioned around the office */}
-        {visibleEmployees.map((employee) => {
-          const pos = deskPositions.get(employee.id);
+        {employees.map((employee) => {
+          const pos = CUSTOM_DESK_POSITIONS[employee.id];
           if (!pos) return null;
-
-          const isSelected = selectedEmployeeId === employee.id;
-          const isActive = selectedRoomId === employee.id || employee.status === 'working';
 
           return (
             <div
@@ -174,8 +174,8 @@ export function LivingOfficeView({
             >
               <OfficeDesk
                 employee={employee}
-                isSelected={isSelected}
-                isActive={isActive}
+                isSelected={isSelected(employee.id)}
+                isActive={isActive(employee.id)}
                 onSelect={() => {
                   selectEmployee(employee.id);
                   onSelectRoom(employee.id);
@@ -185,56 +185,85 @@ export function LivingOfficeView({
           );
         })}
 
-        {/* Collaboration Area - central table */}
-        <CollaborationArea width={240} height={160} />
+        {/* Whiteboard with goals - left side */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '24px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: '100px',
+            height: '80px',
+            backgroundColor: '#F5F1E8',
+            borderRadius: '4px',
+            border: '2px solid #999',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            padding: '8px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+          }}
+        >
+          <div style={{ fontSize: '9px', fontWeight: '700', color: '#333' }}>
+            Team Goals
+          </div>
+          <div
+            style={{
+              width: '70%',
+              height: '1px',
+              backgroundColor: '#D84C45',
+            }}
+          />
+          <div
+            style={{
+              width: '70%',
+              height: '1px',
+              backgroundColor: '#2BA876',
+            }}
+          />
+          <div
+            style={{
+              width: '70%',
+              height: '1px',
+              backgroundColor: '#1E5A9F',
+            }}
+          />
+        </div>
 
         {/* Sandy Dock - bottom center */}
         <SandyDock onAskSandy={onAskSandy || (() => {})} />
 
         {/* Speech bubble when Sandy sends a message */}
-        {sandyMessage && <SpeechBubble text={sandyMessage} x={50} y={40} />}
+        {sandyMessage && <SpeechBubble text={sandyMessage} x={50} y={35} />}
 
         {/* Sandy thinking indicator */}
         {sandyThinking && (
           <div
             style={{
               position: 'absolute',
-              bottom: '100px',
+              bottom: '90px',
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 50,
               display: 'flex',
-              gap: '4px',
+              gap: '3px',
               alignItems: 'center',
             }}
           >
-            <div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-secondary)',
-                animation: 'bounce 1.4s infinite',
-              }}
-            />
-            <div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-secondary)',
-                animation: 'bounce 1.4s infinite 0.2s',
-              }}
-            />
-            <div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-secondary)',
-                animation: 'bounce 1.4s infinite 0.4s',
-              }}
-            />
+            {[0, 1, 2].map((i) => (
+              <div
+                key={`dot-${i}`}
+                style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--text-secondary)',
+                  animation: `bounce 1.4s infinite ${i * 0.2}s`,
+                }}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -246,8 +275,8 @@ export function LivingOfficeView({
             opacity: 1;
           }
           40% {
-            transform: translateY(-8px);
-            opacity: 0.7;
+            transform: translateY(-6px);
+            opacity: 0.6;
           }
         }
       `}</style>
