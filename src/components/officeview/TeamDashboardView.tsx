@@ -24,10 +24,12 @@ export function TeamDashboardView({
   const selectedEmployeeId = useOfficeStore((state) => state.selectedEmployeeId);
   const selectEmployee = useOfficeStore((state) => state.selectEmployee);
   const [activeTab, setActiveTab] = useState<'active' | 'todo' | 'activity' | 'campaigns'>('active');
-  const [darkMode, setDarkMode] = useState(true);
+  const darkMode = true;
 
   const stats = useMemo(() => {
     const working = employees.filter((e) => e.status === 'working').length;
+    const waiting = employees.filter((e) => e.status === 'waiting_approval').length;
+    const blocked = employees.filter((e) => e.status === 'blocked').length;
     const totalTasks = employees.reduce((sum, e) => sum + (e.tasks?.length || 0), 0);
     const totalApprovals = employees.reduce(
       (sum, e) =>
@@ -36,155 +38,74 @@ export function TeamDashboardView({
           .length || 0),
       0
     );
-    const blocked = employees.filter((e) => e.status === 'blocked').length;
-    const completedToday = employees.reduce(
-      (sum, e) =>
-        sum +
-        (e.tasks?.filter((t) => t.status === 'complete')
-          .length || 0),
-      0
-    );
-    const avgWorkload = employees.length > 0
-      ? Math.round((totalTasks / employees.length) * 10) / 10
-      : 0;
-    return { working, totalTasks, totalApprovals, blocked, completedToday, avgWorkload };
+    return { working, waiting, blocked, totalTasks, totalApprovals };
   }, [employees]);
 
   const isSelected = (id: string) => selectedEmployeeId === id;
 
   return (
-    <div
-      className={`w-full h-full flex flex-col overflow-hidden ${
-        darkMode
-          ? 'bg-slate-950 text-slate-50'
-          : 'bg-white text-slate-900'
-      }`}
-    >
+    <div className="w-full h-full flex flex-col overflow-hidden bg-slate-950 text-slate-50">
       {/* Header */}
-      <header
-        className={`${
-          darkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-        } border-b px-8 py-6`}
-      >
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <header className="bg-slate-900 border-b border-slate-800 px-8 py-5">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div>
-            <h1 className="text-3xl font-bold">Marketing Team</h1>
-            <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-              {stats.working} working • {stats.totalTasks} active tasks • {stats.totalApprovals} approvals
+            <h1 className="text-2xl font-bold">Marketing Team</h1>
+            <p className="text-sm text-slate-400 mt-1">
+              8 members • {stats.working} working • {stats.waiting} waiting • {stats.blocked} blocked
             </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                darkMode
-                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                  : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
-              }`}
-            >
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-            <button
-              onClick={onAskSandy}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold transition-colors"
-            >
-              Ask Sandy
-            </button>
-          </div>
+          <button
+            onClick={onAskSandy}
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold transition-colors"
+          >
+            Ask Sandy
+          </button>
         </div>
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden p-8">
+      <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden p-6 max-w-7xl mx-auto w-full">
         {/* Left: Employee Grid */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Sandy Panel - Premium Compact */}
-          <div
-            className={`${
-              darkMode
-                ? 'bg-gradient-to-br from-purple-950 via-purple-900 to-purple-800 border-purple-700'
-                : 'bg-gradient-to-br from-purple-200 via-purple-100 to-purple-50 border-purple-300'
-            } border rounded-xl p-4 mb-6 shadow-lg`}
-          >
-            <div className="flex items-start gap-4">
-              {/* Avatar */}
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                  darkMode
-                    ? 'bg-purple-800 text-purple-100'
-                    : 'bg-purple-300 text-purple-900'
-                }`}
-              >
+          {/* Sandy Panel - Compact & Calm */}
+          <div className="bg-gradient-to-r from-purple-900 to-purple-800 border border-purple-700 rounded-lg p-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center flex-shrink-0 font-bold text-sm text-purple-100">
                 S
               </div>
-
-              {/* Content */}
-              <div className="flex-1">
-                <div>
-                  <h2 className={`font-bold ${darkMode ? 'text-purple-100' : 'text-purple-900'}`}>
-                    Sandy
-                  </h2>
-                  <p className={`text-xs ${darkMode ? 'text-purple-300' : 'text-purple-700'}`}>
-                    Chief of Staff
-                  </p>
-                </div>
-
-                {/* Summary */}
-                <p className={`text-xs mt-2 leading-relaxed ${darkMode ? 'text-purple-200' : 'text-purple-800'}`}>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-purple-100">
                   {stats.working === employees.length
-                    ? `All ${employees.length} team members available.`
-                    : `${employees.length - stats.working} of ${employees.length} team members available.`}{' '}
-                  {stats.totalTasks === 0
-                    ? 'No tasks currently assigned.'
-                    : `${stats.totalTasks} ${stats.totalTasks === 1 ? 'task' : 'tasks'} in progress.`}
+                    ? 'All team members available.'
+                    : `${stats.working} working, ${employees.length - stats.working} available.`}
                 </p>
-
-                {/* Three Metrics */}
-                <div className="flex gap-3 mt-3">
-                  <div className="text-center">
-                    <div className={`text-lg font-bold ${darkMode ? 'text-purple-100' : 'text-purple-900'}`}>
-                      {stats.totalTasks}
-                    </div>
-                    <div className={`text-xs ${darkMode ? 'text-purple-300' : 'text-purple-600'}`}>
-                      Assigned
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-lg font-bold ${darkMode ? 'text-purple-100' : 'text-purple-900'}`}>
-                      {stats.totalApprovals}
-                    </div>
-                    <div className={`text-xs ${darkMode ? 'text-purple-300' : 'text-purple-600'}`}>
-                      Waiting
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-lg font-bold ${darkMode ? 'text-purple-100' : 'text-purple-900'}`}>
-                      {stats.completedToday}
-                    </div>
-                    <div className={`text-xs ${darkMode ? 'text-purple-300' : 'text-purple-600'}`}>
-                      Completed
-                    </div>
-                  </div>
-                </div>
+              </div>
+              <button
+                onClick={onAskSandy}
+                className="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded text-xs font-medium transition-colors flex-shrink-0"
+              >
+                Message
+              </button>
+            </div>
+            <div className="flex gap-4 mt-2 text-xs">
+              <div className="text-center">
+                <div className="font-bold text-purple-100">{stats.totalTasks}</div>
+                <div className="text-purple-300">Assigned</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-purple-100">{stats.totalApprovals}</div>
+                <div className="text-purple-300">Waiting</div>
+              </div>
+              <div className="text-center">
+                <div className="font-bold text-purple-100">{stats.blocked}</div>
+                <div className="text-purple-300">Blocked</div>
               </div>
             </div>
-
-            {/* Message Button */}
-            <button
-              onClick={onAskSandy}
-              className={`w-full mt-3 py-2 px-3 rounded-lg font-medium text-sm transition-colors ${
-                darkMode
-                  ? 'bg-purple-700 hover:bg-purple-600 text-purple-100'
-                  : 'bg-purple-300 hover:bg-purple-400 text-purple-900'
-              }`}
-            >
-              Message Sandy
-            </button>
           </div>
 
           {/* Employee Grid */}
-          <div className="flex-1 overflow-y-auto pr-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-max">
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {employees.map((employee) => {
                 const statusColor = EMPLOYEE_STATUS_COLORS[employee.status];
                 const statusLabel = EMPLOYEE_STATUS_LABELS[employee.status];
@@ -199,146 +120,80 @@ export function TeamDashboardView({
 
                 return (
                   <div
+                    key={employee.id}
                     className={`${
-                      darkMode
-                        ? `${isSelected(employee.id) ? 'bg-slate-700 border-orange-500 shadow-md' : 'bg-slate-800 border-slate-700'} hover:bg-slate-700`
-                        : `${isSelected(employee.id) ? 'bg-slate-50 border-orange-500 shadow-md' : 'bg-white border-slate-200'} hover:bg-slate-50`
-                    } border rounded-xl p-4 cursor-pointer transition-all`}
+                      isSelected(employee.id)
+                        ? 'bg-slate-700 border-orange-500 shadow-lg'
+                        : 'bg-slate-800 border-slate-700 hover:bg-slate-700'
+                    } border rounded-lg p-3 cursor-pointer transition-all`}
                   >
                     {/* Avatar & Title */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                          darkMode
-                            ? 'bg-slate-700 text-slate-100'
-                            : 'bg-slate-200 text-slate-900'
-                        }`}
-                      >
+                    <div className="flex items-start gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-100 flex-shrink-0">
                         {initials}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3
-                          className={`font-semibold text-xs truncate ${
-                            darkMode ? 'text-slate-100' : 'text-slate-900'
-                          }`}
-                        >
+                        <h3 className="font-semibold text-sm text-slate-100">
                           {ROLE_DISPLAY_NAMES[employee.id] || employee.role}
                         </h3>
                         <div className="flex items-center gap-1 mt-0.5">
-                          <span
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: statusColor }}
-                          />
-                          <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                            {statusLabel}
-                          </span>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
+                          <span className="text-xs text-slate-400">{statusLabel}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Task Info */}
-                    <div className="space-y-2">
-                      <div>
-                        <p
-                          className={`text-xs font-medium mb-1 ${
-                            darkMode ? 'text-slate-400' : 'text-slate-600'
-                          }`}
-                        >
-                          Current
-                        </p>
-                        <p
-                          className={`text-xs line-clamp-2 ${
-                            currentTask
-                              ? darkMode
-                                ? 'text-slate-300'
-                                : 'text-slate-700'
-                              : darkMode
-                              ? 'text-slate-500 italic'
-                              : 'text-slate-500 italic'
-                          }`}
-                        >
-                          {currentTask ? currentTask.title : 'No active task'}
-                        </p>
-                      </div>
+                    {/* Task */}
+                    <div className="mb-2">
+                      <p className="text-xs text-slate-400 mb-1">Task</p>
+                      <p className="text-xs text-slate-300 line-clamp-1">
+                        {currentTask ? currentTask.title : 'No task'}
+                      </p>
+                    </div>
 
-                      {/* Workload Progress */}
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span
-                            className={`text-xs font-medium ${
-                              darkMode ? 'text-slate-400' : 'text-slate-600'
-                            }`}
-                          >
-                            Workload
-                          </span>
-                          <span
-                            className={`text-xs font-semibold ${
-                              workload > 80
-                                ? 'text-red-400'
-                                : workload > 60
-                                ? 'text-amber-400'
-                                : 'text-green-400'
-                            }`}
-                          >
-                            {Math.round(workload)}%
-                          </span>
-                        </div>
+                    {/* Workload */}
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-slate-400">Workload</span>
+                        <span className={`text-xs font-semibold ${
+                          workload > 80 ? 'text-red-400' : workload > 60 ? 'text-amber-400' : 'text-green-400'
+                        }`}>
+                          {Math.round(workload)}%
+                        </span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-slate-700 overflow-hidden">
                         <div
-                          className={`w-full h-1.5 rounded-full ${
-                            darkMode ? 'bg-slate-700' : 'bg-slate-300'
-                          } overflow-hidden`}
-                        >
-                          <div
-                            className={`h-full transition-all ${
-                              workload > 80
-                                ? 'bg-red-500'
-                                : workload > 60
-                                ? 'bg-amber-500'
-                                : 'bg-green-500'
-                            }`}
-                            style={{ width: `${workload}%` }}
-                          />
-                        </div>
+                          className={`h-full transition-all ${
+                            workload > 80 ? 'bg-red-500' : workload > 60 ? 'bg-amber-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${workload}%` }}
+                        />
                       </div>
-
-                      {/* Task Count Badge */}
-                      {taskCount > 0 && (
-                        <div className="pt-1">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                              taskCount > 3
-                                ? darkMode
-                                  ? 'bg-red-900 text-red-200'
-                                  : 'bg-red-100 text-red-700'
-                                : taskCount > 1
-                                ? darkMode
-                                  ? 'bg-amber-900 text-amber-200'
-                                  : 'bg-amber-100 text-amber-700'
-                                : darkMode
-                                ? 'bg-green-900 text-green-200'
-                                : 'bg-green-100 text-green-700'
-                            }`}
-                          >
-                            {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
-                          </span>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Open Button */}
-                    <button
-                      onClick={() => {
-                        selectEmployee(employee.id);
-                        onSelectRoom(employee.id);
-                      }}
-                      className={`w-full mt-3 py-1.5 px-3 rounded-lg font-medium text-xs transition-colors ${
-                        darkMode
-                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                          : 'bg-orange-100 hover:bg-orange-200 text-orange-900'
-                      }`}
-                    >
-                      Open
-                    </button>
+                    {/* Task Count & Open */}
+                    <div className="flex items-center justify-between gap-2">
+                      {taskCount > 0 && (
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-semibold ${
+                          taskCount > 3
+                            ? 'bg-red-900 text-red-200'
+                            : taskCount > 1
+                            ? 'bg-amber-900 text-amber-200'
+                            : 'bg-green-900 text-green-200'
+                        }`}>
+                          {taskCount}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => {
+                          selectEmployee(employee.id);
+                          onSelectRoom(employee.id);
+                        }}
+                        className="flex-1 py-1.5 px-2 bg-orange-600 hover:bg-orange-700 text-white rounded text-xs font-medium transition-colors"
+                      >
+                        Open
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -347,69 +202,31 @@ export function TeamDashboardView({
         </div>
 
         {/* Right Sidebar */}
-        <aside className="w-full lg:w-80 flex flex-col gap-6 overflow-y-auto">
+        <aside className="w-full lg:w-72 flex flex-col gap-4 overflow-y-auto">
           {/* Today's To-Do */}
-          <div
-            className={`${
-              darkMode
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-slate-50 border-slate-200'
-            } border rounded-xl p-4`}
-          >
-            <h3 className={`font-semibold text-sm mb-3 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-              Today's To-Do
-            </h3>
-            <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-              No tasks assigned to you yet
-            </div>
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2 text-slate-100">Today's To-Do</h3>
+            <p className="text-xs text-slate-400">No tasks assigned</p>
           </div>
 
           {/* Upcoming Deadlines */}
-          <div
-            className={`${
-              darkMode
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-slate-50 border-slate-200'
-            } border rounded-xl p-4`}
-          >
-            <h3 className={`font-semibold text-sm mb-3 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-              Upcoming Deadlines
-            </h3>
-            <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-              No deadlines this week
-            </div>
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2 text-slate-100">Deadlines</h3>
+            <p className="text-xs text-slate-400">No deadlines this week</p>
           </div>
 
           {/* Waiting for Approval */}
-          <div
-            className={`${
-              darkMode
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-slate-50 border-slate-200'
-            } border rounded-xl p-4`}
-          >
-            <h3 className={`font-semibold text-sm mb-3 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-              Waiting for Approval
-            </h3>
-            <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-              {stats.totalApprovals > 0
-                ? `${stats.totalApprovals} ${stats.totalApprovals === 1 ? 'item' : 'items'} pending`
-                : 'All caught up'}
-            </div>
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2 text-slate-100">Waiting for Approval</h3>
+            <p className="text-xs text-slate-400">
+              {stats.totalApprovals > 0 ? `${stats.totalApprovals} pending` : 'Nothing waiting'}
+            </p>
           </div>
 
           {/* Waiting for John */}
-          <div
-            className={`${
-              darkMode
-                ? 'bg-slate-800 border-slate-700'
-                : 'bg-slate-50 border-slate-200'
-            } border rounded-xl p-4`}
-          >
-            <h3 className={`font-semibold text-sm mb-3 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-              Waiting for John
-            </h3>
-            <div className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2 text-slate-100">Waiting for John</h3>
+            <p className="text-xs text-slate-400">
               {(() => {
                 const waitingForJohn = employees.reduce(
                   (sum, e) =>
@@ -418,76 +235,53 @@ export function TeamDashboardView({
                       .length || 0),
                   0
                 );
-                return waitingForJohn > 0
-                  ? `${waitingForJohn} ${waitingForJohn === 1 ? 'item' : 'items'} pending`
-                  : 'All reviewed';
+                return waitingForJohn > 0 ? `${waitingForJohn} pending` : 'All reviewed';
               })()}
-            </div>
+            </p>
           </div>
 
           {/* AI Insights */}
-          <div
-            className={`${
-              darkMode
-                ? 'bg-blue-950 border-blue-900'
-                : 'bg-blue-50 border-blue-200'
-            } border rounded-xl p-4`}
-          >
-            <h3 className={`font-semibold text-sm mb-2 ${darkMode ? 'text-blue-100' : 'text-blue-900'}`}>
-              ✨ AI Insights
-            </h3>
-            <p className={`text-xs ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>
-              {stats.avgWorkload} tasks per person on average. {stats.blocked} blocked.
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-3">
+            <h3 className="font-semibold text-sm mb-2 text-slate-100">Insights</h3>
+            <p className="text-xs text-slate-400">
+              {stats.totalTasks === 0 && stats.blocked === 0
+                ? 'Team is ready for work'
+                : `${stats.totalTasks} assigned, ${stats.blocked} blocked`}
             </p>
           </div>
         </aside>
       </div>
 
       {/* Bottom Activity Tabs */}
-      <footer
-        className={`${
-          darkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-        } border-t px-8 py-4 flex flex-col`}
-      >
-        <div className="flex gap-6 max-w-7xl mx-auto">
+      <footer className="bg-slate-900 border-t border-slate-800 px-6 py-3 flex flex-col gap-3 max-w-7xl mx-auto w-full">
+        <div className="flex gap-4">
           {[
-            { id: 'active', label: 'Active Tasks', icon: '⚡' },
-            { id: 'todo', label: 'My To-Do', icon: '✓' },
-            { id: 'activity', label: 'Activity Feed', icon: '📝' },
+            { id: 'active', label: 'Active', icon: '⚡' },
+            { id: 'todo', label: 'To-Do', icon: '✓' },
+            { id: 'activity', label: 'Activity', icon: '📝' },
             { id: 'campaigns', label: 'Campaigns', icon: '🎯' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+              className={`px-3 py-1.5 text-sm font-medium transition-colors rounded ${
                 activeTab === tab.id
-                  ? 'bg-orange-600 text-white border-orange-600'
-                  : darkMode
-                  ? 'text-slate-400 hover:text-slate-300 border-transparent hover:border-slate-700'
-                  : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-slate-200'
+                  ? 'bg-orange-600 text-white'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {tab.icon} {tab.label}
             </button>
           ))}
         </div>
-        <div
-          className={`mt-4 p-4 rounded-xl border ${
-            darkMode
-              ? 'bg-slate-800 border-slate-700 text-slate-400'
-              : 'bg-slate-100 border-slate-200 text-slate-600'
-          } text-sm`}
-        >
+        <div className="p-3 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-300">
           {activeTab === 'active' &&
             (stats.totalTasks > 0
-              ? `${stats.totalTasks} ${stats.totalTasks === 1 ? 'task' : 'tasks'} in progress across the team`
-              : 'Nothing is in progress. Ask Sandy to assign work.')}
-          {activeTab === 'todo' &&
-            'No tasks assigned to you yet'}
-          {activeTab === 'activity' &&
-            'Recent activity will appear here'}
-          {activeTab === 'campaigns' &&
-            'Campaign tracking will appear here'}
+              ? `${stats.totalTasks} tasks in progress`
+              : 'Nothing in progress')}
+          {activeTab === 'todo' && 'No tasks assigned'}
+          {activeTab === 'activity' && 'Activity will appear here'}
+          {activeTab === 'campaigns' && 'Campaigns will appear here'}
         </div>
       </footer>
     </div>
