@@ -5,6 +5,8 @@ import { BoardRoomPanel } from '@/components/BoardRoomPanel';
 import { RightPanel } from '@/components/RightPanel';
 import { BottomPanel } from '@/components/BottomPanel';
 import { AskSandyBar } from '@/components/AskSandyBar';
+import { SettingsPanel } from '@/components/SettingsPanel';
+import { CampaignsView } from '@/components/CampaignsView';
 import { LeftSidebar, type NavKey } from '@/components/layout/LeftSidebar';
 import { TopBar, type TopTab } from '@/components/layout/TopBar';
 import { PlaceholderModal } from '@/components/PlaceholderModal';
@@ -14,7 +16,8 @@ import { SandyResponse } from '@/components/SandyResponse';
 import { useOfficeStore } from '@/store/officeStore';
 import { RoutingEngine } from '@/systems/RoutingEngine';
 import { WorkflowEngine } from '@/systems/WorkflowEngine';
-import { SandyCoordinator } from '@/systems/SandyCoordinator';
+import { ClaudeWorkflowGenerator } from '@/systems/ClaudeWorkflowGenerator';
+import { SandyCommandParser } from '@/systems/SandyCommandParser';
 import type { RoutingResult } from '@/systems/RoutingEngine';
 import { rooms, roomForEmployee } from '@/data/rooms';
 
@@ -65,8 +68,6 @@ export function SandyInterface() {
   const employees = useOfficeStore((state) => state.employees);
   const assignTask = useOfficeStore((state) => state.assignTask);
   const logActivity = useOfficeStore((state) => state.logActivity);
-  const getAllOpenTasks = useOfficeStore((state) => state.getAllOpenTasks);
-  const getTasksByCampaign = useOfficeStore((state) => state.getTasksByCampaign);
 
   const handleAskSandy = async () => {
     if (!taskInput.trim() || isProcessing) return;
@@ -74,96 +75,124 @@ export function SandyInterface() {
     setIsProcessing(true);
     setShowResponse(false);
     setCurrentRequest(taskInput);
-    setSandyMessage('Processing...');
     logActivity(`Sandy received: "${taskInput.trim()}"`);
 
     try {
-      const coordinator = new SandyCoordinator(employees);
-      const intent = coordinator.detectIntent(taskInput);
+      // Parse the command
+      const parser = new SandyCommandParser();
+      const command = parser.parseCommand(taskInput);
 
-      if (intent === 'brief') {
-        // Campaign brief - generate workflow from Claude
-        setSandyMessage('Generating campaign workflow...');
-        await new Promise((resolve) => setTimeout(resolve, 600));
+      // Handle recognized commands
+      if (command.type !== 'unknown') {
+        const response = parser.executeCommand(command, employees);
+        setTaskInput('');
+        setSandyMessage(response);
+        setShowResponse(true);
+        logActivity(`Sandy: ${response}`);
 
-        const workflow = await coordinator.generateCampaignWorkflow(taskInput);
-        const tasks = coordinator.createTasksFromWorkflow(workflow, employees);
+        setTimeout(() => {
+          setShowResponse(false);
+          setSandyMessage(undefined);
+        }, 8000);
 
-        let totalTasks = 0;
-        for (const { employeeId, task } of tasks) {
+        setIsProcessing(false);
+        return;
+      }
+
+      // Unknown command - check API key
+      const apiKey = localStorage.getItem('anthropic_api_key');
+
+      if (!apiKey?.trim()) {
+        // No API key - show fallback message
+        const fallback =
+          "I don't have an API key configured yet — add it in Settings so I can process new briefs. For task queries, try asking: what are my tasks, what's outstanding on [campaign], or what's waiting.";
+        setSandyMessage(fallback);
+        setShowResponse(true);
+        setTaskInput('');
+        logActivity(`Sandy: ${fallback}`);
+
+        setTimeout(() => {
+          setShowResponse(false);
+          setSandyMessage(undefined);
+        }, 6000);
+
+        setIsProcessing(false);
+        return;
+      }
+
+      // API key exists - treat as new brief
+      let totalTasks = 0;
+
+      try {
+        setSandyMessage('Generating campaign with Claude...');
+        const generator = new ClaudeWorkflowGenerator(apiKey);
+        const workflow = await generator.generateWorkflow(taskInput);
+        const workflowTasks = generator.createTasksFromWorkflow(workflow, employees);
+
+        for (const { employeeId, task } of workflowTasks) {
           assignTask(employeeId, task);
           totalTasks++;
         }
 
-        const responseMessage = coordinator.generateBriefResponse(workflow, totalTasks);
-        setSandyMessage(responseMessage);
         setTaskCount(totalTasks);
         setShowResponse(true);
-        logActivity(`Sandy created campaign: "${workflow.campaignName}" with ${totalTasks} tasks`);
-      } else if (intent === 'task_query') {
-        // Query open tasks
-        const allTasks = getAllOpenTasks();
-        const responseMessage = coordinator.generateTaskQueryResponse([], allTasks);
-        setSandyMessage(responseMessage);
-        setShowResponse(true);
-        logActivity('Sandy provided task summary');
-      } else if (intent === 'campaign_query') {
-        // Query campaign-specific tasks
-        const campaignName = coordinator.extractCampaignForQuery(taskInput);
-        if (campaignName) {
-          const tasks = getTasksByCampaign(campaignName);
-          const responseMessage = coordinator.generateCampaignQueryResponse(campaignName, tasks);
-          setSandyMessage(responseMessage);
-          setShowResponse(true);
-          logActivity(`Sandy provided status for "${campaignName}"`);
-        } else {
-          setSandyMessage('Which campaign? I need more specifics.');
-          setShowResponse(true);
-        }
-      } else {
-        // Fallback to routing engine for backward compatibility
-        const routingEngine = new RoutingEngine(employees);
-        const routing = routingEngine.route(taskInput, employees);
-        setCurrentRouting(routing);
-        setAssigningEmployeeId(routing.primaryAssignee.id);
+        setTaskInput('');
+        setSandyMessage(`Campaign created: ${workflow.campaignName}`);
+        logActivity(`Sandy created campaign: "${workflow.campaignName}" with ${totalTasks} tasks using Claude API`);
 
-        const involvedRoomIds = [routing.primaryAssignee, ...routing.suggestedCollaborators]
-          .map((emp) => roomForEmployee(emp.id)?.id)
-          .filter((id): id is string => Boolean(id));
-        setActiveRoomIds(involvedRoomIds);
+        setTimeout(() => {
+          setShowResponse(false);
+          setSandyMessage(undefined);
+        }, 6000);
 
-        const workflowEngine = new WorkflowEngine();
-        const campaign = workflowEngine.createCampaign(taskInput, routing, employees);
-
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        let totalTasks = 0;
-        routing.taskBreakdown.forEach((item) => {
-          item.subtasks.forEach((subtask, idx) => {
-            assignTask(item.assignee.id, {
-              id: `task-${campaign.id}-${item.assignee.id}-${idx}`,
-              title: subtask,
-              priority: idx === 0 ? ('high' as const) : ('medium' as const),
-              createdAt: new Date().toISOString(),
-              assignedBy: 'sandy',
-            });
-            totalTasks++;
-          });
-        });
-
-        setTaskCount(totalTasks);
-        setShowResponse(true);
-        setSandyMessage(`Assigned to ${routing.primaryAssignee.name}`);
-        logActivity(
-          `Sandy routed the request to ${routing.primaryAssignee.name}${
-            routing.suggestedCollaborators.length
-              ? ` with support from ${routing.suggestedCollaborators.map((c) => c.name).join(', ')}`
-              : ''
-          }`
-        );
+        setIsProcessing(false);
+        return;
+      } catch (claudeError) {
+        console.error('Claude API error, falling back to routing engine:', claudeError);
+        // Fall through to routing engine
       }
 
+      // Fallback: Use routing engine
+      setSandyMessage('Routing request...');
+      const routingEngine = new RoutingEngine(employees);
+      const routing = routingEngine.route(taskInput, employees);
+      setCurrentRouting(routing);
+      setAssigningEmployeeId(routing.primaryAssignee.id);
+
+      const involvedRoomIds = [routing.primaryAssignee, ...routing.suggestedCollaborators]
+        .map((emp) => roomForEmployee(emp.id)?.id)
+        .filter((id): id is string => Boolean(id));
+      setActiveRoomIds(involvedRoomIds);
+
+      const workflowEngine = new WorkflowEngine();
+      const campaign = workflowEngine.createCampaign(taskInput, routing, employees);
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      routing.taskBreakdown.forEach((item) => {
+        item.subtasks.forEach((subtask, idx) => {
+          assignTask(item.assignee.id, {
+            id: `task-${campaign.id}-${item.assignee.id}-${idx}`,
+            title: subtask,
+            priority: idx === 0 ? ('high' as const) : ('medium' as const),
+            createdAt: new Date().toISOString(),
+            assignedBy: 'sandy',
+          });
+          totalTasks++;
+        });
+      });
+
+      setTaskCount(totalTasks);
+      setShowResponse(true);
       setTaskInput('');
+      setSandyMessage(`Assigned to ${routing.primaryAssignee.name}`);
+      logActivity(
+        `Sandy routed the request to ${routing.primaryAssignee.name}${
+          routing.suggestedCollaborators.length
+            ? ` with support from ${routing.suggestedCollaborators.map((c) => c.name).join(', ')}`
+            : ''
+        }`
+      );
 
       setTimeout(() => {
         setShowResponse(false);
@@ -178,12 +207,13 @@ export function SandyInterface() {
       console.error('Error processing Sandy request:', error);
       setSandyMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setShowResponse(true);
-      setIsProcessing(false);
 
       setTimeout(() => {
         setShowResponse(false);
         setSandyMessage(undefined);
       }, 4000);
+
+      setIsProcessing(false);
     }
   };
 
@@ -216,9 +246,10 @@ export function SandyInterface() {
               )}
               {topTab === 'board-room' && <BoardRoomPanel />}
               {topTab === 'tasks' && <TasksBoard />}
+              {topTab === 'campaigns' && <CampaignsView />}
               {topTab === 'reports' && <PlaceholderPanel title="Reports" />}
               {topTab === 'analytics' && <PlaceholderPanel title="Analytics" />}
-              {topTab === 'settings' && <PlaceholderPanel title="Settings" />}
+              {topTab === 'settings' && <SettingsPanel />}
 
               {topTab === 'office' && selectedRoomId && (
                 <RoomDetailDrawer
