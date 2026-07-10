@@ -14,6 +14,7 @@ import { SandyResponse } from '@/components/SandyResponse';
 import { useOfficeStore } from '@/store/officeStore';
 import { RoutingEngine } from '@/systems/RoutingEngine';
 import { WorkflowEngine } from '@/systems/WorkflowEngine';
+import { SandyCoordinator } from '@/systems/SandyCoordinator';
 import type { RoutingResult } from '@/systems/RoutingEngine';
 import { rooms, roomForEmployee } from '@/data/rooms';
 
@@ -64,6 +65,8 @@ export function SandyInterface() {
   const employees = useOfficeStore((state) => state.employees);
   const assignTask = useOfficeStore((state) => state.assignTask);
   const logActivity = useOfficeStore((state) => state.logActivity);
+  const getAllOpenTasks = useOfficeStore((state) => state.getAllOpenTasks);
+  const getTasksByCampaign = useOfficeStore((state) => state.getTasksByCampaign);
 
   const handleAskSandy = async () => {
     if (!taskInput.trim() || isProcessing) return;
@@ -71,50 +74,96 @@ export function SandyInterface() {
     setIsProcessing(true);
     setShowResponse(false);
     setCurrentRequest(taskInput);
-    setSandyMessage(`Routing: "${taskInput.trim()}"`);
+    setSandyMessage('Processing...');
     logActivity(`Sandy received: "${taskInput.trim()}"`);
 
     try {
-      const routingEngine = new RoutingEngine(employees);
-      const routing = routingEngine.route(taskInput, employees);
-      setCurrentRouting(routing);
-      setAssigningEmployeeId(routing.primaryAssignee.id);
+      const coordinator = new SandyCoordinator(employees);
+      const intent = coordinator.detectIntent(taskInput);
 
-      const involvedRoomIds = [routing.primaryAssignee, ...routing.suggestedCollaborators]
-        .map((emp) => roomForEmployee(emp.id)?.id)
-        .filter((id): id is string => Boolean(id));
-      setActiveRoomIds(involvedRoomIds);
+      if (intent === 'brief') {
+        // Campaign brief - generate workflow from Claude
+        setSandyMessage('Generating campaign workflow...');
+        await new Promise((resolve) => setTimeout(resolve, 600));
 
-      const workflowEngine = new WorkflowEngine();
-      const campaign = workflowEngine.createCampaign(taskInput, routing, employees);
+        const workflow = await coordinator.generateCampaignWorkflow(taskInput);
+        const tasks = coordinator.createTasksFromWorkflow(workflow, employees);
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      let totalTasks = 0;
-      routing.taskBreakdown.forEach((item) => {
-        item.subtasks.forEach((subtask, idx) => {
-          assignTask(item.assignee.id, {
-            id: `task-${campaign.id}-${item.assignee.id}-${idx}`,
-            title: subtask,
-            priority: idx === 0 ? ('high' as const) : ('medium' as const),
-            createdAt: new Date().toISOString(),
-            assignedBy: 'sandy',
-          });
+        let totalTasks = 0;
+        for (const { employeeId, task } of tasks) {
+          assignTask(employeeId, task);
           totalTasks++;
-        });
-      });
+        }
 
-      setTaskCount(totalTasks);
-      setShowResponse(true);
+        const responseMessage = coordinator.generateBriefResponse(workflow, totalTasks);
+        setSandyMessage(responseMessage);
+        setTaskCount(totalTasks);
+        setShowResponse(true);
+        logActivity(`Sandy created campaign: "${workflow.campaignName}" with ${totalTasks} tasks`);
+      } else if (intent === 'task_query') {
+        // Query open tasks
+        const allTasks = getAllOpenTasks();
+        const responseMessage = coordinator.generateTaskQueryResponse([], allTasks);
+        setSandyMessage(responseMessage);
+        setShowResponse(true);
+        logActivity('Sandy provided task summary');
+      } else if (intent === 'campaign_query') {
+        // Query campaign-specific tasks
+        const campaignName = coordinator.extractCampaignForQuery(taskInput);
+        if (campaignName) {
+          const tasks = getTasksByCampaign(campaignName);
+          const responseMessage = coordinator.generateCampaignQueryResponse(campaignName, tasks);
+          setSandyMessage(responseMessage);
+          setShowResponse(true);
+          logActivity(`Sandy provided status for "${campaignName}"`);
+        } else {
+          setSandyMessage('Which campaign? I need more specifics.');
+          setShowResponse(true);
+        }
+      } else {
+        // Fallback to routing engine for backward compatibility
+        const routingEngine = new RoutingEngine(employees);
+        const routing = routingEngine.route(taskInput, employees);
+        setCurrentRouting(routing);
+        setAssigningEmployeeId(routing.primaryAssignee.id);
+
+        const involvedRoomIds = [routing.primaryAssignee, ...routing.suggestedCollaborators]
+          .map((emp) => roomForEmployee(emp.id)?.id)
+          .filter((id): id is string => Boolean(id));
+        setActiveRoomIds(involvedRoomIds);
+
+        const workflowEngine = new WorkflowEngine();
+        const campaign = workflowEngine.createCampaign(taskInput, routing, employees);
+
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        let totalTasks = 0;
+        routing.taskBreakdown.forEach((item) => {
+          item.subtasks.forEach((subtask, idx) => {
+            assignTask(item.assignee.id, {
+              id: `task-${campaign.id}-${item.assignee.id}-${idx}`,
+              title: subtask,
+              priority: idx === 0 ? ('high' as const) : ('medium' as const),
+              createdAt: new Date().toISOString(),
+              assignedBy: 'sandy',
+            });
+            totalTasks++;
+          });
+        });
+
+        setTaskCount(totalTasks);
+        setShowResponse(true);
+        setSandyMessage(`Assigned to ${routing.primaryAssignee.name}`);
+        logActivity(
+          `Sandy routed the request to ${routing.primaryAssignee.name}${
+            routing.suggestedCollaborators.length
+              ? ` with support from ${routing.suggestedCollaborators.map((c) => c.name).join(', ')}`
+              : ''
+          }`
+        );
+      }
+
       setTaskInput('');
-      setSandyMessage(`Assigned to ${routing.primaryAssignee.name}`);
-      logActivity(
-        `Sandy routed the request to ${routing.primaryAssignee.name}${
-          routing.suggestedCollaborators.length
-            ? ` with support from ${routing.suggestedCollaborators.map((c) => c.name).join(', ')}`
-            : ''
-        }`
-      );
 
       setTimeout(() => {
         setShowResponse(false);
@@ -126,8 +175,15 @@ export function SandyInterface() {
 
       setIsProcessing(false);
     } catch (error) {
-      console.error('Error creating workflow:', error);
+      console.error('Error processing Sandy request:', error);
+      setSandyMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setShowResponse(true);
       setIsProcessing(false);
+
+      setTimeout(() => {
+        setShowResponse(false);
+        setSandyMessage(undefined);
+      }, 4000);
     }
   };
 
