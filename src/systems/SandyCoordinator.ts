@@ -1,14 +1,5 @@
 import type { Employee, Task, TaskStatus } from '@/types/employee';
 
-declare global {
-  interface ImportMeta {
-    env: {
-      VITE_ANTHROPIC_API_KEY: string;
-      [key: string]: any;
-    };
-  }
-}
-
 export interface CampaignWorkflow {
   campaignName: string;
   summary: string;
@@ -23,8 +14,6 @@ export interface TaskDefinition {
 }
 
 export type SandyIntent = 'brief' | 'task_query' | 'campaign_query' | 'unknown';
-
-const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
 
 export class SandyCoordinator {
   private employees: Employee[];
@@ -88,98 +77,137 @@ export class SandyCoordinator {
   }
 
   /**
-   * Call Claude API to generate campaign workflow
+   * Generate campaign workflow using local pattern-based generation
+   * No API calls needed - works offline
    */
   async generateCampaignWorkflow(brief: string): Promise<CampaignWorkflow> {
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('VITE_ANTHROPIC_API_KEY environment variable not set');
-    }
+    // Detect campaign type from keywords
+    const lower = brief.toLowerCase();
+    const campaignName = this.extractCampaignName(brief);
 
-    const systemPrompt = `You are Sandy, a marketing coordinator at a marketing agency. Your job is to break down marketing campaign briefs into actionable task workflows.
+    let type = 'general';
+    if (lower.includes('email') || lower.includes('newsletter')) type = 'email';
+    else if (lower.includes('social') || lower.includes('post') || lower.includes('instagram') || lower.includes('twitter')) type = 'social';
+    else if (lower.includes('case study') || lower.includes('case-study')) type = 'case_study';
+    else if (lower.includes('website') || lower.includes('web') || lower.includes('landing')) type = 'website';
+    else if (lower.includes('blog') || lower.includes('article') || lower.includes('content')) type = 'blog';
+    else if (lower.includes('seo') || lower.includes('search') || lower.includes('ppc') || lower.includes('ads')) type = 'seo_ppc';
+    else if (lower.includes('launch') || lower.includes('product') || lower.includes('release')) type = 'launch';
+    else if (lower.includes('promotion') || lower.includes('promo') || lower.includes('sale') || lower.includes('discount')) type = 'promotion';
 
-When given a campaign brief, respond with a JSON object containing:
-- campaignName: The campaign name (string, max 50 chars)
-- summary: One sentence summary of the campaign (string, max 100 chars)
-- tasks: Array of task objects, each with:
-  - title: Task title (string, clear and specific)
-  - description: Task description (string, brief)
-  - priority: 'high', 'medium', or 'low'
-  - suggestedAssignee: Optional role suggestion (e.g., 'Email Marketing Manager', 'Social Media Manager', 'Website Manager', 'Proposal Writer', 'Case Study Writer')
+    const workflows: Record<string, TaskDefinition[]> = {
+      email: [
+        { title: 'Define email strategy & goals', description: 'Outline campaign objectives', priority: 'high', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Research competitor emails', description: 'Analyze similar campaigns', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+        { title: 'Write email copy', description: 'Draft compelling subject & body', priority: 'high', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Create email graphics/design', description: 'Design visual elements', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Get approval from John', description: 'Review & approve email', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Set up email segments', description: 'Define audience targeting', priority: 'medium', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Schedule email send', description: 'Set send time & timezone', priority: 'medium', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Monitor open rates & clicks', description: 'Track engagement metrics', priority: 'low', suggestedAssignee: 'Marketing Director' },
+      ],
+      social: [
+        { title: 'Define social strategy', description: 'Set posting schedule & platforms', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Create social content calendar', description: 'Plan content themes', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Design social graphics', description: 'Create visual assets', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Write social copy', description: 'Craft engaging captions', priority: 'medium', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Get approval from John', description: 'Review social content', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Schedule posts across platforms', description: 'Set up posting schedule', priority: 'medium', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Monitor engagement', description: 'Track likes, comments, shares', priority: 'medium', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Respond to comments', description: 'Engage with audience', priority: 'low', suggestedAssignee: 'Social Media Manager' },
+      ],
+      case_study: [
+        { title: 'Define case study scope', description: 'Choose topic & outcomes', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Interview client', description: 'Gather success story details', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Outline case study', description: 'Create structure & flow', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Write case study draft', description: 'Full first draft', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Edit & refine content', description: 'Polish writing & clarity', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+        { title: 'Get approval from John', description: 'Final review & approval', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Create case study graphics', description: 'Design layout & visuals', priority: 'medium', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Publish to website', description: 'Upload & format on site', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Create supporting blog post', description: 'Write companion article', priority: 'low', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Promote via social & email', description: 'Share case study', priority: 'low', suggestedAssignee: 'Social Media Manager' },
+      ],
+      website: [
+        { title: 'Audit current website', description: 'Review existing pages', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Define website goals', description: 'Set conversion targets', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Write website copy', description: 'Create page content', priority: 'high', suggestedAssignee: 'Proposal Writer' },
+        { title: 'Design website layout', description: 'Create wireframes & mockups', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Get approval from John', description: 'Review website design', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Implement website changes', description: 'Build & code pages', priority: 'high', suggestedAssignee: 'Website Manager' },
+        { title: 'Test website functionality', description: 'Check all links & forms', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Set up analytics tracking', description: 'Install tracking code', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Launch website', description: 'Go live with new pages', priority: 'high', suggestedAssignee: 'Website Manager' },
+      ],
+      blog: [
+        { title: 'Choose blog topic', description: 'Research keywords & audience', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Create blog outline', description: 'Structure main points', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Write blog post', description: 'Full first draft (800+ words)', priority: 'high', suggestedAssignee: 'Case Study Writer' },
+        { title: 'Edit for SEO', description: 'Optimize keywords & structure', priority: 'medium', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Get approval from John', description: 'Final review & edit', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Create blog graphics', description: 'Design featured image', priority: 'medium', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Publish blog post', description: 'Upload & format on site', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Promote blog via social', description: 'Share on social platforms', priority: 'medium', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Email list announcement', description: 'Send to email subscribers', priority: 'medium', suggestedAssignee: 'Email Marketing Manager' },
+      ],
+      seo_ppc: [
+        { title: 'Conduct keyword research', description: 'Find target keywords', priority: 'high', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Audit current SEO', description: 'Analyze existing rankings', priority: 'medium', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Create content strategy', description: 'Plan content for rankings', priority: 'high', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Set up PPC campaign', description: 'Create ad groups & keywords', priority: 'high', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Write ad copy', description: 'Create compelling ads', priority: 'high', suggestedAssignee: 'Proposal Writer' },
+        { title: 'Get approval from John', description: 'Review strategy & ads', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Launch PPC campaigns', description: 'Go live with ads', priority: 'high', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Monitor PPC performance', description: 'Track clicks & conversions', priority: 'medium', suggestedAssignee: 'SEO & PPC Manager' },
+        { title: 'Optimize bids & keywords', description: 'Improve ROI', priority: 'medium', suggestedAssignee: 'SEO & PPC Manager' },
+      ],
+      launch: [
+        { title: 'Define launch strategy', description: 'Plan messaging & timing', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Create launch landing page', description: 'Build conversion page', priority: 'high', suggestedAssignee: 'Website Manager' },
+        { title: 'Write launch copy', description: 'Create compelling messaging', priority: 'high', suggestedAssignee: 'Proposal Writer' },
+        { title: 'Design launch graphics', description: 'Create visual assets', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Create email campaign', description: 'Plan launch email sequence', priority: 'high', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Get approval from John', description: 'Review all launch materials', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Set up tracking', description: 'Track signups & conversions', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Launch email campaign', description: 'Send launch emails', priority: 'high', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Promote on social media', description: 'Launch social campaign', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Monitor launch metrics', description: 'Track performance', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+      ],
+      promotion: [
+        { title: 'Define promotion details', description: 'Set discount & timeframe', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Create promotional graphics', description: 'Design banners & assets', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Write promotional copy', description: 'Create persuasive messaging', priority: 'high', suggestedAssignee: 'Proposal Writer' },
+        { title: 'Get approval from John', description: 'Review promotion details', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Set up email campaign', description: 'Create promotion email', priority: 'high', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Schedule social posts', description: 'Plan social promotion', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Update website', description: 'Add promotion banner', priority: 'medium', suggestedAssignee: 'Website Manager' },
+        { title: 'Launch promotion', description: 'Go live with all channels', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Monitor engagement', description: 'Track clicks & conversions', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+      ],
+      general: [
+        { title: 'Define campaign strategy', description: 'Set goals & approach', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Research target audience', description: 'Understand customer needs', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Create campaign calendar', description: 'Plan timeline & milestones', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+        { title: 'Develop messaging', description: 'Create campaign narrative', priority: 'high', suggestedAssignee: 'Proposal Writer' },
+        { title: 'Create campaign assets', description: 'Design graphics & content', priority: 'high', suggestedAssignee: 'Social Media Manager' },
+        { title: 'Get approval from John', description: 'Review campaign direction', priority: 'high', suggestedAssignee: 'Marketing Director' },
+        { title: 'Execute across channels', description: 'Launch on email, social, web', priority: 'high', suggestedAssignee: 'Email Marketing Manager' },
+        { title: 'Monitor campaign performance', description: 'Track metrics & engagement', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+        { title: 'Optimize underperforming areas', description: 'Adjust strategy if needed', priority: 'medium', suggestedAssignee: 'Marketing Director' },
+      ],
+    };
 
-Generate 5-15 realistic marketing tasks in logical sequence. Think about dependencies: research first, then creative work, then reviews, then distribution.
+    const tasks = workflows[type] || workflows.general;
+    const summary = `${campaignName} - ${type.replace(/_/g, ' ')} campaign`;
 
-Examples of tasks might include:
-- Create case study outline/content/review
-- Design social media graphics
-- Write email copy
-- Update website
-- Schedule posts
-- Get approval from John
-- Launch campaign
+    // Simulate async processing
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
-Keep tasks specific, actionable, and in dependency order.
-
-Respond ONLY with valid JSON, no other text.`;
-
-    const userMessage = `Campaign Brief: ${brief}
-
-Team context:
-- Marketing Director
-- Website Manager
-- SEO & PPC Manager
-- Email Marketing Manager
-- Proposal Writer
-- Social Media Manager
-- Case Study Writer
-- Funding & Rewards Manager
-
-Generate a complete marketing campaign workflow. Focus on practical, achievable tasks.`;
-
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2000,
-          system: systemPrompt,
-          messages: [
-            {
-              role: 'user',
-              content: userMessage,
-            },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Claude API error: ${error.error?.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-      const textContent = data.content[0];
-
-      if (textContent.type !== 'text') {
-        throw new Error('Unexpected response type from Claude');
-      }
-
-      const parsed = JSON.parse(textContent.text);
-      return {
-        campaignName: parsed.campaignName || this.extractCampaignName(brief),
-        summary: parsed.summary || 'Marketing campaign',
-        tasks: parsed.tasks || [],
-      };
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        throw new Error('Failed to parse Claude API response');
-      }
-      throw error;
-    }
+    return {
+      campaignName,
+      summary,
+      tasks: tasks.slice(0, 12), // Cap at 12 tasks
+    };
   }
 
   /**
