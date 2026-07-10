@@ -25,6 +25,7 @@ export function TeamDashboardView({
   const selectEmployee = useOfficeStore((state) => state.selectEmployee);
   const [activeTab, setActiveTab] = useState<'active' | 'todo' | 'activity' | 'campaigns'>('active');
   const [darkMode, setDarkMode] = useState(true);
+  const [hoveredEmployeeId, setHoveredEmployeeId] = useState<string | null>(null);
 
   const stats = useMemo(() => {
     const working = employees.filter((e) => e.status === 'working').length;
@@ -145,10 +146,22 @@ export function TeamDashboardView({
                   <div
                     key={employee.id}
                     onClick={() => {
-                      selectEmployee(employee.id);
-                      onSelectRoom(employee.id);
+                      const projectUrl = localStorage.getItem(`claude_project_url_${employee.id}`);
+                      if (projectUrl?.trim()) {
+                        window.open(projectUrl, '_blank');
+                      } else {
+                        selectEmployee(employee.id);
+                        onSelectRoom(employee.id);
+                      }
                     }}
-                    className={`${
+                    onMouseEnter={() => {
+                      const projectUrl = localStorage.getItem(`claude_project_url_${employee.id}`);
+                      if (!projectUrl?.trim()) {
+                        setHoveredEmployeeId(employee.id);
+                      }
+                    }}
+                    onMouseLeave={() => setHoveredEmployeeId(null)}
+                    className={`relative ${
                       darkMode
                         ? `${isSelected(employee.id) ? 'bg-slate-800 border-orange-500' : 'bg-slate-800 border-slate-700'} hover:bg-slate-700`
                         : `${isSelected(employee.id) ? 'bg-slate-100 border-orange-500' : 'bg-white border-slate-200'} hover:bg-slate-50`
@@ -263,6 +276,16 @@ export function TeamDashboardView({
                         </div>
                       )}
                     </div>
+
+                    {hoveredEmployeeId === employee.id && (
+                      <div className={`absolute inset-0 flex items-center justify-center rounded-lg ${
+                        darkMode ? 'bg-slate-900 bg-opacity-95' : 'bg-slate-100 bg-opacity-95'
+                      } z-10 pointer-events-none`}>
+                        <p className={`text-xs font-medium text-center px-2 ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                          Add Claude project URL in Settings
+                        </p>
+                      </div>
+                    )}
                   </div>
                 );
               })}
