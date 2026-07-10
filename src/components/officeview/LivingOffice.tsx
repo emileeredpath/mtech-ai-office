@@ -4,6 +4,7 @@ import { EMPLOYEE_STATUS_COLORS, EMPLOYEE_STATUS_LABELS } from '@/types/employee
 import { SandyDock } from './SandyDock';
 import { ROLE_DISPLAY_NAMES } from './OfficeProps';
 import { EmployeeCharacter } from './EmployeeCharacter';
+import { useState, useEffect } from 'react';
 
 interface LivingOfficeProps {
   sandyThinking: boolean;
@@ -13,7 +14,7 @@ interface LivingOfficeProps {
   onAskSandy?: () => void;
 }
 
-// Premium office workstation positions using CSS Grid + percentage offsets
+// Premium office workstation positions - responsive 4-column layout
 const WORKSTATION_GRID = {
   'marketing-director': { column: 1, row: 1 },
   'seo-ppc-manager': { column: 2, row: 1 },
@@ -44,10 +45,12 @@ export function LivingOffice({
   const employees = useOfficeStore((state) => state.employees);
   const selectedEmployeeId = useOfficeStore((state) => state.selectedEmployeeId);
   const selectEmployee = useOfficeStore((state) => state.selectEmployee);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const isSelected = (id: string) => selectedEmployeeId === id;
   const isActive = (id: string) =>
     selectedRoomId === id || employees.find((e) => e.id === id)?.status === 'working';
+  const isHovered = (id: string) => hoveredId === id;
 
   return (
     <div
@@ -58,64 +61,123 @@ export function LivingOffice({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        backgroundColor: '#FAF8F5',
+        backgroundColor: '#FDFBF7',
       }}
     >
-      {/* Top navigation bar */}
+      {/* Top section - Introduction & Status */}
       <header
         style={{
-          height: '56px',
-          backgroundColor: '#2B2B3E',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: '24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          padding: '28px 40px',
+          background: `
+            linear-gradient(135deg,
+              rgba(255,255,255,0.4) 0%,
+              rgba(250,245,238,0.2) 100%),
+            linear-gradient(180deg,
+              #FDFBF7 0%,
+              #F9F5F0 100%)
+          `,
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(200,180,160,0.2)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           zIndex: 100,
         }}
       >
-        <h1
+        <div
           style={{
-            fontSize: '16px',
-            fontWeight: '700',
-            color: '#fff',
-            margin: 0,
-            letterSpacing: '0.5px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            width: '100%',
           }}
         >
-          Living Office
-        </h1>
+          <div>
+            <h1
+              style={{
+                fontSize: '24px',
+                fontWeight: '800',
+                color: '#2B2B3E',
+                margin: 0,
+                marginBottom: '4px',
+                letterSpacing: '-0.5px',
+              }}
+            >
+              Team Workspace
+            </h1>
+            <p
+              style={{
+                fontSize: '13px',
+                color: '#999',
+                margin: 0,
+                fontWeight: '500',
+              }}
+            >
+              {employees.filter(e => e.status === 'working').length} team members working •{' '}
+              {employees.reduce((sum, e) => sum + (e.tasks?.length || 0), 0)} active tasks
+            </p>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+            }}
+          >
+            <div
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                border: '1px solid rgba(76, 175, 80, 0.3)',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#2E7D32',
+              }}
+            >
+              ✓ All systems operational
+            </div>
+          </div>
+        </div>
       </header>
 
-      {/* Main office canvas */}
+      {/* Main office workspace grid */}
       <main
         style={{
           flex: 1,
           position: 'relative',
           overflow: 'auto',
           background: `
-            linear-gradient(135deg, #FAF8F5 0%, #F5F0EA 40%, #EFE9E1 100%),
-            repeating-linear-gradient(
-              90deg,
-              transparent 0px,
-              transparent 200px,
-              rgba(150,130,110,0.02) 200px,
-              rgba(150,130,110,0.02) 400px
+            linear-gradient(135deg,
+              #FDFBF7 0%,
+              #FAF6F0 35%,
+              #F5EFE7 70%,
+              #F0E8DF 100%),
+            radial-gradient(
+              circle at 20% 50%,
+              rgba(255,200,140,0.03) 0%,
+              transparent 50%
+            ),
+            radial-gradient(
+              circle at 80% 80%,
+              rgba(150,120,90,0.02) 0%,
+              transparent 50%
             )
           `,
           backgroundAttachment: 'fixed',
         }}
       >
-        {/* Premium office workspace grid */}
+        {/* Workstations grid - responsive premium layout */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(280px, 1fr))',
-            gridTemplateRows: 'repeat(2, 1fr)',
-            gap: '32px',
-            padding: '40px',
-            minHeight: '100vh',
-            alignContent: 'start',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '28px',
+            padding: '48px 40px',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            width: '100%',
+            justifyItems: 'center',
           }}
         >
           {/* Workstations */}
@@ -134,11 +196,11 @@ export function LivingOffice({
               <div
                 key={employee.id}
                 style={{
-                  gridColumn: gridPos.column,
-                  gridRow: gridPos.row,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
+                  width: '100%',
+                  maxWidth: '300px',
                   cursor: 'pointer',
                   perspective: '1000px',
                 }}
@@ -146,54 +208,64 @@ export function LivingOffice({
                   selectEmployee(employee.id);
                   onSelectRoom(employee.id);
                 }}
+                onMouseEnter={() => setHoveredId(employee.id)}
+                onMouseLeave={() => setHoveredId(null)}
               >
-                {/* Workstation base - premium desk environment */}
+                {/* Premium workstation card - sophisticated glassmorphism */}
                 <div
                   style={{
                     width: '100%',
                     aspectRatio: '1',
                     position: 'relative',
-                    borderRadius: '18px',
+                    borderRadius: '20px',
                     background: `
                       linear-gradient(135deg,
-                        rgba(255,255,255,0.85) 0%,
-                        rgba(250,245,238,0.7) 30%,
-                        rgba(240,235,225,0.5) 70%,
-                        rgba(230,220,205,0.3) 100%),
+                        rgba(255,255,255,0.9) 0%,
+                        rgba(252,248,242,0.75) 25%,
+                        rgba(245,240,232,0.6) 65%,
+                        rgba(235,225,210,0.35) 100%),
                       radial-gradient(
-                        circle at 25% 25%,
-                        rgba(255,255,255,0.5) 0%,
-                        transparent 45%
+                        circle at 20% 20%,
+                        rgba(255,255,255,0.6) 0%,
+                        transparent 40%
                       ),
                       radial-gradient(
-                        circle at 75% 75%,
-                        rgba(0,0,0,0.03) 0%,
+                        circle at 80% 80%,
+                        rgba(0,0,0,0.04) 0%,
                         transparent 50%
                       )
                     `,
-                    backdropFilter: 'blur(24px)',
-                    border: '1.5px solid rgba(255,255,255,0.75)',
+                    backdropFilter: 'blur(28px)',
+                    border: '1.5px solid rgba(255,255,255,0.8)',
                     boxShadow: isEmployeeSelected
                       ? `
-                        0 0 50px rgba(249,112,31,0.35),
-                        0 25px 70px rgba(0,0,0,0.14),
-                        inset 0 1px 3px rgba(255,255,255,0.7),
-                        inset 0 -1px 2px rgba(0,0,0,0.02)
+                        0 0 60px rgba(249,112,31,0.4),
+                        0 30px 80px rgba(0,0,0,0.16),
+                        inset 0 1px 4px rgba(255,255,255,0.8),
+                        inset 0 -1px 3px rgba(0,0,0,0.03)
+                      `
+                      : isHovered
+                      ? `
+                        0 18px 60px rgba(0,0,0,0.12),
+                        inset 0 1px 4px rgba(255,255,255,0.8),
+                        inset 0 -1px 3px rgba(0,0,0,0.03)
                       `
                       : `
-                        0 14px 48px rgba(0,0,0,0.1),
-                        inset 0 1px 3px rgba(255,255,255,0.7),
-                        inset 0 -1px 2px rgba(0,0,0,0.02)
+                        0 12px 42px rgba(0,0,0,0.08),
+                        inset 0 1px 4px rgba(255,255,255,0.8),
+                        inset 0 -1px 3px rgba(0,0,0,0.03)
                       `,
-                    transition: 'all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
                     transform: isEmployeeSelected
-                      ? 'translateY(-12px) scale(1.03)'
+                      ? 'translateY(-14px) scale(1.04)'
+                      : isHovered
+                      ? 'translateY(-6px) scale(1.01)'
                       : 'translateY(0) scale(1)',
                     display: 'flex',
                     flexDirection: 'column',
-                    padding: '26px',
-                    gap: '16px',
-                    willChange: 'transform',
+                    padding: '28px',
+                    gap: '18px',
+                    willChange: 'transform, box-shadow',
                   }}
                 >
                   {/* Employee character - large prominent display */}
@@ -371,74 +443,76 @@ export function LivingOffice({
           0%, 100% {
             opacity: 1;
             transform: scale(1);
-            box-shadow: 0 0 8px currentColor;
+            box-shadow: 0 0 12px currentColor;
           }
           50% {
-            opacity: 0.55;
-            transform: scale(1.25);
-            box-shadow: 0 0 16px currentColor;
+            opacity: 0.5;
+            transform: scale(1.3);
+            box-shadow: 0 0 20px currentColor;
           }
         }
 
         @keyframes float-message {
           0%, 100% {
-            opacity: 0.3;
-            transform: translateY(2px);
+            opacity: 0.2;
+            transform: translateY(3px);
           }
-          20%, 80% {
+          15%, 85% {
             opacity: 1;
-            transform: translateY(-8px);
           }
           50% {
-            transform: translateY(-14px);
+            transform: translateY(-12px);
           }
         }
 
         @keyframes float-subtle {
           0%, 100% {
             transform: translateX(-50%) translateY(0);
-            filter: drop-shadow(0 20px 50px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 24px 60px rgba(0,0,0,0.16));
           }
           50% {
-            transform: translateX(-50%) translateY(-12px);
-            filter: drop-shadow(0 28px 60px rgba(0,0,0,0.18));
+            transform: translateX(-50%) translateY(-14px);
+            filter: drop-shadow(0 32px 72px rgba(0,0,0,0.2));
+          }
+        }
+
+        @keyframes breathe {
+          0%, 100% {
+            opacity: 0.85;
+          }
+          50% {
+            opacity: 1;
           }
         }
 
         /* Premium scrollbar styling */
         main::-webkit-scrollbar {
-          width: 10px;
+          width: 11px;
         }
 
         main::-webkit-scrollbar-track {
           background: linear-gradient(180deg,
-            rgba(150,130,110,0.02) 0%,
+            rgba(150,130,110,0.03) 0%,
             transparent 50%,
-            rgba(150,130,110,0.02) 100%);
+            rgba(150,130,110,0.03) 100%);
         }
 
         main::-webkit-scrollbar-thumb {
           background: linear-gradient(180deg,
-            rgba(100,80,60,0.25) 0%,
-            rgba(100,80,60,0.35) 50%,
-            rgba(100,80,60,0.25) 100%);
-          border-radius: 5px;
+            rgba(120,100,80,0.3) 0%,
+            rgba(120,100,80,0.4) 50%,
+            rgba(120,100,80,0.3) 100%);
+          border-radius: 6px;
           border: 2px solid transparent;
           background-clip: padding-box;
-          transition: all 0.2s;
         }
 
         main::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(180deg,
-            rgba(80,60,40,0.4) 0%,
-            rgba(80,60,40,0.5) 50%,
-            rgba(80,60,40,0.4) 100%);
+            rgba(100,80,60,0.45) 0%,
+            rgba(100,80,60,0.55) 50%,
+            rgba(100,80,60,0.45) 100%);
           background-clip: padding-box;
-        }
-
-        /* Smooth transitions */
-        * {
-          transition: color 0.2s ease, background-color 0.2s ease;
         }
       `}</style>
     </div>
