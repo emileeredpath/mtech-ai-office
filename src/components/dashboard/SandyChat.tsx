@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { SandyRecommendation, type Recommendation } from './SandyRecommendation';
+import SpecialistAIDelegation from './SpecialistAIDelegation';
+import * as api from '../../services/api';
 
 interface Employee {
   id: string;
@@ -19,7 +21,9 @@ interface Message {
 
 interface Conversation {
   id: string;
+  company_id?: string;
   messages?: Message[];
+  user_id?: string;
 }
 
 interface SandyChatProps {
@@ -32,6 +36,7 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [specialistAISuggestion, setSpecialistAISuggestion] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -56,7 +61,58 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
       // Check for context triggers to show recommendations
       const inputLower = currentInput.toLowerCase();
 
-      if (inputLower.includes('assign') || inputLower.includes('delegate')) {
+      if (inputLower.includes('invoice') || inputLower.includes('expense') || inputLower.includes('payment')) {
+        // Check if Finance AI should handle this
+        if (conversation.company_id) {
+          try {
+            const suggestion = await api.suggestSpecialistAI(
+              conversation.id,
+              'Financial Task',
+              currentInput,
+              conversation.company_id
+            );
+            if (suggestion.suggestion) {
+              setSpecialistAISuggestion(suggestion.suggestion);
+            }
+          } catch (err) {
+            console.warn('Could not get specialist AI suggestion:', err);
+          }
+        }
+      } else if (inputLower.includes('write') || inputLower.includes('edit') || inputLower.includes('review') || inputLower.includes('content')) {
+        // Check if Content AI should handle this
+        if (conversation.company_id) {
+          try {
+            const suggestion = await api.suggestSpecialistAI(
+              conversation.id,
+              'Content Task',
+              currentInput,
+              conversation.company_id
+            );
+            if (suggestion.suggestion) {
+              setSpecialistAISuggestion(suggestion.suggestion);
+            }
+          } catch (err) {
+            console.warn('Could not get specialist AI suggestion:', err);
+          }
+        }
+      } else if (inputLower.includes('campaign') || inputLower.includes('analysis') || inputLower.includes('metric') || inputLower.includes('roi')) {
+        // Check if Marketing AI should handle this
+        if (conversation.company_id) {
+          try {
+            const suggestion = await api.suggestSpecialistAI(
+              conversation.id,
+              'Marketing Task',
+              currentInput,
+              conversation.company_id
+            );
+            if (suggestion.suggestion) {
+              setSpecialistAISuggestion(suggestion.suggestion);
+            }
+          } catch (err) {
+            console.warn('Could not get specialist AI suggestion:', err);
+          }
+        }
+      } else if (inputLower.includes('assign') || inputLower.includes('delegate')) {
         setRecommendations([
           {
             type: 'task_assignment',
@@ -103,6 +159,19 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {/* Specialist AI Delegation */}
+          {specialistAISuggestion && (
+            <SpecialistAIDelegation
+              taskId=""
+              taskTitle="Delegate Task"
+              aiName={specialistAISuggestion.aiName}
+              aiEmployeeId={specialistAISuggestion.aiEmployeeId}
+              reason={specialistAISuggestion.reason}
+              canAutoHandle={specialistAISuggestion.canAutoHandle}
+              onDelegationComplete={() => setSpecialistAISuggestion(null)}
+            />
+          )}
+
           {/* Recommendations */}
           {recommendations.length > 0 && (
             <div className="space-y-2 mb-4">

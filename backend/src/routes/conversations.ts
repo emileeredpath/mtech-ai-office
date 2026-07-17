@@ -203,4 +203,27 @@ router.post('/:id/suggest-assignment', async (req: Request, res: Response) => {
   }
 });
 
+// Get specialist AI suggestion for a task
+router.post('/:id/suggest-specialist-ai', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { taskTitle, taskDescription, companyId } = req.body;
+
+    if (!taskTitle || !companyId) {
+      return res.status(400).json({ error: 'taskTitle and companyId required' });
+    }
+
+    const suggestion = await sandyService.suggestSpecialistAI(
+      taskTitle,
+      taskDescription || '',
+      companyId
+    );
+
+    res.json({ suggestion });
+  } catch (error) {
+    console.error('Error suggesting specialist AI:', error);
+    res.status(500).json({ error: 'Failed to suggest specialist AI' });
+  }
+});
+
 export default router;

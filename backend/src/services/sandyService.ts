@@ -177,6 +177,51 @@ When you suggest actions, be specific and actionable. Always ask before executin
 
     return suggestions;
   }
+
+  async suggestSpecialistAI(
+    taskTitle: string,
+    taskDescription: string,
+    companyId: string
+  ): Promise<{ aiEmployeeId: string; aiName: string; reason: string; canAutoHandle: boolean } | null> {
+    const aiEmployeesResult = await query(
+      `SELECT id, name FROM ai_employees
+       WHERE company_id = $1 AND is_ai = true
+       ORDER BY name`,
+      [companyId]
+    );
+
+    const taskLower = `${taskTitle} ${taskDescription}`.toLowerCase();
+
+    // Match task to specialist AI based on keywords
+    for (const ai of aiEmployeesResult.rows) {
+      const aiName = ai.name.toLowerCase();
+
+      if (aiName.includes('finance') && (taskLower.includes('invoice') || taskLower.includes('invoice') || taskLower.includes('expense') || taskLower.includes('payment'))) {
+        return {
+          aiEmployeeId: ai.id,
+          aiName: ai.name,
+          reason: 'This is a financial task - Finance AI can handle invoice approvals',
+          canAutoHandle: true,
+        };
+      } else if (aiName.includes('content') && (taskLower.includes('write') || taskLower.includes('edit') || taskLower.includes('review') || taskLower.includes('content'))) {
+        return {
+          aiEmployeeId: ai.id,
+          aiName: ai.name,
+          reason: 'This is a content task - Content AI can review and improve writing',
+          canAutoHandle: true,
+        };
+      } else if (aiName.includes('marketing') && (taskLower.includes('campaign') || taskLower.includes('analysis') || taskLower.includes('metric') || taskLower.includes('roi'))) {
+        return {
+          aiEmployeeId: ai.id,
+          aiName: ai.name,
+          reason: 'This is a marketing task - Marketing AI can analyze and provide insights',
+          canAutoHandle: true,
+        };
+      }
+    }
+
+    return null;
+  }
 }
 
 export const sandyService = new SandyService();

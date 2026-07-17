@@ -201,3 +201,60 @@ export async function sendMessage(
   if (!response.ok) throw new Error('Failed to send message');
   return response.json();
 }
+
+export async function suggestSpecialistAI(
+  conversationId: string,
+  taskTitle: string,
+  taskDescription: string,
+  companyId: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/conversations/${conversationId}/suggest-specialist-ai`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ taskTitle, taskDescription, companyId }),
+  });
+  if (!response.ok) throw new Error('Failed to suggest specialist AI');
+  return response.json();
+}
+
+// Specialist AI
+export interface AICapability {
+  name: string;
+  domain: string;
+  canApproveUpTo?: number;
+  responsibilities: string[];
+  escalationPath: string;
+}
+
+export async function getSpecialistAICapabilities(aiEmployeeId: string): Promise<AICapability> {
+  const response = await fetch(`${API_URL}/api/specialist-ai/${aiEmployeeId}/capabilities`);
+  if (!response.ok) throw new Error('Failed to fetch capabilities');
+  return response.json();
+}
+
+export async function processTaskWithAI(
+  aiEmployeeId: string,
+  taskId: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/specialist-ai/${aiEmployeeId}/process-task`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ taskId }),
+  });
+  if (!response.ok) throw new Error('Failed to process task');
+  return response.json();
+}
+
+export async function delegateTaskToAI(
+  aiEmployeeId: string,
+  taskId: string,
+  reason?: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/specialist-ai/${aiEmployeeId}/delegate-task`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ taskId, reason }),
+  });
+  if (!response.ok) throw new Error('Failed to delegate task');
+  return response.json();
+}
