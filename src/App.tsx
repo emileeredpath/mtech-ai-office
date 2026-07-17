@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { SandyInterface } from '@/components/SandyInterface';
+import { Dashboard } from '@/components/dashboard/Dashboard';
 
 export default function App() {
   return (
     <BrowserRouter basename="/ai-office">
       <Routes>
-        <Route path="/" element={<SandyInterface />} />
+        <Route path="/" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );
