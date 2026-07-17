@@ -41,14 +41,18 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
   }, [conversation?.messages]);
 
   const handleSend = async () => {
-    if (!input.trim() || !conversation) return;
+    if (!input.trim() || !conversation || !conversation.messages) return;
 
+    const currentInput = input;
+    setInput('');
     setLoading(true);
+
     try {
-      await onSendMessage(sandyEmployee.id, input);
-      setInput('');
+      // Send message as the current user
+      await onSendMessage(conversation.user_id || sandyEmployee.id, currentInput);
     } catch (error) {
       console.error('Failed to send message:', error);
+      setInput(currentInput); // Restore input on error
     } finally {
       setLoading(false);
     }
@@ -84,7 +88,7 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
               >
                 {msg.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <span className="text-2xl">{sandyEmployee.emoji}</span>
+                    <span className="text-2xl">{msg.sender_emoji || sandyEmployee.emoji}</span>
                   </div>
                 )}
                 <div
@@ -94,8 +98,11 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
                       : 'bg-blue-600 text-white'
                   }`}
                 >
+                  <p className="text-xs font-semibold mb-1 opacity-75">
+                    {msg.sender_name || (msg.role === 'assistant' ? 'Sandy' : 'You')}
+                  </p>
                   <p className="text-sm">{msg.content}</p>
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs opacity-60 mt-1">
                     {new Date(msg.created_at).toLocaleTimeString()}
                   </p>
                 </div>

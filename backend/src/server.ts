@@ -4,6 +4,7 @@ import 'dotenv/config';
 import employeesRouter from './routes/employees.js';
 import tasksRouter from './routes/tasks.js';
 import conversationsRouter from './routes/conversations.js';
+import companiesRouter from './routes/companies.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API Routes
+app.use('/api/companies', companiesRouter);
 app.use('/api/employees', employeesRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/conversations', conversationsRouter);

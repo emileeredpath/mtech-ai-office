@@ -1,5 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+export interface Company {
+  id: string;
+  name: string;
+}
+
+// Companies
+export async function getDefaultCompany(): Promise<Company> {
+  const response = await fetch(`${API_URL}/api/companies/default`);
+  if (!response.ok) throw new Error('Failed to fetch company');
+  return response.json();
+}
+
 export interface Employee {
   id: string;
   name: string;

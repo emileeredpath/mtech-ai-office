@@ -64,5 +64,16 @@ export function useTasks(companyId: string) {
     }
   };
 
-  return { tasks, loading, error, updateTask, createTask };
+  const refetch = async () => {
+    if (!companyId) return;
+    try {
+      const data = await api.getTasks(companyId);
+      setTasks(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
+    }
+  };
+
+  return { tasks, loading, error, updateTask, createTask, refetch };
 }

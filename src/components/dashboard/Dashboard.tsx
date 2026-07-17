@@ -2,20 +2,55 @@ import { useState, useEffect } from 'react';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useTasks } from '@/hooks/useTasks';
 import { useConversation } from '@/hooks/useConversations';
+import { useAppStore } from '@/store/appStore';
 import { EmployeeCard } from './EmployeeCard';
 import { TaskList } from './TaskList';
 import { SandyChat } from './SandyChat';
 import { Button } from '@/components/ui/Button';
-
-const COMPANY_ID = '01950f7c-6f5f-4d8f-a81a-b6f7e1c3a2d0'; // Will be replaced with actual company ID from context
+import { UserSelector } from '@/components/UserSelector';
+import { CreateTaskModal } from './CreateTaskModal';
+import * as api from '@/services/api';
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState<'team' | 'tasks' | 'sandy'>('team');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
 
-  const { employees, loading: employeesLoading } = useEmployees(COMPANY_ID);
-  const { tasks, loading: tasksLoading, updateTask } = useTasks(COMPANY_ID);
+  const companyId = useAppStore((s) => s.companyId);
+  const setCompanyId = useAppStore((s) => s.setCompanyId);
+  const currentUserId = useAppStore((s) => s.currentUserId);
+  const setCurrentUser = useAppStore((s) => s.setCurrentUser);
+
+  // Initialize company and user on mount
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        const company = await api.getDefaultCompany();
+        setCompanyId(company.id);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        setLoading(false);
+      }
+    };
+
+    initializeApp();
+  }, [setCompanyId, setCurrentUser]);
+
+  // Set default user to Emilee once employees are loaded
+  useEffect(() => {
+    if (!currentUserId && employees.length > 0) {
+      const emilee = employees.find((e) => e.name === 'Emilee');
+      if (emilee) {
+        setCurrentUser(emilee.id, emilee.name);
+      }
+    }
+  }, [employees, currentUserId, setCurrentUser]);
+
+  const { employees, loading: employeesLoading } = useEmployees(companyId || '');
+  const { tasks, loading: tasksLoading, updateTask, refetch: refetchTasks } = useTasks(companyId || '');
   const { conversation, sendMessage } = useConversation(conversationId || '');
 
   // Find Sandy
@@ -31,9 +66,18 @@ export function Dashboard() {
   };
 
   const handleStartSandyChat = async () => {
-    if (sandy && !conversationId) {
-      // Create new conversation with Sandy (for now just set a conversation ID)
-      setConversationId(sandy.id);
+    if (sandy && !conversationId && companyId && currentUserId) {
+      try {
+        const conversation = await api.createConversation(
+          companyId,
+          sandy.id,
+          currentUserId,
+          'Chat with Sandy'
+        );
+        setConversationId(conversation.id);
+      } catch (error) {
+        console.error('Failed to create conversation:', error);
+      }
     }
   };
 
@@ -45,7 +89,30 @@ export function Dashboard() {
     }
   };
 
-  if (employeesLoading || tasksLoading) {
+  const handleCreateTask = async (taskData: {
+    title: string;
+    description: string;
+    priority: 'low' | 'medium' | 'high';
+    employeeId?: string;
+  }) => {
+    if (!companyId) return;
+    try {
+      await api.createTask(companyId, {
+        title: taskData.title,
+        description: taskData.description || undefined,
+        priority: taskData.priority,
+        employee_id: taskData.employeeId,
+        status: 'backlog',
+      });
+      // Refetch tasks to update the list
+      await refetchTasks();
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      throw error;
+    }
+  };
+
+  if (loading || employeesLoading || tasksLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900">
         <div className="text-center">
@@ -61,7 +128,10 @@ export function Dashboard() {
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">AI Office</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">AI Office</h1>
+            <UserSelector />
+          </div>
           <div className="flex gap-2">
             <Button
               variant={activeTab === 'team' ? 'primary' : 'secondary'}
@@ -124,7 +194,10 @@ export function Dashboard() {
         {/* Tasks Tab */}
         {activeTab === 'tasks' && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Task Board</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">Task Board</h2>
+              <Button onClick={() => setShowCreateTaskModal(true)}>+ New Task</Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {Object.entries(tasksByStatus).map(([status, taskList]) => (
                 <div key={status} className="bg-gray-800 rounded-lg p-4">
@@ -156,6 +229,14 @@ export function Dashboard() {
           <SandyChat sandyEmployee={sandy} conversation={conversation} onSendMessage={sendMessage} />
         )}
       </div>
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        isOpen={showCreateTaskModal}
+        employees={employees}
+        onClose={() => setShowCreateTaskModal(false)}
+        onCreate={handleCreateTask}
+      />
     </div>
   );
 }
