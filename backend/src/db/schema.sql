@@ -146,6 +146,171 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- External Integration Tables
+
+-- Vendors (from Acumatica)
+CREATE TABLE IF NOT EXISTS vendors (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  is_approved BOOLEAN DEFAULT FALSE,
+  payment_terms VARCHAR(100),
+  status VARCHAR(50) DEFAULT 'active', -- active, inactive, blocked
+  approved_date TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(company_id, name)
+);
+
+-- Cost Centers (from Acumatica)
+CREATE TABLE IF NOT EXISTS cost_centers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  code VARCHAR(50) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  budget DECIMAL(15, 2),
+  spent DECIMAL(15, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(company_id, code)
+);
+
+-- Invoices (from Acumatica)
+CREATE TABLE IF NOT EXISTS invoices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  vendor_id UUID NOT NULL REFERENCES vendors(id),
+  vendor_name VARCHAR(255),
+  amount DECIMAL(15, 2) NOT NULL,
+  description TEXT,
+  cost_center VARCHAR(50),
+  due_date DATE,
+  status VARCHAR(50) DEFAULT 'open', -- open, paid, overdue, rejected, pending_review
+  is_approved BOOLEAN DEFAULT FALSE,
+  approved_by UUID REFERENCES ai_employees(id),
+  rejection_reason TEXT,
+  review_reason TEXT,
+  approved_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Campaigns (from GA4/Analytics)
+CREATE TABLE IF NOT EXISTS campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  name VARCHAR(255) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  impressions INTEGER DEFAULT 0,
+  clicks INTEGER DEFAULT 0,
+  conversions INTEGER DEFAULT 0,
+  spend DECIMAL(15, 2) DEFAULT 0,
+  revenue DECIMAL(15, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Email Campaigns (from Campaign Monitor)
+CREATE TABLE IF NOT EXISTS email_campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  name VARCHAR(255) NOT NULL,
+  sent_date TIMESTAMP,
+  recipient_count INTEGER DEFAULT 0,
+  open_rate DECIMAL(5, 4) DEFAULT 0,
+  click_rate DECIMAL(5, 4) DEFAULT 0,
+  unsubscribe_rate DECIMAL(5, 4) DEFAULT 0,
+  bounce_rate DECIMAL(5, 4) DEFAULT 0,
+  complaint_rate DECIMAL(5, 4) DEFAULT 0,
+  conversions INTEGER DEFAULT 0,
+  revenue DECIMAL(15, 2) DEFAULT 0,
+  status VARCHAR(50) DEFAULT 'draft', -- draft, scheduled, sent, paused
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Email Lists (from Campaign Monitor)
+CREATE TABLE IF NOT EXISTS email_lists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  name VARCHAR(255) NOT NULL,
+  subscriber_count INTEGER DEFAULT 0,
+  unsubscribe_rate DECIMAL(5, 4) DEFAULT 0,
+  bounce_rate DECIMAL(5, 4) DEFAULT 0,
+  engagement_rate DECIMAL(5, 4) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(company_id, name)
+);
+
+-- Email Segments (from Campaign Monitor)
+CREATE TABLE IF NOT EXISTS email_segments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  list_id UUID NOT NULL REFERENCES email_lists(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  size INTEGER DEFAULT 0,
+  open_rate DECIMAL(5, 4) DEFAULT 0,
+  click_rate DECIMAL(5, 4) DEFAULT 0,
+  conversion_rate DECIMAL(5, 4) DEFAULT 0,
+  revenue_per_email DECIMAL(10, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Traffic Sources (from GA4)
+CREATE TABLE IF NOT EXISTS traffic_sources (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  date DATE NOT NULL,
+  source VARCHAR(100),
+  medium VARCHAR(100),
+  sessions INTEGER DEFAULT 0,
+  users INTEGER DEFAULT 0,
+  bounce_rate DECIMAL(5, 2) DEFAULT 0,
+  avg_session_duration INTEGER DEFAULT 0,
+  conversion_rate DECIMAL(5, 4) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(company_id, date, source, medium)
+);
+
+-- Daily Metrics (from GA4)
+CREATE TABLE IF NOT EXISTS daily_metrics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  date DATE NOT NULL,
+  sessions INTEGER DEFAULT 0,
+  users INTEGER DEFAULT 0,
+  pageviews INTEGER DEFAULT 0,
+  bounce_rate DECIMAL(5, 2) DEFAULT 0,
+  conversions INTEGER DEFAULT 0,
+  revenue DECIMAL(15, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(company_id, date)
+);
+
+-- Anomalies (from GA4)
+CREATE TABLE IF NOT EXISTS anomalies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  metric_type VARCHAR(100),
+  metric_name VARCHAR(255),
+  current_value DECIMAL(15, 2),
+  expected_value DECIMAL(15, 2),
+  detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Unsubscribe Events (from Campaign Monitor)
+CREATE TABLE IF NOT EXISTS unsubscribe_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id UUID NOT NULL REFERENCES email_campaigns(id) ON DELETE CASCADE,
+  email VARCHAR(255),
+  reason TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_ai_employees_company_id ON ai_employees(company_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_company_id ON tasks(company_id);
@@ -160,3 +325,14 @@ CREATE INDEX IF NOT EXISTS idx_memory_company_id ON memory(company_id);
 CREATE INDEX IF NOT EXISTS idx_projects_company_id ON projects(company_id);
 CREATE INDEX IF NOT EXISTS idx_ai_contracts_company_id ON ai_contracts(company_id);
 CREATE INDEX IF NOT EXISTS idx_ai_contracts_ai_employee_id ON ai_contracts(ai_employee_id);
+CREATE INDEX IF NOT EXISTS idx_vendors_company_id ON vendors(company_id);
+CREATE INDEX IF NOT EXISTS idx_cost_centers_company_id ON cost_centers(company_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_company_id ON invoices(company_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_vendor_id ON invoices(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_campaigns_company_id ON campaigns(company_id);
+CREATE INDEX IF NOT EXISTS idx_email_campaigns_company_id ON email_campaigns(company_id);
+CREATE INDEX IF NOT EXISTS idx_email_lists_company_id ON email_lists(company_id);
+CREATE INDEX IF NOT EXISTS idx_traffic_sources_company_id ON traffic_sources(company_id);
+CREATE INDEX IF NOT EXISTS idx_daily_metrics_company_id ON daily_metrics(company_id);
+CREATE INDEX IF NOT EXISTS idx_anomalies_company_id ON anomalies(company_id);

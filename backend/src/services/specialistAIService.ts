@@ -1,5 +1,8 @@
 import { Anthropic } from 'anthropic';
 import { query } from '../db/connection.js';
+import { acumaticaService } from './acumaticaService.js';
+import { ga4Service } from './ga4Service.js';
+import { campaignMonitorService } from './campaignMonitorService.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -127,7 +130,7 @@ Always be specific with numbers and clearly explain your reasoning.`;
   }> {
     // Get task details from database
     const taskResult = await query(
-      `SELECT priority, description FROM tasks WHERE id = $1`,
+      `SELECT priority, description, company_id FROM tasks WHERE id = $1`,
       [taskId]
     );
 
@@ -140,6 +143,69 @@ Always be specific with numbers and clearly explain your reasoning.`;
     }
 
     const task = taskResult.rows[0];
+    let contextData = '';
+
+    // Fetch relevant external data based on AI type
+    if (aiName.toLowerCase() === 'finance ai') {
+      try {
+        // Fetch invoice metrics and vendor info
+        const metrics = await acumaticaService.getInvoiceMetrics(task.company_id);
+        contextData = `
+
+## Current Financial Context
+- Pending invoices: ${metrics.totalPending}
+- Approved invoices: ${metrics.totalApproved}
+- Average approval time: ${metrics.averageApprovalTime} hours
+- Approval rate: ${metrics.approvalRate}%`;
+      } catch (error) {
+        console.warn('Could not fetch financial context:', error);
+      }
+    } else if (aiName.toLowerCase() === 'marketing ai') {
+      try {
+        // Fetch recent campaign data
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const campaigns = await ga4Service.getCampaignsByPeriod(
+          task.company_id,
+          thirtyDaysAgo.toISOString().split('T')[0],
+          today.toISOString().split('T')[0]
+        );
+
+        if (campaigns.length > 0) {
+          const avgROI = campaigns.reduce((sum, c) => sum + c.roi, 0) / campaigns.length;
+          const totalSpend = campaigns.reduce((sum, c) => sum + c.spend, 0);
+          contextData = `
+
+## Recent Campaign Performance (30 days)
+- Active campaigns: ${campaigns.length}
+- Average ROI: ${avgROI.toFixed(1)}%
+- Total spend: $${totalSpend.toFixed(2)}
+- Top campaign: ${campaigns[0].campaignName} (ROI: ${campaigns[0].roi}%)`;
+        }
+      } catch (error) {
+        console.warn('Could not fetch marketing context:', error);
+      }
+    } else if (aiName.toLowerCase() === 'content ai') {
+      try {
+        // Fetch recent content performance
+        const campaigns = await ga4Service.getCampaignsByPeriod(
+          task.company_id,
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          new Date().toISOString().split('T')[0]
+        );
+
+        if (campaigns.length > 0) {
+          const totalConversions = campaigns.reduce((sum, c) => sum + c.conversions, 0);
+          contextData = `
+
+## Recent Content Performance (7 days)
+- Total conversions: ${totalConversions}
+- Active campaigns using content: ${campaigns.length}`;
+        }
+      } catch (error) {
+        console.warn('Could not fetch content context:', error);
+      }
+    }
 
     // Create context for the AI
     const prompt = `
@@ -147,7 +213,7 @@ You are reviewing the following task:
 
 **Task**: ${taskTitle}
 **Priority**: ${task.priority}
-**Details**: ${taskDescription || task.description || 'No additional details'}
+**Details**: ${taskDescription || task.description || 'No additional details'}${contextData}
 
 Based on your expertise and authority, please:
 1. Determine if you can handle this task independently
