@@ -5,6 +5,7 @@ import employeesRouter from './routes/employees.js';
 import tasksRouter from './routes/tasks.js';
 import conversationsRouter from './routes/conversations.js';
 import companiesRouter from './routes/companies.js';
+import knowledgeRouter from './routes/knowledge.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +34,7 @@ app.use('/api/companies', companiesRouter);
 app.use('/api/employees', employeesRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/conversations', conversationsRouter);
+app.use('/api/knowledge', knowledgeRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { SandyRecommendation, type Recommendation } from './SandyRecommendation';
 
 interface Employee {
   id: string;
@@ -30,6 +31,7 @@ interface SandyChatProps {
 export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyChatProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -50,12 +52,39 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
     try {
       // Send message as the current user
       await onSendMessage(conversation.user_id || sandyEmployee.id, currentInput);
+
+      // Check for context triggers to show recommendations
+      const inputLower = currentInput.toLowerCase();
+
+      if (inputLower.includes('assign') || inputLower.includes('delegate')) {
+        setRecommendations([
+          {
+            type: 'task_assignment',
+            title: 'Suggested Assignments',
+            description: 'Based on team expertise and workload',
+            actionLabel: 'Review Assignments',
+          },
+        ]);
+      } else if (inputLower.includes('create') || inputLower.includes('new task')) {
+        setRecommendations([
+          {
+            type: 'task_creation',
+            title: 'Ready to Create Task',
+            description: 'I can create this task and assign it to the right person',
+            actionLabel: 'Create Task',
+          },
+        ]);
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       setInput(currentInput); // Restore input on error
     } finally {
       setLoading(false);
     }
+  };
+
+  const dismissRecommendation = (index: number) => {
+    setRecommendations((recs) => recs.filter((_, i) => i !== index));
   };
 
   const messages = conversation?.messages || [];
@@ -74,6 +103,19 @@ export function SandyChat({ sandyEmployee, conversation, onSendMessage }: SandyC
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {/* Recommendations */}
+          {recommendations.length > 0 && (
+            <div className="space-y-2 mb-4">
+              {recommendations.map((rec, idx) => (
+                <SandyRecommendation
+                  key={idx}
+                  recommendation={rec}
+                  onDismiss={() => dismissRecommendation(idx)}
+                />
+              ))}
+            </div>
+          )}
+
           {messages.length === 0 ? (
             <div className="text-center text-gray-400 py-8">
               <p className="text-lg mb-2">👋 Hello!</p>

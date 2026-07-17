@@ -1,11 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../db/connection.js';
-import { Anthropic } from 'anthropic';
+import { sandyService } from '../services/sandyService.js';
 
 const router = Router();
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 // Get all conversations for a user
 router.get('/', async (req: Request, res: Response) => {
@@ -140,26 +137,17 @@ router.post('/:id/messages', async (req: Request, res: Response) => {
     );
 
     // Get conversation history for context
-    const messagesResult = await query(
-      `SELECT content, role FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
+    const conversationHistory = await sandyService.getConversationContext(id);
+
+    // Get company ID from conversation
+    const convResult = await query(
+      'SELECT company_id FROM conversations WHERE id = $1',
       [id]
     );
+    const companyId = convResult.rows[0]?.company_id;
 
-    const messages = messagesResult.rows.map((msg: any) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
-
-    // Call Claude API
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
-      system: `You are Sandy, an AI orchestrator for the Emilee Media team. You are helpful, efficient, and coordinated.
-You help manage work, delegate tasks, and keep the team organized. You understand the team's projects and priorities.`,
-      messages,
-    });
-
-    const aiMessage = response.content[0].type === 'text' ? response.content[0].text : '';
+    // Generate Sandy's response
+    const aiMessage = await sandyService.generateResponse(content, conversationHistory, companyId);
 
     // Save AI response
     const aiResponseResult = await query(
@@ -176,6 +164,42 @@ You help manage work, delegate tasks, and keep the team organized. You understan
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// Get team summary (for Sandy context)
+router.get('/:id/team-summary', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const companyId = req.query.companyId as string;
+
+    if (!companyId) {
+      return res.status(400).json({ error: 'companyId required' });
+    }
+
+    const summary = await sandyService.getTeamSummary(companyId);
+    res.json({ summary });
+  } catch (error) {
+    console.error('Error getting team summary:', error);
+    res.status(500).json({ error: 'Failed to get team summary' });
+  }
+});
+
+// Get task assignment suggestions
+router.post('/:id/suggest-assignment', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { taskTitle, companyId } = req.body;
+
+    if (!taskTitle || !companyId) {
+      return res.status(400).json({ error: 'taskTitle and companyId required' });
+    }
+
+    const suggestions = await sandyService.suggestTaskAssignment(taskTitle, companyId);
+    res.json({ suggestions });
+  } catch (error) {
+    console.error('Error suggesting assignment:', error);
+    res.status(500).json({ error: 'Failed to suggest assignment' });
   }
 });
 
