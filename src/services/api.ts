@@ -383,3 +383,83 @@ export async function getSpecialistResponse(
   if (!response.ok) throw new Error('Failed to get specialist response');
   return response.json();
 }
+
+// Phase 5: Knowledge Integration
+
+export async function getCompanyGuidelines(companyId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/company/${companyId}/guidelines`);
+  if (!response.ok) throw new Error('Failed to fetch guidelines');
+  return response.json();
+}
+
+export async function createCompanyGuideline(
+  companyId: string,
+  guideline: {
+    category: string;
+    title: string;
+    description: string;
+    examples?: string[];
+    createdById?: string;
+  }
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/company/${companyId}/guidelines`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(guideline),
+  });
+  if (!response.ok) throw new Error('Failed to create guideline');
+  return response.json();
+}
+
+export async function getCompanyKnowledge(companyId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/company/${companyId}/knowledge`);
+  if (!response.ok) throw new Error('Failed to fetch knowledge');
+  return response.json();
+}
+
+export async function createKnowledgeEntry(
+  companyId: string,
+  knowledge: {
+    title: string;
+    content: string;
+    domain?: string;
+    type?: string;
+    tags?: string[];
+    ownerId?: string;
+  }
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/company/${companyId}/knowledge`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(knowledge),
+  });
+  if (!response.ok) throw new Error('Failed to create knowledge entry');
+  return response.json();
+}
+
+export async function linkOutputToKnowledge(
+  taskId: string,
+  outputId: string,
+  knowledgeId: string,
+  relevanceScore?: number
+): Promise<any> {
+  const response = await fetch(
+    `${API_URL}/api/task-workspace/task/${taskId}/output/${outputId}/link-knowledge/${knowledgeId}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ relevanceScore }),
+    }
+  );
+  if (!response.ok) throw new Error('Failed to link output to knowledge');
+  return response.json();
+}
+
+export async function getSpecialistContextHistory(
+  specialistId: string,
+  taskId: string
+): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/specialist/${specialistId}/context-history/${taskId}`);
+  if (!response.ok) throw new Error('Failed to fetch context history');
+  return response.json();
+}

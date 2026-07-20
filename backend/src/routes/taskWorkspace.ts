@@ -385,13 +385,14 @@ router.post('/:taskId/specialist-response', async (req: Request, res: Response) 
 
     const conversationHistory = historyResult.rows;
 
-    // Generate specialist response
+    // Generate specialist response with company knowledge
     const specialistResponse = await specialistService.generateResponse(
       specialistId,
       content,
       conversationHistory,
       task.title,
-      task.description || ''
+      task.description || '',
+      task.company_id
     );
 
     // Save user message
@@ -421,6 +422,131 @@ router.post('/:taskId/specialist-response', async (req: Request, res: Response) 
   } catch (error) {
     console.error('Error generating specialist response:', error);
     res.status(500).json({ error: 'Failed to generate response' });
+  }
+});
+
+// Company Guidelines Management (Phase 5)
+
+// Get company guidelines
+router.get('/company/:companyId/guidelines', async (req: Request, res: Response) => {
+  try {
+    const { companyId } = req.params;
+
+    const result = await query(
+      `SELECT * FROM company_guidelines WHERE company_id = $1 ORDER BY category, title`,
+      [companyId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching company guidelines:', error);
+    res.status(500).json({ error: 'Failed to fetch guidelines' });
+  }
+});
+
+// Create company guideline
+router.post('/company/:companyId/guidelines', async (req: Request, res: Response) => {
+  try {
+    const { companyId } = req.params;
+    const { category, title, description, examples, createdById } = req.body;
+
+    if (!category || !title || !description) {
+      return res.status(400).json({ error: 'category, title, and description required' });
+    }
+
+    const result = await query(
+      `INSERT INTO company_guidelines (company_id, category, title, description, examples, created_by_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [companyId, category, title, description, examples || [], createdById]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating company guideline:', error);
+    res.status(500).json({ error: 'Failed to create guideline' });
+  }
+});
+
+// Get company knowledge
+router.get('/company/:companyId/knowledge', async (req: Request, res: Response) => {
+  try {
+    const { companyId } = req.params;
+
+    const result = await query(
+      `SELECT * FROM knowledge WHERE company_id = $1 ORDER BY domain, title`,
+      [companyId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching company knowledge:', error);
+    res.status(500).json({ error: 'Failed to fetch knowledge' });
+  }
+});
+
+// Create knowledge entry
+router.post('/company/:companyId/knowledge', async (req: Request, res: Response) => {
+  try {
+    const { companyId } = req.params;
+    const { title, content, domain, type, tags, ownerId } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ error: 'title and content required' });
+    }
+
+    const result = await query(
+      `INSERT INTO knowledge (company_id, title, content, domain, type, tags, owner_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING *`,
+      [companyId, title, content, domain, type, tags || [], ownerId]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating knowledge entry:', error);
+    res.status(500).json({ error: 'Failed to create knowledge' });
+  }
+});
+
+// Link output to knowledge (for learning)
+router.post('/task/:taskId/output/:outputId/link-knowledge/:knowledgeId', async (req: Request, res: Response) => {
+  try {
+    const { outputId, knowledgeId } = req.params;
+    const { relevanceScore } = req.body;
+
+    const result = await query(
+      `INSERT INTO knowledge_linkages (knowledge_id, output_id, relevance_score)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (knowledge_id, output_id) DO UPDATE
+       SET relevance_score = $3
+       RETURNING *`,
+      [knowledgeId, outputId, relevanceScore || 0.5]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error linking output to knowledge:', error);
+    res.status(500).json({ error: 'Failed to link output' });
+  }
+});
+
+// Get specialist context history
+router.get('/specialist/:specialistId/context-history/:taskId', async (req: Request, res: Response) => {
+  try {
+    const { specialistId, taskId } = req.params;
+
+    const result = await query(
+      `SELECT * FROM specialist_context_history
+       WHERE specialist_id = $1 AND task_id = $2
+       ORDER BY created_at DESC`,
+      [specialistId, taskId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching context history:', error);
+    res.status(500).json({ error: 'Failed to fetch context history' });
   }
 });
 

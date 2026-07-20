@@ -31,7 +31,7 @@ export class SpecialistService {
     };
   }
 
-  // Assemble context for specialist (handbook + preferences + knowledge)
+  // Assemble context for specialist (handbook + preferences + knowledge + past outputs)
   async assembleSpecialistContext(employeeId: string, companyId: string) {
     // Get specialist profile
     const profile = await this.getSpecialistProfile(employeeId);
@@ -44,23 +44,122 @@ export class SpecialistService {
 
     const preferences = prefsResult.rows.map((p: any) => `${p.preference_key}: ${p.preference_value}`);
 
-    // For now, create a basic context
-    // In a real app, this would load from a database of employee handbooks
+    // Get company guidelines (brand voice, tone, style)
+    const guidelinesResult = await query(
+      `SELECT * FROM company_guidelines WHERE company_id = $1 ORDER BY category`,
+      [companyId]
+    );
+
+    const guidelines = guidelinesResult.rows.reduce((acc: any, g: any) => {
+      if (!acc[g.category]) {
+        acc[g.category] = [];
+      }
+      acc[g.category].push(`${g.title}: ${g.description}`);
+      return acc;
+    }, {});
+
+    // Get company knowledge (processes, decisions, policies)
+    const knowledgeResult = await query(
+      `SELECT * FROM knowledge WHERE company_id = $1 ORDER BY domain LIMIT 10`,
+      [companyId]
+    );
+
+    const knowledge = knowledgeResult.rows.map((k: any) => ({
+      domain: k.domain,
+      title: k.title,
+      summary: k.content.substring(0, 200),
+    }));
+
+    // Get recent outputs (past successful deliverables)
+    const outputsResult = await query(
+      `SELECT to.id, to.title, to.content, to.type, to.created_at
+       FROM task_outputs to
+       WHERE EXISTS (
+         SELECT 1 FROM tasks t WHERE t.id = to.task_id AND t.company_id = $1
+       )
+       AND to.status = 'approved'
+       ORDER BY to.created_at DESC LIMIT 5`,
+      [companyId]
+    );
+
+    const recentOutputs = outputsResult.rows.map((o: any) => ({
+      title: o.title,
+      type: o.type,
+      preview: o.content.substring(0, 150),
+      date: o.created_at,
+    }));
+
+    // Get campaign performance data if available
+    const campaignResult = await query(
+      `SELECT name, impressions, clicks, conversions, revenue
+       FROM campaigns WHERE company_id = $1
+       ORDER BY created_at DESC LIMIT 3`,
+      [companyId]
+    );
+
+    const campaignContext = campaignResult.rows.map((c: any) => ({
+      name: c.name,
+      conversions: c.conversions,
+      revenue: c.revenue,
+    }));
+
     const context = {
       employeeName: profile.name,
       role: profile.role,
       personality: profile.personality || [],
       preferences,
-      recentLearnings: preferences.slice(0, 5), // Top 5 preferences
+      recentLearnings: preferences.slice(0, 5),
+      guidelines,
+      knowledge,
+      recentOutputs,
+      campaignContext,
     };
 
     return context;
   }
 
-  // Generate specialist system prompt
-  async generateSystemPrompt(employeeId: string, taskTitle: string, taskDescription: string) {
+  // Generate specialist system prompt with full context
+  async generateSystemPrompt(employeeId: string, taskTitle: string, taskDescription: string, companyId?: string) {
     const profile = await this.getSpecialistProfile(employeeId);
-    const context = await this.assembleSpecialistContext(employeeId, '');
+    const context = await this.assembleSpecialistContext(employeeId, companyId || '');
+
+    // Build context sections
+    let contextSections = '';
+
+    // Add guidelines
+    if (Object.keys(context.guidelines).length > 0) {
+      contextSections += '\n**Company Guidelines**:\n';
+      Object.entries(context.guidelines).forEach(([category, items]: [string, any]) => {
+        contextSections += `${category.toUpperCase()}:\n`;
+        items.forEach((item: string) => {
+          contextSections += `- ${item}\n`;
+        });
+      });
+    }
+
+    // Add knowledge
+    if (context.knowledge.length > 0) {
+      contextSections += '\n**Company Knowledge Base**:\n';
+      context.knowledge.forEach((k: any) => {
+        contextSections += `- [${k.domain}] ${k.title}: ${k.summary}...\n`;
+      });
+    }
+
+    // Add recent outputs as examples
+    if (context.recentOutputs.length > 0) {
+      contextSections += '\n**Recent Successful Outputs** (use these as inspiration):\n';
+      context.recentOutputs.forEach((o: any) => {
+        contextSections += `- [${o.type}] ${o.title}: "${o.preview}..."\n`;
+      });
+    }
+
+    // Add campaign context
+    if (context.campaignContext.length > 0) {
+      contextSections += '\n**Campaign Performance Context**:\n';
+      context.campaignContext.forEach((c: any) => {
+        contextSections += `- ${c.name}: ${c.conversions} conversions, $${c.revenue} revenue\n`;
+      });
+    }
 
     // Base prompt for all specialists
     const basePrompt = `You are ${profile.name}, a specialist AI employee.
@@ -79,10 +178,11 @@ ${taskDescription ? `**Details**: ${taskDescription}` : ''}
 4. Be specific and actionable
 5. Explain your reasoning
 
-**User Preferences**:
+**User Preferences** (learned from feedback):
 ${context.preferences.length > 0 ? context.preferences.join('\n') : 'No preferences recorded yet'}
+${contextSections}
 
-Remember: You're collaborating with the user on their task. Listen carefully to their needs and provide expert guidance.`;
+Remember: You're collaborating with the user on their task. Use company knowledge and past successful outputs to inform your recommendations. Listen carefully to user feedback and improve continuously.`;
 
     return basePrompt;
   }
@@ -93,9 +193,10 @@ Remember: You're collaborating with the user on their task. Listen carefully to 
     userMessage: string,
     conversationHistory: Array<{ role: string; content: string }>,
     taskTitle: string,
-    taskDescription: string
+    taskDescription: string,
+    companyId?: string
   ): Promise<string> {
-    const systemPrompt = await this.generateSystemPrompt(employeeId, taskTitle, taskDescription);
+    const systemPrompt = await this.generateSystemPrompt(employeeId, taskTitle, taskDescription, companyId);
 
     const messages = [
       ...conversationHistory,

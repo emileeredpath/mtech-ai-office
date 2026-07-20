@@ -500,3 +500,60 @@ CREATE INDEX IF NOT EXISTS idx_task_files_task_id ON task_files(task_id);
 CREATE INDEX IF NOT EXISTS idx_task_history_task_id ON task_history(task_id);
 CREATE INDEX IF NOT EXISTS idx_task_history_actor_id ON task_history(actor_id);
 CREATE INDEX IF NOT EXISTS idx_employee_preferences_employee_id ON employee_preferences(employee_id);
+
+-- Company Guidelines (brand voice, style guides, brand standards)
+CREATE TABLE IF NOT EXISTS company_guidelines (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id),
+  category VARCHAR(100), -- 'voice', 'tone', 'style', 'branding', 'audience', 'values'
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  examples TEXT[], -- array of examples
+  created_by_id UUID REFERENCES ai_employees(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(company_id, category, title)
+);
+
+-- Knowledge Linkages (links outputs to knowledge for specialist learning)
+CREATE TABLE IF NOT EXISTS knowledge_linkages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  knowledge_id UUID NOT NULL REFERENCES knowledge(id) ON DELETE CASCADE,
+  output_id UUID NOT NULL REFERENCES task_outputs(id) ON DELETE CASCADE,
+  relevance_score DECIMAL(3, 2), -- 0-1 how relevant this output is to the knowledge
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(knowledge_id, output_id)
+);
+
+-- Campaign Outputs (links outputs to campaigns for tracking campaign-related deliverables)
+CREATE TABLE IF NOT EXISTS campaign_outputs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+  output_id UUID NOT NULL REFERENCES task_outputs(id) ON DELETE CASCADE,
+  performance_notes TEXT,
+  metrics JSONB, -- stores relevant metrics from the campaign
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(campaign_id, output_id)
+);
+
+-- Specialist Context History (tracks what context was provided to each specialist for learning)
+CREATE TABLE IF NOT EXISTS specialist_context_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  specialist_id UUID NOT NULL REFERENCES ai_employees(id),
+  context_type VARCHAR(50), -- 'brand_guidelines', 'past_outputs', 'company_knowledge', 'campaign_history'
+  context_summary TEXT, -- summary of context provided
+  usage_count INTEGER DEFAULT 0, -- how many times specialist referenced this context
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for Phase 5
+CREATE INDEX IF NOT EXISTS idx_company_guidelines_company_id ON company_guidelines(company_id);
+CREATE INDEX IF NOT EXISTS idx_company_guidelines_category ON company_guidelines(category);
+CREATE INDEX IF NOT EXISTS idx_knowledge_linkages_knowledge_id ON knowledge_linkages(knowledge_id);
+CREATE INDEX IF NOT EXISTS idx_knowledge_linkages_output_id ON knowledge_linkages(output_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_outputs_campaign_id ON campaign_outputs(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_outputs_output_id ON campaign_outputs(output_id);
+CREATE INDEX IF NOT EXISTS idx_specialist_context_history_task_id ON specialist_context_history(task_id);
+CREATE INDEX IF NOT EXISTS idx_specialist_context_history_specialist_id ON specialist_context_history(specialist_id);
+CREATE INDEX IF NOT EXISTS idx_specialist_context_history_context_type ON specialist_context_history(context_type);
