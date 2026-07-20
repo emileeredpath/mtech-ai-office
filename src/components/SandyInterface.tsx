@@ -3,6 +3,8 @@ import { TodaysWork } from '@/components/TodaysWork';
 import { TasksList } from '@/components/TasksList';
 import { ProjectsList } from '@/components/ProjectsList';
 import { CampaignsList } from '@/components/CampaignsList';
+import { BoardRoom } from '@/components/BoardRoom';
+import { KnowledgeHub } from '@/components/KnowledgeHub';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { LeftSidebar, type NavKey } from '@/components/layout/LeftSidebar';
 import { TopBar, type TopTab } from '@/components/layout/TopBar';
@@ -63,12 +65,12 @@ export function SandyInterface() {
 
           {/* Board Room */}
           {topTab === 'board-room' && (
-            <PlaceholderScreen title="Board Room" subtitle="Weekly management reporting" />
+            <BoardRoom companyId={companyId} currentUserId={currentUserId} />
           )}
 
           {/* Knowledge */}
           {topTab === 'knowledge' && (
-            <PlaceholderScreen title="Knowledge Hub" subtitle="Brand guidelines and reference material" />
+            <KnowledgeHub companyId={companyId} currentUserId={currentUserId} />
           )}
 
           {/* Settings */}
