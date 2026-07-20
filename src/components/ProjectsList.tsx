@@ -132,7 +132,7 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
       case 'complete':
         return '#1D9E75';
       default:
-        return '#5C6879';
+        return 'var(--text-secondary)';
     }
   };
 
@@ -152,14 +152,14 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#E8ECF1' }}>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Projects
           </h1>
-          <p style={{ color: '#5C6879' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
             {projects.length} active project{projects.length !== 1 ? 's' : ''} • {projects.reduce((sum, p) => sum + p.taskCount, 0)} total tasks
           </p>
         </div>
@@ -171,17 +171,17 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
               key={project.id}
               className="p-6 rounded-lg"
               style={{
-                backgroundColor: '#0F1219',
-                borderColor: '#1E2430',
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
               }}
             >
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold mb-1" style={{ color: '#E8ECF1' }}>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                     {project.name}
                   </h3>
-                  <p className="text-sm" style={{ color: '#5C6879' }}>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                     {project.description}
                   </p>
                 </div>
@@ -202,11 +202,11 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
                   <span className="text-xs" style={{ color: '#7A8997' }}>
                     Progress
                   </span>
-                  <span className="text-xs font-medium" style={{ color: '#E8ECF1' }}>
+                  <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {project.completedCount} of {project.taskCount} tasks
                   </span>
                 </div>
-                <div className="h-2 rounded-full" style={{ backgroundColor: '#1E2430' }}>
+                <div className="h-2 rounded-full" style={{ backgroundColor: 'var(--border-color)' }}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -221,7 +221,7 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
               <div className="flex flex-wrap gap-4 text-xs">
                 {project.brands.length > 0 && (
                   <div>
-                    <p style={{ color: '#5C6879' }} className="mb-1">
+                    <p style={{ color: 'var(--text-secondary)' }} className="mb-1">
                       Brands
                     </p>
                     <div className="flex gap-1 flex-wrap">
@@ -230,8 +230,8 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
                           key={brand}
                           className="px-2 py-1 rounded"
                           style={{
-                            backgroundColor: '#1E2430',
-                            color: '#E8ECF1',
+                            backgroundColor: 'var(--border-color)',
+                            color: 'var(--text-primary)',
                           }}
                         >
                           {brand}
@@ -243,7 +243,7 @@ export function ProjectsList({ companyId, currentUserId }: ProjectsListProps) {
 
                 {project.teamMembers.length > 0 && (
                   <div>
-                    <p style={{ color: '#5C6879' }} className="mb-1">
+                    <p style={{ color: 'var(--text-secondary)' }} className="mb-1">
                       Team
                     </p>
                     <div className="flex gap-1">

@@ -56,18 +56,18 @@ export function SettingsPanel() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-8" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto p-8" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold mb-8" style={{ color: '#E8ECF1' }}>
+        <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>
           Settings
         </h1>
 
         {/* API Key Section */}
-        <div className="mb-10 p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-          <h2 className="text-xl font-bold mb-4" style={{ color: '#E8ECF1' }}>
+        <div className="mb-10 p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+          <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Anthropic API Configuration
           </h2>
-          <p className="text-sm mb-4" style={{ color: '#5C6879' }}>
+          <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
             Add your Anthropic API key to enable Sandy to generate marketing campaigns using Claude. Get your key at{' '}
             <a
               href="https://console.anthropic.com/account/keys"
@@ -89,22 +89,22 @@ export function SettingsPanel() {
               className="flex-1 px-4 py-2 rounded-lg text-sm"
               style={{
                 backgroundColor: '#0A0E14',
-                borderColor: '#1E2430',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
-                color: '#E8ECF1',
+                color: 'var(--text-primary)',
               }}
             />
             <button
               onClick={() => setApiKeyVisible(!apiKeyVisible)}
               className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
               style={{
-                backgroundColor: '#1E2430',
-                color: '#E8ECF1',
-                borderColor: '#1E2430',
+                backgroundColor: 'var(--border-color)',
+                color: 'var(--text-primary)',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2A3141')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1E2430')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-color)')}
             >
               {apiKeyVisible ? 'Hide' : 'Show'}
             </button>
@@ -112,18 +112,18 @@ export function SettingsPanel() {
         </div>
 
         {/* Team Member Claude Projects */}
-        <div className="p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-          <h2 className="text-xl font-bold mb-4" style={{ color: '#E8ECF1' }}>
+        <div className="p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+          <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Team Member Claude Projects
           </h2>
-          <p className="text-sm mb-6" style={{ color: '#5C6879' }}>
+          <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
             Paste your team member's Claude.ai project URLs. The project links will allow direct access to each team member's workspace.
           </p>
 
           <div className="space-y-4">
             {TEAM_MEMBERS.map((member) => (
               <div key={member.id}>
-                <label className="text-sm font-medium mb-2 block" style={{ color: '#E8ECF1' }}>
+                <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
                   {member.label}
                 </label>
                 <input
@@ -134,9 +134,9 @@ export function SettingsPanel() {
                   className="w-full px-4 py-2 rounded-lg text-sm"
                   style={{
                     backgroundColor: '#0A0E14',
-                    borderColor: '#1E2430',
+                    borderColor: 'var(--border-color)',
                     border: '1px solid',
-                    color: '#E8ECF1',
+                    color: 'var(--text-primary)',
                   }}
                 />
               </div>
@@ -162,11 +162,11 @@ export function SettingsPanel() {
         </div>
 
         {/* Info Section */}
-        <div className="mt-10 p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-          <h3 className="font-bold mb-3" style={{ color: '#E8ECF1' }}>
+        <div className="mt-10 p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+          <h3 className="font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
             How This Works
           </h3>
-          <ul className="space-y-2 text-sm" style={{ color: '#5C6879' }}>
+          <ul className="space-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
             <li>✓ API key is stored securely in your browser (never sent to servers)</li>
             <li>✓ Team member URLs are saved locally in localStorage</li>
             <li>✓ Sandy uses your API key to generate campaigns and content</li>

@@ -71,15 +71,15 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
       case 'in-progress':
         return '#1D9E75';
       case 'complete':
-        return '#5C6879';
+        return 'var(--text-secondary)';
       case 'backlog':
-        return '#5C6879';
+        return 'var(--text-secondary)';
       case 'assigned':
         return '#3B82F6';
       case 'waiting-approval':
         return '#F97031';
       default:
-        return '#5C6879';
+        return 'var(--text-secondary)';
     }
   };
 
@@ -134,18 +134,18 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
     >
       <div
         className="bg-slate-900 rounded-lg shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}
+        style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-slate-900 border-b p-6" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430' }}>
+        <div className="sticky top-0 bg-slate-900 border-b p-6" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-2" style={{ color: '#E8ECF1' }}>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                 {task.title}
               </h2>
               <div className="flex flex-wrap gap-3 text-sm">
-                <span style={{ color: '#5C6879' }}>{brand.shortName}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{brand.shortName}</span>
                 <span
                   style={{
                     backgroundColor: `${getStatusColor(task.status)}22`,
@@ -173,9 +173,9 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
             <button
               onClick={onClose}
               className="text-2xl font-bold transition-all"
-              style={{ color: '#5C6879' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#E8ECF1')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#5C6879')}
+              style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
             >
               ✕
             </button>
@@ -183,22 +183,22 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
         </div>
 
         {/* Task Details */}
-        <div className="p-6 border-b" style={{ borderColor: '#1E2430' }}>
+        <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p style={{ color: '#5C6879' }}>Owner</p>
-              <p style={{ color: '#E8ECF1', fontWeight: '500' }}>
+              <p style={{ color: 'var(--text-secondary)' }}>Owner</p>
+              <p style={{ color: 'var(--text-primary)', fontWeight: '500' }}>
                 {owner ? `${owner.emoji} ${owner.name}` : 'Unassigned'}
               </p>
             </div>
             <div>
-              <p style={{ color: '#5C6879' }}>Context</p>
-              <p style={{ color: '#E8ECF1', fontWeight: '500' }}>{task.context}</p>
+              <p style={{ color: 'var(--text-secondary)' }}>Context</p>
+              <p style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{task.context}</p>
             </div>
             {task.deadline && (
               <div>
-                <p style={{ color: '#5C6879' }}>Deadline</p>
-                <p style={{ color: '#E8ECF1', fontWeight: '500' }}>
+                <p style={{ color: 'var(--text-secondary)' }}>Deadline</p>
+                <p style={{ color: 'var(--text-primary)', fontWeight: '500' }}>
                   {new Date(task.deadline).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -211,17 +211,17 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
         </div>
 
         {/* Output Section */}
-        <div className="p-6 border-b" style={{ borderColor: '#1E2430' }}>
-          <h3 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+        <div className="p-6 border-b" style={{ borderColor: 'var(--border-color)' }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             AI Output
           </h3>
           <div
             className="p-4 rounded-lg mb-4 text-sm whitespace-pre-wrap"
             style={{
               backgroundColor: '#0A0E14',
-              borderColor: '#1E2430',
+              borderColor: 'var(--border-color)',
               border: '1px solid',
-              color: '#E8ECF1',
+              color: 'var(--text-primary)',
               fontFamily: 'monospace',
               lineHeight: '1.6',
             }}
@@ -247,11 +247,11 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
               onClick={handleDownload}
               className="px-4 py-2 rounded-lg font-medium transition-all text-sm"
               style={{
-                backgroundColor: '#1E2430',
-                color: '#E8ECF1',
+                backgroundColor: 'var(--border-color)',
+                color: 'var(--text-primary)',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2A3141')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1E2430')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-color)')}
             >
               Download
             </button>
@@ -288,24 +288,24 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
 
         {/* Activity Log */}
         <div className="p-6">
-          <h3 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Activity
           </h3>
           <div className="space-y-3 text-sm">
             <div className="flex gap-3">
-              <span style={{ color: '#5C6879' }}>Today 10:30 AM</span>
-              <span style={{ color: '#E8ECF1' }}>Task created</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Today 10:30 AM</span>
+              <span style={{ color: 'var(--text-primary)' }}>Task created</span>
             </div>
             {task.status === 'in-progress' && (
               <div className="flex gap-3">
-                <span style={{ color: '#5C6879' }}>Today 2:15 PM</span>
-                <span style={{ color: '#E8ECF1' }}>Employee started working</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Today 2:15 PM</span>
+                <span style={{ color: 'var(--text-primary)' }}>Employee started working</span>
               </div>
             )}
             {task.status !== 'backlog' && (
               <div className="flex gap-3">
-                <span style={{ color: '#5C6879' }}>Today 4:45 PM</span>
-                <span style={{ color: '#E8ECF1' }}>Output generated</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Today 4:45 PM</span>
+                <span style={{ color: 'var(--text-primary)' }}>Output generated</span>
               </div>
             )}
           </div>

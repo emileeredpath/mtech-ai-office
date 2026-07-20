@@ -60,13 +60,13 @@ export function CampaignsList({ companyId, currentUserId }: CampaignsListProps) 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'backlog':
-        return '#5C6879';
+        return 'var(--text-secondary)';
       case 'active':
         return '#F97031';
       case 'complete':
         return '#1D9E75';
       default:
-        return '#5C6879';
+        return 'var(--text-secondary)';
     }
   };
 
@@ -88,38 +88,38 @@ export function CampaignsList({ companyId, currentUserId }: CampaignsListProps) 
   const activeCampaigns = campaigns.filter((c) => c.status === 'active').length;
 
   return (
-    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#E8ECF1' }}>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Campaigns
           </h1>
-          <p style={{ color: '#5C6879' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
             {activeCampaigns} active • {completedTasks}/{totalTasks} tasks complete
           </p>
         </div>
 
         {/* Campaign Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Active Campaigns
             </p>
             <p className="text-2xl font-bold mt-2" style={{ color: '#F97031' }}>
               {activeCampaigns}
             </p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               In Progress
             </p>
             <p className="text-2xl font-bold mt-2" style={{ color: '#F59E0B' }}>
               {campaigns.reduce((sum, c) => sum + c.inProgressCount, 0)}
             </p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Completion Rate
             </p>
             <p className="text-2xl font-bold mt-2" style={{ color: '#1D9E75' }}>
@@ -137,17 +137,17 @@ export function CampaignsList({ companyId, currentUserId }: CampaignsListProps) 
                 key={campaign.id}
                 className="p-6 rounded-lg"
                 style={{
-                  backgroundColor: '#0F1219',
-                  borderColor: '#1E2430',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderColor: 'var(--border-color)',
                   border: '1px solid',
                 }}
               >
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold mb-1" style={{ color: '#E8ECF1' }}>
+                    <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
                       {campaign.name}
                     </h3>
-                    <p className="text-sm" style={{ color: '#5C6879' }}>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       {campaign.taskCount} tasks • {campaign.inProgressCount} in progress
                     </p>
                   </div>
@@ -168,11 +168,11 @@ export function CampaignsList({ companyId, currentUserId }: CampaignsListProps) 
                     <span className="text-xs" style={{ color: '#7A8997' }}>
                       Progress
                     </span>
-                    <span className="text-xs font-medium" style={{ color: '#E8ECF1' }}>
+                    <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                       {campaign.completedCount}/{campaign.taskCount}
                     </span>
                   </div>
-                  <div className="h-2 rounded-full" style={{ backgroundColor: '#1E2430' }}>
+                  <div className="h-2 rounded-full" style={{ backgroundColor: 'var(--border-color)' }}>
                     <div
                       className="h-full rounded-full transition-all"
                       style={{

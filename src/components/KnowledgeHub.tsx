@@ -35,14 +35,14 @@ export function KnowledgeHub({ companyId, currentUserId }: KnowledgeHubProps) {
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#E8ECF1' }}>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Knowledge Hub
           </h1>
-          <p style={{ color: '#5C6879' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Brand guidelines, content standards, and reference materials
           </p>
         </div>
@@ -51,7 +51,7 @@ export function KnowledgeHub({ companyId, currentUserId }: KnowledgeHubProps) {
         <div className="space-y-8">
           {resources.map((category) => (
             <div key={category.category}>
-              <h2 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+              <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 {category.category}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,21 +60,21 @@ export function KnowledgeHub({ companyId, currentUserId }: KnowledgeHubProps) {
                     key={item.title}
                     className="p-4 rounded-lg cursor-pointer transition-all hover:border-opacity-100"
                     style={{
-                      backgroundColor: '#0F1219',
-                      borderColor: '#1E2430',
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderColor: 'var(--border-color)',
                       border: '1px solid',
                     }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.backgroundColor = '#15171E';
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.backgroundColor = '#0F1219';
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--bg-secondary)';
                     }}
                   >
-                    <h3 className="font-semibold" style={{ color: '#E8ECF1' }}>
+                    <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {item.title}
                     </h3>
-                    <p className="text-sm mt-1" style={{ color: '#5C6879' }}>
+                    <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
                       {item.description}
                     </p>
                   </div>
@@ -85,8 +85,8 @@ export function KnowledgeHub({ companyId, currentUserId }: KnowledgeHubProps) {
         </div>
 
         {/* Quick Links */}
-        <div className="mt-12 p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-          <h2 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+        <div className="mt-12 p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+          <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Quick Links
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -96,7 +96,7 @@ export function KnowledgeHub({ companyId, currentUserId }: KnowledgeHubProps) {
                 href="#"
                 className="p-3 text-center rounded-lg transition-all"
                 style={{
-                  backgroundColor: '#1E2430',
+                  backgroundColor: 'var(--border-color)',
                   color: '#F97031',
                   textDecoration: 'none',
                 }}
@@ -104,7 +104,7 @@ export function KnowledgeHub({ companyId, currentUserId }: KnowledgeHubProps) {
                   (e.currentTarget as HTMLElement).style.backgroundColor = '#2A3141';
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.backgroundColor = '#1E2430';
+                  (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--border-color)';
                 }}
               >
                 {link}

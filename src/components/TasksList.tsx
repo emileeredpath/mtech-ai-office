@@ -51,15 +51,15 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
       case 'in-progress':
         return '#1D9E75';
       case 'complete':
-        return '#5C6879';
+        return 'var(--text-secondary)';
       case 'backlog':
-        return '#5C6879';
+        return 'var(--text-secondary)';
       case 'assigned':
         return '#3B82F6';
       case 'waiting-approval':
         return '#F97031';
       default:
-        return '#5C6879';
+        return 'var(--text-secondary)';
     }
   };
 
@@ -70,9 +70,9 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
       case 'medium':
         return '#F97031';
       case 'low':
-        return '#5C6879';
+        return 'var(--text-secondary)';
       default:
-        return '#5C6879';
+        return 'var(--text-secondary)';
     }
   };
 
@@ -83,31 +83,31 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#E8ECF1' }}>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             All Tasks
           </h1>
-          <p style={{ color: '#5C6879' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
             {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''} • {statusCounts['waiting-john']} waiting for John
           </p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>Waiting for John</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Waiting for John</p>
             <p className="text-2xl font-bold mt-2" style={{ color: '#F59E0B' }}>{statusCounts['waiting-john']}</p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>In Progress</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>In Progress</p>
             <p className="text-2xl font-bold mt-2" style={{ color: '#1D9E75' }}>{statusCounts['in-progress']}</p>
           </div>
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>Complete</p>
-            <p className="text-2xl font-bold mt-2" style={{ color: '#5C6879' }}>{statusCounts['complete']}</p>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Complete</p>
+            <p className="text-2xl font-bold mt-2" style={{ color: 'var(--text-secondary)' }}>{statusCounts['complete']}</p>
           </div>
         </div>
 
@@ -121,10 +121,10 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
               onChange={(e) => setSelectedBrand(e.target.value as BrandId | 'all')}
               className="px-4 py-2 rounded-lg text-sm"
               style={{
-                backgroundColor: '#0F1219',
-                borderColor: '#1E2430',
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
-                color: '#E8ECF1',
+                color: 'var(--text-primary)',
               }}
             >
               <option value="all">All Brands</option>
@@ -147,10 +147,10 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-4 py-2 rounded-lg text-sm"
               style={{
-                backgroundColor: '#0F1219',
-                borderColor: '#1E2430',
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
-                color: '#E8ECF1',
+                color: 'var(--text-primary)',
               }}
             >
               <option value="all">All Statuses</option>
@@ -170,10 +170,10 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
               onChange={(e) => setSelectedPriority(e.target.value)}
               className="px-4 py-2 rounded-lg text-sm"
               style={{
-                backgroundColor: '#0F1219',
-                borderColor: '#1E2430',
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
-                color: '#E8ECF1',
+                color: 'var(--text-primary)',
               }}
             >
               <option value="all">All Priorities</option>
@@ -187,8 +187,8 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
         {/* Task List */}
         <div className="space-y-3">
           {filteredTasks.length === 0 ? (
-            <div className="p-8 text-center" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid', borderRadius: '8px' }}>
-              <p style={{ color: '#5C6879' }}>No tasks match your filters</p>
+            <div className="p-8 text-center" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid', borderRadius: '8px' }}>
+              <p style={{ color: 'var(--text-secondary)' }}>No tasks match your filters</p>
             </div>
           ) : (
             filteredTasks.map((task) => (
@@ -197,8 +197,8 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
                 onClick={() => setSelectedTaskId(task.id)}
                 className="p-4 rounded-lg cursor-pointer transition-all hover:bg-opacity-80"
                 style={{
-                  backgroundColor: '#0F1219',
-                  borderColor: '#1E2430',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderColor: 'var(--border-color)',
                   border: '1px solid',
                   borderLeftColor: getStatusColor(task.status),
                   borderLeftWidth: task.status === 'complete' ? '1px' : '4px',
@@ -209,10 +209,10 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-3 mb-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate" style={{ color: '#E8ECF1' }}>
+                        <h3 className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                           {task.title}
                         </h3>
-                        <p className="text-xs mt-1" style={{ color: '#5C6879' }}>
+                        <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                           {BRANDS[task.brand].shortName} • {task.context}
                         </p>
                       </div>

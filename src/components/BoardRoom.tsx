@@ -45,22 +45,22 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#E8ECF1' }}>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Board Room
           </h1>
-          <p style={{ color: '#5C6879' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Weekly management reporting & strategic overview
           </p>
         </div>
 
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Task Completion
             </p>
             <p className="text-3xl font-bold mt-2" style={{ color: '#1D9E75' }}>
@@ -71,8 +71,8 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
             </p>
           </div>
 
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               In Progress
             </p>
             <p className="text-3xl font-bold mt-2" style={{ color: '#F97031' }}>
@@ -83,8 +83,8 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
             </p>
           </div>
 
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Awaiting Review
             </p>
             <p className="text-3xl font-bold mt-2" style={{ color: '#F59E0B' }}>
@@ -95,8 +95,8 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
             </p>
           </div>
 
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <p className="text-xs" style={{ color: '#5C6879' }}>
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Team Capacity
             </p>
             <p className="text-3xl font-bold mt-2" style={{ color: '#3B82F6' }}>
@@ -111,14 +111,14 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
         {/* Secondary Metrics */}
         <div className="grid grid-cols-2 gap-6 mb-8">
           {/* High Priority Focus */}
-          <div className="p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <h3 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+          <div className="p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               High Priority Tasks
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span style={{ color: '#7A8997' }}>Total High Priority</span>
-                <span style={{ color: '#E8ECF1', fontWeight: 'bold' }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
                   {metrics.highPriorityTasks}
                 </span>
               </div>
@@ -128,14 +128,14 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
                   {metrics.highPriorityComplete}
                 </span>
               </div>
-              <div className="mt-4 pt-4" style={{ borderTop: '1px solid #1E2430' }}>
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <div className="flex justify-between items-center mb-2">
                   <span style={{ color: '#7A8997', fontSize: '0.75rem' }}>Completion Rate</span>
-                  <span style={{ color: '#E8ECF1', fontWeight: 'bold' }}>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
                     {metrics.highPriorityRate}%
                   </span>
                 </div>
-                <div className="h-2 rounded-full" style={{ backgroundColor: '#1E2430' }}>
+                <div className="h-2 rounded-full" style={{ backgroundColor: 'var(--border-color)' }}>
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -149,14 +149,14 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
           </div>
 
           {/* Team Status */}
-          <div className="p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-            <h3 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+          <div className="p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+            <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               Team Status
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span style={{ color: '#7A8997' }}>Total Team Members</span>
-                <span style={{ color: '#E8ECF1', fontWeight: 'bold' }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
                   {Object.keys(EMPLOYEES).length - 1}
                 </span>
               </div>
@@ -166,8 +166,8 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
                   {metrics.teamBusyCount}
                 </span>
               </div>
-              <div className="mt-4 pt-4" style={{ borderTop: '1px solid #1E2430' }}>
-                <p style={{ color: '#5C6879', fontSize: '0.75rem', lineHeight: '1.6' }}>
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: '1.6' }}>
                   Team is performing well. Average workload at {metrics.avgWorkload}% capacity. Consider load balancing if approaching 80%+.
                 </p>
               </div>
@@ -176,8 +176,8 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
         </div>
 
         {/* Brand Performance */}
-        <div className="p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
-          <h3 className="text-lg font-bold mb-4" style={{ color: '#E8ECF1' }}>
+        <div className="p-6 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', border: '1px solid' }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Performance by Brand
           </h3>
           <div className="space-y-4">
@@ -188,14 +188,14 @@ export function BoardRoom({ companyId, currentUserId }: BoardRoomProps) {
                 return (
                   <div key={brand}>
                     <div className="flex justify-between items-center mb-2">
-                      <span style={{ color: '#E8ECF1', fontWeight: '500' }}>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>
                         {brand}
                       </span>
                       <span style={{ color: '#7A8997', fontSize: '0.875rem' }}>
                         {data.complete}/{data.total} ({rate}%)
                       </span>
                     </div>
-                    <div className="h-2 rounded-full" style={{ backgroundColor: '#1E2430' }}>
+                    <div className="h-2 rounded-full" style={{ backgroundColor: 'var(--border-color)' }}>
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
