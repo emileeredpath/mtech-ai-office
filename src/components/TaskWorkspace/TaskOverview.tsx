@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import * as api from '@/services/api';
+import { DelegationDialog } from './DelegationDialog';
 
 interface TaskOverviewProps {
   workspace: any;
@@ -8,34 +9,15 @@ interface TaskOverviewProps {
 }
 
 export function TaskOverview({ workspace, currentUserId, onUpdate }: TaskOverviewProps) {
-  const [isDelegating, setIsDelegating] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [showDelegationDialog, setShowDelegationDialog] = useState(false);
 
-  const handleDelegateClick = async () => {
-    setLoadingEmployees(true);
+  const handleDelegate = async (employeeId: string, employeeName: string) => {
     try {
-      // In a real app, fetch employees from API
-      // For now, we'll use mock data
-      setLoadingEmployees(false);
-      setIsDelegating(true);
-    } catch (err) {
-      console.error(err);
-      setLoadingEmployees(false);
-    }
-  };
-
-  const handleDelegate = async () => {
-    if (!selectedEmployee) return;
-
-    try {
-      await api.delegateTask(workspace.task.id, selectedEmployee, currentUserId);
-      setIsDelegating(false);
-      setSelectedEmployee('');
+      await api.delegateTask(workspace.task.id, employeeId, currentUserId);
       onUpdate();
     } catch (err) {
       console.error('Failed to delegate task:', err);
+      alert('Failed to delegate task');
     }
   };
 
@@ -76,29 +58,16 @@ export function TaskOverview({ workspace, currentUserId, onUpdate }: TaskOvervie
         {/* Delegation Section */}
         {!workspace.conversation?.delegated_to_id && (
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-            <h2 className="text-xl font-bold text-slate-50 mb-4">Delegate to Specialist</h2>
-            <p className="text-slate-400 mb-4">Assign this task to a specialist to get help.</p>
+            <h2 className="text-xl font-bold text-slate-50 mb-4">👤 Delegate to Specialist</h2>
+            <p className="text-slate-400 mb-4">
+              Choose a specialist to help. They'll have access to this task and can collaborate with you.
+            </p>
             <button
-              onClick={handleDelegateClick}
+              onClick={() => setShowDelegationDialog(true)}
               className="px-6 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium transition-colors"
             >
-              Delegate Task
+              Select Specialist
             </button>
-
-            {isDelegating && (
-              <div className="mt-4 p-4 bg-slate-900 rounded-lg border border-slate-700">
-                <p className="text-sm text-slate-300 mb-3">Select a specialist to delegate to:</p>
-                {/* Employee selection would go here */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsDelegating(false)}
-                    className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -137,6 +106,15 @@ export function TaskOverview({ workspace, currentUserId, onUpdate }: TaskOvervie
           </div>
         )}
       </div>
+
+      {/* Delegation Dialog */}
+      <DelegationDialog
+        taskId={workspace.task.id}
+        isOpen={showDelegationDialog}
+        onClose={() => setShowDelegationDialog(false)}
+        onDelegate={handleDelegate}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 }

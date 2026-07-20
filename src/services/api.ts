@@ -369,3 +369,17 @@ export async function getTaskHistory(taskId: string): Promise<any[]> {
   if (!response.ok) throw new Error('Failed to fetch task history');
   return response.json();
 }
+
+export async function getSpecialistResponse(
+  taskId: string,
+  senderId: string,
+  content: string
+): Promise<Message> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/specialist-response`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ senderId, content }),
+  });
+  if (!response.ok) throw new Error('Failed to get specialist response');
+  return response.json();
+}

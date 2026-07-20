@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { taskWorkspaceService } from '../services/taskWorkspaceService.js';
+import { specialistService } from '../services/specialistService.js';
 import { query } from '../db/connection.js';
 
 const router = Router();
@@ -332,6 +333,94 @@ router.get('/employees/:employeeId/preferences', async (req: Request, res: Respo
   } catch (error) {
     console.error('Error fetching employee preferences:', error);
     res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
+});
+
+// Get specialist response (Claude integration)
+router.post('/:taskId/specialist-response', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { senderId, content } = req.body;
+
+    if (!senderId || !content) {
+      return res.status(400).json({ error: 'senderId and content required' });
+    }
+
+    // Get task details
+    const taskResult = await query(
+      `SELECT * FROM tasks WHERE id = $1`,
+      [taskId]
+    );
+
+    if (taskResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    const task = taskResult.rows[0];
+
+    // Get conversation history
+    const convResult = await query(
+      `SELECT * FROM task_conversations WHERE task_id = $1`,
+      [taskId]
+    );
+
+    if (convResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Task conversation not found' });
+    }
+
+    const conversation = convResult.rows[0];
+    const specialistId = conversation.delegated_to_id;
+
+    if (!specialistId) {
+      return res.status(400).json({ error: 'Task not delegated to specialist' });
+    }
+
+    // Get message history
+    const historyResult = await query(
+      `SELECT role, content FROM task_messages
+       WHERE task_conversation_id = $1
+       ORDER BY created_at ASC`,
+      [conversation.id]
+    );
+
+    const conversationHistory = historyResult.rows;
+
+    // Generate specialist response
+    const specialistResponse = await specialistService.generateResponse(
+      specialistId,
+      content,
+      conversationHistory,
+      task.title,
+      task.description || ''
+    );
+
+    // Save user message
+    await taskWorkspaceService.addTaskMessage(conversation.id, senderId, content, 'user');
+
+    // Save specialist response
+    const responseMessage = await taskWorkspaceService.addTaskMessage(
+      conversation.id,
+      specialistId,
+      specialistResponse,
+      'assistant'
+    );
+
+    // Get specialist details for response
+    const specialistResult = await query(
+      `SELECT * FROM ai_employees WHERE id = $1`,
+      [specialistId]
+    );
+
+    const specialist = specialistResult.rows[0];
+
+    res.status(201).json({
+      ...responseMessage,
+      sender_name: specialist.name,
+      sender_emoji: specialist.emoji,
+    });
+  } catch (error) {
+    console.error('Error generating specialist response:', error);
+    res.status(500).json({ error: 'Failed to generate response' });
   }
 });
 

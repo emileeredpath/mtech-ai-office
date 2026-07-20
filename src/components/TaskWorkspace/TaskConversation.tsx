@@ -41,23 +41,54 @@ export function TaskConversation({ workspace, taskId, currentUserId, onUpdate }:
     setSending(true);
 
     try {
-      // Add user message
-      await api.addTaskMessage(taskId, currentUserId, userMessage, 'user');
+      // Get specialist response (this saves user message and generates specialist response via Claude)
+      const response = await api.getSpecialistResponse(taskId, currentUserId, userMessage);
 
-      // In a real implementation, this would call Claude through the backend
-      // For now, we'll just refresh the messages
-      const updatedMessages = await api.getTaskMessages(taskId);
-      setMessages(updatedMessages);
+      // Add user message to local state
+      setMessages([
+        ...messages,
+        {
+          id: `temp-${Date.now()}`,
+          sender_id: currentUserId,
+          content: userMessage,
+          role: 'user',
+          created_at: new Date().toISOString(),
+          name: 'You',
+        },
+        {
+          id: response.id,
+          sender_id: response.sender_id,
+          content: response.content,
+          role: 'assistant',
+          created_at: response.created_at,
+          name: response.sender_name,
+          emoji: response.sender_emoji,
+        },
+      ]);
     } catch (err) {
       console.error('Failed to send message:', err);
       setInput(userMessage); // Restore input on error
+      alert('Failed to get specialist response. Make sure API key is configured in Settings.');
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-slate-950">
+      {/* Specialist Header */}
+      {workspace.conversation?.delegated_to_name && (
+        <div className="bg-slate-800 border-b border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{workspace.conversation.delegated_to_emoji || '👤'}</span>
+            <div>
+              <h3 className="font-bold text-slate-50">{workspace.conversation.delegated_to_name}</h3>
+              <p className="text-xs text-slate-400">Specialist AI Assistant</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 ? (
