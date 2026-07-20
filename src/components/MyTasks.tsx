@@ -16,7 +16,7 @@ export function MyTasks({ companyId, currentUserId }: MyTasksProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priority: 'medium' as const,
+    priority: 'medium' as 'low' | 'medium' | 'high',
   });
 
   useEffect(() => {

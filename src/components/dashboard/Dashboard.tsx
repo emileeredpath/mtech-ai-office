@@ -39,6 +39,10 @@ export function Dashboard() {
     initializeApp();
   }, [setCompanyId, setCurrentUser]);
 
+  const { employees, loading: employeesLoading } = useEmployees(companyId || '');
+  const { tasks, loading: tasksLoading, updateTask, refetch: refetchTasks } = useTasks(companyId || '');
+  const { conversation, sendMessage } = useConversation(conversationId || '');
+
   // Set default user to Emilee once employees are loaded
   useEffect(() => {
     if (!currentUserId && employees.length > 0) {
@@ -48,10 +52,6 @@ export function Dashboard() {
       }
     }
   }, [employees, currentUserId, setCurrentUser]);
-
-  const { employees, loading: employeesLoading } = useEmployees(companyId || '');
-  const { tasks, loading: tasksLoading, updateTask, refetch: refetchTasks } = useTasks(companyId || '');
-  const { conversation, sendMessage } = useConversation(conversationId || '');
 
   // Find Sandy
   const sandy = employees.find((e) => e.name === 'Sandy');

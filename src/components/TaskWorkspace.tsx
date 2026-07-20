@@ -134,7 +134,7 @@ export function TaskWorkspace({ taskId, currentUserId }: TaskWorkspaceProps) {
           />
         )}
         {activeTab === 'drafts' && (
-          <TaskDrafts workspace={workspace} taskId={taskId} currentUserId={currentUserId} />
+          <TaskDrafts workspace={workspace} taskId={taskId} currentUserId={currentUserId} onUpdate={loadWorkspace} />
         )}
         {activeTab === 'outputs' && (
           <TaskOutputs
