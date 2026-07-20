@@ -1,12 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Dashboard } from '@/components/dashboard/Dashboard';
+import { useTheme } from '@/contexts/ThemeContext';
+import { SandyInterface } from '@/components/SandyInterface';
 
 export default function App() {
+  const { theme } = useTheme();
+
   return (
-    <BrowserRouter basename="/ai-office">
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-      </Routes>
-    </BrowserRouter>
+    <div data-theme={theme}>
+      <SandyInterface />
+    </div>
   );
 }
