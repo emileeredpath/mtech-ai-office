@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TodaysWork } from '@/components/TodaysWork';
+import { TasksList } from '@/components/TasksList';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { LeftSidebar, type NavKey } from '@/components/layout/LeftSidebar';
 import { TopBar, type TopTab } from '@/components/layout/TopBar';
@@ -50,7 +51,7 @@ export function SandyInterface() {
 
           {/* Tasks */}
           {topTab === 'tasks' && (
-            <PlaceholderScreen title="Tasks" subtitle="All tasks across projects" />
+            <TasksList companyId={companyId} currentUserId={currentUserId} />
           )}
 
           {/* Campaigns */}
