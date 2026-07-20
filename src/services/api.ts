@@ -258,3 +258,114 @@ export async function delegateTaskToAI(
   if (!response.ok) throw new Error('Failed to delegate task');
   return response.json();
 }
+
+// Task Workspace
+export async function getTaskWorkspace(taskId: string): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}`);
+  if (!response.ok) throw new Error('Failed to fetch task workspace');
+  return response.json();
+}
+
+export async function delegateTask(
+  taskId: string,
+  employeeId: string,
+  delegatedById: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/delegate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ employeeId, delegatedById }),
+  });
+  if (!response.ok) throw new Error('Failed to delegate task');
+  return response.json();
+}
+
+export async function getTaskMessages(taskId: string): Promise<Message[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/messages`);
+  if (!response.ok) throw new Error('Failed to fetch task messages');
+  return response.json();
+}
+
+export async function addTaskMessage(
+  taskId: string,
+  senderId: string,
+  content: string,
+  role: 'user' | 'assistant'
+): Promise<Message> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ senderId, content, role }),
+  });
+  if (!response.ok) throw new Error('Failed to add message');
+  return response.json();
+}
+
+export async function createDraft(
+  taskId: string,
+  title: string,
+  content: string,
+  createdById: string,
+  messageId?: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/drafts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, content, createdById, messageId }),
+  });
+  if (!response.ok) throw new Error('Failed to create draft');
+  return response.json();
+}
+
+export async function getTaskDrafts(taskId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/drafts`);
+  if (!response.ok) throw new Error('Failed to fetch drafts');
+  return response.json();
+}
+
+export async function approveDraft(
+  taskId: string,
+  draftId: string,
+  approvedById: string,
+  outputType?: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/outputs/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ draftId, approvedById, outputType }),
+  });
+  if (!response.ok) throw new Error('Failed to approve draft');
+  return response.json();
+}
+
+export async function getTaskOutputs(taskId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/outputs`);
+  if (!response.ok) throw new Error('Failed to fetch outputs');
+  return response.json();
+}
+
+export async function getTaskFiles(taskId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/files`);
+  if (!response.ok) throw new Error('Failed to fetch files');
+  return response.json();
+}
+
+export async function updateTaskStatus(
+  taskId: string,
+  status: string,
+  updatedById: string
+): Promise<any> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, updatedById }),
+  });
+  if (!response.ok) throw new Error('Failed to update task status');
+  return response.json();
+}
+
+export async function getTaskHistory(taskId: string): Promise<any[]> {
+  const response = await fetch(`${API_URL}/api/task-workspace/${taskId}/history`);
+  if (!response.ok) throw new Error('Failed to fetch task history');
+  return response.json();
+}

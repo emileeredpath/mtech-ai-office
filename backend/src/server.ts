@@ -9,6 +9,8 @@ import knowledgeRouter from './routes/knowledge.js';
 import specialistAIRouter from './routes/specialistAI.js';
 import integrationsRouter from './routes/integrations.js';
 import outcomesRouter from './routes/outcomes.js';
+import adminRouter from './routes/admin.js';
+import taskWorkspaceRouter from './routes/taskWorkspace.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,6 +43,8 @@ app.use('/api/knowledge', knowledgeRouter);
 app.use('/api/specialist-ai', specialistAIRouter);
 app.use('/api/integrations', integrationsRouter);
 app.use('/api/outcomes', outcomesRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/task-workspace', taskWorkspaceRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

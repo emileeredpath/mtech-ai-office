@@ -362,6 +362,94 @@ CREATE TABLE IF NOT EXISTS ai_performance_history (
   UNIQUE(ai_employee_id, snapshot_date)
 );
 
+-- Task Workspace Tables
+
+-- Task Conversations (integrated conversations within a task, not general chat)
+CREATE TABLE IF NOT EXISTS task_conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  delegated_to_id UUID REFERENCES ai_employees(id), -- which specialist this task is delegated to
+  status VARCHAR(50) DEFAULT 'draft', -- draft, in_progress, awaiting_review, completed
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(task_id)
+);
+
+-- Task Messages (messages within task conversations)
+CREATE TABLE IF NOT EXISTS task_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_conversation_id UUID NOT NULL REFERENCES task_conversations(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES ai_employees(id),
+  content TEXT NOT NULL,
+  role VARCHAR(50) NOT NULL, -- 'user' or 'assistant'
+  is_draft BOOLEAN DEFAULT FALSE, -- whether this is a draft/working message
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Task Drafts (working versions of deliverables)
+CREATE TABLE IF NOT EXISTS task_drafts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  task_message_id UUID REFERENCES task_messages(id) ON DELETE SET NULL, -- originated from which message
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  version INTEGER NOT NULL, -- v1, v2, v3, etc.
+  created_by_id UUID REFERENCES ai_employees(id), -- who created this draft
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Task Outputs (approved deliverables)
+CREATE TABLE IF NOT EXISTS task_outputs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  draft_id UUID REFERENCES task_drafts(id) ON DELETE SET NULL,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  type VARCHAR(50), -- 'document', 'email', 'social_post', 'proposal', etc.
+  status VARCHAR(50) DEFAULT 'draft', -- draft, approved, archived
+  created_by_id UUID REFERENCES ai_employees(id), -- who created this output
+  approved_by_id UUID REFERENCES ai_employees(id), -- who approved it (human)
+  approved_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Task Files (attachments and file storage)
+CREATE TABLE IF NOT EXISTS task_files (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  file_name VARCHAR(255) NOT NULL,
+  file_type VARCHAR(50), -- 'image', 'document', 'video', etc.
+  file_path VARCHAR(500), -- path or URL
+  file_size INTEGER, -- in bytes
+  uploaded_by_id UUID REFERENCES ai_employees(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Task History (audit trail of changes)
+CREATE TABLE IF NOT EXISTS task_history (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  action VARCHAR(100), -- 'created', 'delegated', 'status_changed', 'output_approved', etc.
+  actor_id UUID REFERENCES ai_employees(id), -- who made this change
+  changes JSONB, -- what changed (old values, new values)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Employee Preferences (what employees learn from feedback)
+CREATE TABLE IF NOT EXISTS employee_preferences (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id UUID NOT NULL REFERENCES ai_employees(id) ON DELETE CASCADE,
+  preference_key VARCHAR(255), -- 'tone', 'format', 'length', etc.
+  preference_value TEXT,
+  feedback_source VARCHAR(50), -- 'user_feedback', 'learning', 'training'
+  confidence_score DECIMAL(3, 2) DEFAULT 0.5, -- how confident we are in this preference
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(employee_id, preference_key)
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_ai_employees_company_id ON ai_employees(company_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_company_id ON tasks(company_id);
@@ -396,3 +484,19 @@ CREATE INDEX IF NOT EXISTS idx_decision_feedback_task_id ON decision_feedback(ta
 CREATE INDEX IF NOT EXISTS idx_decision_feedback_ai_employee_id ON decision_feedback(ai_employee_id);
 CREATE INDEX IF NOT EXISTS idx_ai_performance_history_ai_employee_id ON ai_performance_history(ai_employee_id);
 CREATE INDEX IF NOT EXISTS idx_ai_performance_history_snapshot_date ON ai_performance_history(snapshot_date);
+
+-- Task Workspace Indexes
+CREATE INDEX IF NOT EXISTS idx_task_conversations_task_id ON task_conversations(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_conversations_delegated_to_id ON task_conversations(delegated_to_id);
+CREATE INDEX IF NOT EXISTS idx_task_messages_task_conversation_id ON task_messages(task_conversation_id);
+CREATE INDEX IF NOT EXISTS idx_task_messages_sender_id ON task_messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_task_drafts_task_id ON task_drafts(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_drafts_created_by_id ON task_drafts(created_by_id);
+CREATE INDEX IF NOT EXISTS idx_task_outputs_task_id ON task_outputs(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_outputs_created_by_id ON task_outputs(created_by_id);
+CREATE INDEX IF NOT EXISTS idx_task_outputs_approved_by_id ON task_outputs(approved_by_id);
+CREATE INDEX IF NOT EXISTS idx_task_outputs_status ON task_outputs(status);
+CREATE INDEX IF NOT EXISTS idx_task_files_task_id ON task_files(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_history_task_id ON task_history(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_history_actor_id ON task_history(actor_id);
+CREATE INDEX IF NOT EXISTS idx_employee_preferences_employee_id ON employee_preferences(employee_id);

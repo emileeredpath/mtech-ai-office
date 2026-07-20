@@ -1,0 +1,338 @@
+import { Router, Request, Response } from 'express';
+import { taskWorkspaceService } from '../services/taskWorkspaceService.js';
+import { query } from '../db/connection.js';
+
+const router = Router();
+
+// Get task workspace (all sections)
+router.get('/:taskId', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const workspace = await taskWorkspaceService.getTaskWorkspace(taskId);
+    res.json(workspace);
+  } catch (error) {
+    console.error('Error fetching task workspace:', error);
+    res.status(500).json({ error: 'Failed to fetch task workspace' });
+  }
+});
+
+// Delegate task to specialist
+router.post('/:taskId/delegate', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { employeeId, delegatedById } = req.body;
+
+    if (!employeeId || !delegatedById) {
+      return res.status(400).json({ error: 'employeeId and delegatedById required' });
+    }
+
+    const result = await taskWorkspaceService.delegateTask(taskId, employeeId, delegatedById);
+    res.json(result);
+  } catch (error) {
+    console.error('Error delegating task:', error);
+    res.status(500).json({ error: 'Failed to delegate task' });
+  }
+});
+
+// Get task conversation
+router.get('/:taskId/conversation', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const result = await query(
+      `SELECT tc.*, ae.name as delegated_to_name, ae.emoji
+       FROM task_conversations tc
+       LEFT JOIN ai_employees ae ON tc.delegated_to_id = ae.id
+       WHERE tc.task_id = $1`,
+      [taskId]
+    );
+
+    res.json(result.rows[0] || null);
+  } catch (error) {
+    console.error('Error fetching task conversation:', error);
+    res.status(500).json({ error: 'Failed to fetch task conversation' });
+  }
+});
+
+// Get task messages
+router.get('/:taskId/messages', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const result = await query(
+      `SELECT tm.*, ae.name, ae.emoji
+       FROM task_messages tm
+       JOIN task_conversations tc ON tm.task_conversation_id = tc.id
+       LEFT JOIN ai_employees ae ON tm.sender_id = ae.id
+       WHERE tc.task_id = $1
+       ORDER BY tm.created_at ASC`,
+      [taskId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching task messages:', error);
+    res.status(500).json({ error: 'Failed to fetch task messages' });
+  }
+});
+
+// Add message to task conversation
+router.post('/:taskId/messages', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { senderId, content, role } = req.body;
+
+    if (!senderId || !content || !role) {
+      return res.status(400).json({ error: 'senderId, content, and role required' });
+    }
+
+    // Get task conversation
+    const convResult = await query(
+      `SELECT id FROM task_conversations WHERE task_id = $1`,
+      [taskId]
+    );
+
+    if (convResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Task conversation not found' });
+    }
+
+    const message = await taskWorkspaceService.addTaskMessage(
+      convResult.rows[0].id,
+      senderId,
+      content,
+      role as 'user' | 'assistant'
+    );
+
+    // Get message with sender details
+    const detailResult = await query(
+      `SELECT tm.*, ae.name, ae.emoji
+       FROM task_messages tm
+       LEFT JOIN ai_employees ae ON tm.sender_id = ae.id
+       WHERE tm.id = $1`,
+      [message.id]
+    );
+
+    res.status(201).json(detailResult.rows[0]);
+  } catch (error) {
+    console.error('Error adding task message:', error);
+    res.status(500).json({ error: 'Failed to add message' });
+  }
+});
+
+// Create draft from message
+router.post('/:taskId/drafts', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { title, content, createdById, messageId } = req.body;
+
+    if (!title || !content || !createdById) {
+      return res.status(400).json({ error: 'title, content, and createdById required' });
+    }
+
+    const draft = await taskWorkspaceService.createDraft(
+      taskId,
+      messageId || null,
+      title,
+      content,
+      createdById
+    );
+
+    res.status(201).json(draft);
+  } catch (error) {
+    console.error('Error creating draft:', error);
+    res.status(500).json({ error: 'Failed to create draft' });
+  }
+});
+
+// Get task drafts
+router.get('/:taskId/drafts', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const result = await query(
+      `SELECT td.*, ae.name as created_by_name
+       FROM task_drafts td
+       LEFT JOIN ai_employees ae ON td.created_by_id = ae.id
+       WHERE td.task_id = $1
+       ORDER BY td.version DESC`,
+      [taskId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching drafts:', error);
+    res.status(500).json({ error: 'Failed to fetch drafts' });
+  }
+});
+
+// Approve draft as output
+router.post('/:taskId/outputs/approve', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { draftId, approvedById, outputType } = req.body;
+
+    if (!draftId || !approvedById) {
+      return res.status(400).json({ error: 'draftId and approvedById required' });
+    }
+
+    const output = await taskWorkspaceService.approveDraft(
+      taskId,
+      draftId,
+      approvedById,
+      outputType || 'document'
+    );
+
+    res.status(201).json(output);
+  } catch (error) {
+    console.error('Error approving draft:', error);
+    res.status(500).json({ error: 'Failed to approve draft' });
+  }
+});
+
+// Get task outputs
+router.get('/:taskId/outputs', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const result = await query(
+      `SELECT to_out.*,
+              creator.name as created_by_name,
+              approver.name as approved_by_name
+       FROM task_outputs to_out
+       LEFT JOIN ai_employees creator ON to_out.created_by_id = creator.id
+       LEFT JOIN ai_employees approver ON to_out.approved_by_id = approver.id
+       WHERE to_out.task_id = $1
+       ORDER BY to_out.created_at DESC`,
+      [taskId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching outputs:', error);
+    res.status(500).json({ error: 'Failed to fetch outputs' });
+  }
+});
+
+// Upload file to task
+router.post('/:taskId/files', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { fileName, fileType, filePath, fileSize, uploadedById } = req.body;
+
+    if (!fileName || !filePath || !uploadedById) {
+      return res.status(400).json({ error: 'fileName, filePath, and uploadedById required' });
+    }
+
+    const file = await taskWorkspaceService.uploadFile(
+      taskId,
+      fileName,
+      fileType || 'document',
+      filePath,
+      fileSize || 0,
+      uploadedById
+    );
+
+    res.status(201).json(file);
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).json({ error: 'Failed to upload file' });
+  }
+});
+
+// Get task files
+router.get('/:taskId/files', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const result = await query(
+      `SELECT tf.*, ae.name as uploaded_by_name
+       FROM task_files tf
+       LEFT JOIN ai_employees ae ON tf.uploaded_by_id = ae.id
+       WHERE tf.task_id = $1
+       ORDER BY tf.created_at DESC`,
+      [taskId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    res.status(500).json({ error: 'Failed to fetch files' });
+  }
+});
+
+// Update task status
+router.put('/:taskId/status', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+    const { status, updatedById } = req.body;
+
+    if (!status || !updatedById) {
+      return res.status(400).json({ error: 'status and updatedById required' });
+    }
+
+    const result = await taskWorkspaceService.updateTaskStatus(taskId, status, updatedById);
+    res.json(result);
+  } catch (error) {
+    console.error('Error updating task status:', error);
+    res.status(500).json({ error: 'Failed to update task status' });
+  }
+});
+
+// Get task history
+router.get('/:taskId/history', async (req: Request, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const result = await query(
+      `SELECT th.*, ae.name as actor_name
+       FROM task_history th
+       LEFT JOIN ai_employees ae ON th.actor_id = ae.id
+       WHERE th.task_id = $1
+       ORDER BY th.created_at DESC`,
+      [taskId]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching task history:', error);
+    res.status(500).json({ error: 'Failed to fetch task history' });
+  }
+});
+
+// Save employee preference
+router.post('/employees/:employeeId/preferences', async (req: Request, res: Response) => {
+  try {
+    const { employeeId } = req.params;
+    const { key, value, confidenceScore } = req.body;
+
+    if (!key || !value) {
+      return res.status(400).json({ error: 'key and value required' });
+    }
+
+    const pref = await taskWorkspaceService.saveEmployeePreference(
+      employeeId,
+      key,
+      value,
+      confidenceScore || 0.8
+    );
+
+    res.json(pref);
+  } catch (error) {
+    console.error('Error saving employee preference:', error);
+    res.status(500).json({ error: 'Failed to save preference' });
+  }
+});
+
+// Get employee preferences
+router.get('/employees/:employeeId/preferences', async (req: Request, res: Response) => {
+  try {
+    const { employeeId } = req.params;
+    const prefs = await taskWorkspaceService.getEmployeePreferences(employeeId);
+    res.json(prefs);
+  } catch (error) {
+    console.error('Error fetching employee preferences:', error);
+    res.status(500).json({ error: 'Failed to fetch preferences' });
+  }
+});
+
+export default router;
