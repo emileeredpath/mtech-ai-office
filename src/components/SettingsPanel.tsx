@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 
 const TEAM_MEMBERS = [
-  { id: 'marketing-director', label: 'Marketing Director' },
-  { id: 'website-auditor', label: 'Website Manager' },
-  { id: 'seo-ppc-manager', label: 'SEO & PPC Manager' },
-  { id: 'email-marketing-manager', label: 'Email Marketing Manager' },
-  { id: 'social-media-manager', label: 'Social Media Manager' },
-  { id: 'case-study-writer', label: 'Case Study Writer' },
-  { id: 'proposal-writer', label: 'Proposal Writer' },
-  { id: 'funding-rewards-manager', label: 'Funding & Rewards Manager' },
+  { id: 'email_manager', label: 'Email Marketing Manager' },
+  { id: 'website_manager', label: 'Website Manager' },
+  { id: 'seo_ppc_manager', label: 'SEO & PPC Manager' },
+  { id: 'social_media_manager', label: 'Social Media Manager' },
+  { id: 'proposal_writer', label: 'Proposal Writer' },
+  { id: 'case_study_writer', label: 'Case Study Writer' },
+  { id: 'funding_manager', label: 'Funding & Rewards Manager' },
 ];
 
 export function SettingsPanel() {
@@ -17,7 +16,6 @@ export function SettingsPanel() {
   const [projectUrls, setProjectUrls] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
 
-  // Load from localStorage on mount
   useEffect(() => {
     const savedKey = localStorage.getItem('anthropic_api_key') || '';
     setApiKey(savedKey);
@@ -31,14 +29,12 @@ export function SettingsPanel() {
   }, []);
 
   const handleSave = () => {
-    // Save API key
     if (apiKey.trim()) {
       localStorage.setItem('anthropic_api_key', apiKey);
     } else {
       localStorage.removeItem('anthropic_api_key');
     }
 
-    // Save project URLs
     TEAM_MEMBERS.forEach((member) => {
       const url = projectUrls[member.id] || '';
       if (url.trim()) {
@@ -60,20 +56,26 @@ export function SettingsPanel() {
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 bg-slate-950 text-slate-50">
+    <div className="flex-1 overflow-y-auto p-8" style={{ backgroundColor: '#070A0F' }}>
       <div className="max-w-2xl">
-        <h1 className="text-3xl font-bold mb-8 text-slate-50">Settings</h1>
+        <h1 className="text-3xl font-bold mb-8" style={{ color: '#E8ECF1' }}>
+          Settings
+        </h1>
 
         {/* API Key Section */}
-        <div className="mb-10 p-6 rounded-lg bg-slate-800 border border-slate-700">
-          <h2 className="text-xl font-bold mb-4 text-slate-50">Anthropic API Configuration</h2>
-          <p className="text-sm mb-4 text-slate-400">
+        <div className="mb-10 p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
+          <h2 className="text-xl font-bold mb-4" style={{ color: '#E8ECF1' }}>
+            Anthropic API Configuration
+          </h2>
+          <p className="text-sm mb-4" style={{ color: '#5C6879' }}>
             Add your Anthropic API key to enable Sandy to generate marketing campaigns using Claude. Get your key at{' '}
             <a
               href="https://console.anthropic.com/account/keys"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-orange-500 underline hover:text-orange-400"
+              style={{ color: '#F97031', textDecoration: 'none', fontWeight: '500' }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
             >
               console.anthropic.com
             </a>
@@ -84,11 +86,25 @@ export function SettingsPanel() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-ant-..."
-              className="flex-1 px-4 py-2 rounded-lg text-sm bg-slate-900 text-slate-50 border border-slate-700"
+              className="flex-1 px-4 py-2 rounded-lg text-sm"
+              style={{
+                backgroundColor: '#0A0E14',
+                borderColor: '#1E2430',
+                border: '1px solid',
+                color: '#E8ECF1',
+              }}
             />
             <button
               onClick={() => setApiKeyVisible(!apiKeyVisible)}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-900 text-slate-400 border border-slate-700 hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: '#1E2430',
+                color: '#E8ECF1',
+                borderColor: '#1E2430',
+                border: '1px solid',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2A3141')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1E2430')}
             >
               {apiKeyVisible ? 'Hide' : 'Show'}
             </button>
@@ -96,22 +112,32 @@ export function SettingsPanel() {
         </div>
 
         {/* Team Member Claude Projects */}
-        <div className="p-6 rounded-lg bg-slate-800 border border-slate-700">
-          <h2 className="text-xl font-bold mb-4 text-slate-50">Team Member Claude Projects</h2>
-          <p className="text-sm mb-6 text-slate-400">
-            Paste your team member's Claude.ai project URLs. The "Open" button on team member cards will link directly to their project.
+        <div className="p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
+          <h2 className="text-xl font-bold mb-4" style={{ color: '#E8ECF1' }}>
+            Team Member Claude Projects
+          </h2>
+          <p className="text-sm mb-6" style={{ color: '#5C6879' }}>
+            Paste your team member's Claude.ai project URLs. The project links will allow direct access to each team member's workspace.
           </p>
 
           <div className="space-y-4">
             {TEAM_MEMBERS.map((member) => (
               <div key={member.id}>
-                <label className="text-sm font-medium mb-2 block text-slate-300">{member.label}</label>
+                <label className="text-sm font-medium mb-2 block" style={{ color: '#E8ECF1' }}>
+                  {member.label}
+                </label>
                 <input
                   type="url"
                   value={projectUrls[member.id] || ''}
                   onChange={(e) => handleUrlChange(member.id, e.target.value)}
                   placeholder="https://claude.ai/projects/..."
-                  className="w-full px-4 py-2 rounded-lg text-sm bg-slate-900 text-slate-50 border border-slate-700"
+                  className="w-full px-4 py-2 rounded-lg text-sm"
+                  style={{
+                    backgroundColor: '#0A0E14',
+                    borderColor: '#1E2430',
+                    border: '1px solid',
+                    color: '#E8ECF1',
+                  }}
                 />
               </div>
             ))}
@@ -121,22 +147,29 @@ export function SettingsPanel() {
           <div className="mt-8 flex items-center gap-4">
             <button
               onClick={handleSave}
-              className="px-6 py-2 rounded-lg text-sm font-medium bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+              className="px-6 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: '#F97031',
+                color: 'white',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#E85E1F')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#F97031')}
             >
               Save Settings
             </button>
-            {saved && <span className="text-sm font-medium text-green-400">✓ Saved successfully</span>}
+            {saved && <span className="text-sm font-medium" style={{ color: '#1D9E75' }}>✓ Saved successfully</span>}
           </div>
         </div>
 
         {/* Info Section */}
-        <div className="mt-10 p-6 rounded-lg bg-slate-800 border border-slate-700">
-          <h3 className="font-bold mb-3 text-slate-50">How This Works</h3>
-          <ul className="space-y-2 text-sm text-slate-400">
+        <div className="mt-10 p-6 rounded-lg" style={{ backgroundColor: '#0F1219', borderColor: '#1E2430', border: '1px solid' }}>
+          <h3 className="font-bold mb-3" style={{ color: '#E8ECF1' }}>
+            How This Works
+          </h3>
+          <ul className="space-y-2 text-sm" style={{ color: '#5C6879' }}>
             <li>✓ API key is stored securely in your browser (never sent to servers)</li>
             <li>✓ Team member URLs are saved locally in localStorage</li>
-            <li>✓ Click team member cards to jump to their Claude project</li>
-            <li>✓ Sandy uses your API key to generate realistic campaign workflows</li>
+            <li>✓ Sandy uses your API key to generate campaigns and content</li>
             <li>✓ All data stays in your browser — nothing is transmitted</li>
           </ul>
         </div>

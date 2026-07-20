@@ -80,21 +80,3 @@ export function SandyInterface() {
     </div>
   );
 }
-
-function PlaceholderScreen({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    <div className="w-full h-full flex items-center justify-center flex-col" style={{ backgroundColor: '#070A0F' }}>
-      <div className="text-center">
-        <p className="text-2xl font-bold" style={{ color: '#E8ECF1' }}>
-          {title}
-        </p>
-        <p className="text-sm mt-2" style={{ color: '#5C6879' }}>
-          {subtitle}
-        </p>
-        <p className="text-sm mt-4" style={{ color: '#5C6879' }}>
-          Coming in Phase 1
-        </p>
-      </div>
-    </div>
-  );
-}
