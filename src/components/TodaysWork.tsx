@@ -23,11 +23,10 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
   const dayName = todayDate.toLocaleDateString('en-US', { weekday: 'long' });
   const dateStr = todayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-  // Calculate Sandy's briefing from real data
   const briefingStats = useMemo(() => {
     const waitingForJohn = REAL_TASKS.filter((t) => t.status === 'waiting-john');
     const inProgress = REAL_TASKS.filter((t) => t.status === 'in-progress');
-    const dueSoon = REAL_TASKS.filter((t) => t.deadline && new Date(t.deadline) <= new Date(Date.now() + 86400000)); // Next 24 hours
+    const dueSoon = REAL_TASKS.filter((t) => t.deadline && new Date(t.deadline) <= new Date(Date.now() + 86400000));
 
     return {
       approvalsWaiting: waitingForJohn.length,
@@ -36,19 +35,16 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
     };
   }, []);
 
-  // Get today's focus (high priority, waiting for john, or in progress)
   const todaysFocus = useMemo(() => {
     return REAL_TASKS.filter((t) =>
       t.status === 'waiting-john' || (t.status === 'in-progress' && t.priority === 'high')
     ).slice(0, 3);
   }, []);
 
-  // Get waiting for john tasks
   const waitingForJohnTasks = useMemo(() => {
     return REAL_TASKS.filter((t) => t.status === 'waiting-john');
   }, []);
 
-  // Get busy team members
   const busyTeam = useMemo(() => {
     return Object.values(EMPLOYEES)
       .filter((e) => e.status === 'busy' && e.id !== 'sandy')
@@ -62,7 +58,7 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
       case 'in-progress':
         return '#1D9E75';
       case 'waiting-approval':
-        return '#F97031';
+        return 'var(--accent-orange)';
       case 'complete':
         return '#5C6879';
       default:
@@ -152,35 +148,33 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-8" style={{ backgroundColor: '#070A0F' }}>
+    <div className="flex-1 overflow-y-auto p-8" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="max-w-4xl mx-auto">
-        {/* Greeting */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold" style={{ color: '#E8ECF1' }}>
+          <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
             Good morning, Emilee.
           </h1>
           <div className="text-right">
-            <p style={{ color: '#5C6879' }} className="text-sm">
+            <p style={{ color: 'var(--text-secondary)' }} className="text-sm">
               {dayName}
             </p>
-            <p style={{ color: '#7A8997' }} className="text-base font-medium">
+            <p style={{ color: 'var(--text-tertiary)' }} className="text-base font-medium">
               {dateStr}
             </p>
           </div>
         </div>
 
-        {/* Sandy Panel */}
         <div className="mb-8 p-6 rounded-lg border" style={{
-          backgroundColor: '#0F1219',
-          borderColor: '#1E2430',
+          backgroundColor: 'var(--bg-secondary)',
+          borderColor: 'var(--border-color)',
         }}>
           <div className="flex items-start gap-4 mb-4">
             <div className="text-3xl">🤖</div>
             <div className="flex-1">
-              <h2 className="text-lg font-bold" style={{ color: '#E8ECF1' }}>
+              <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                 Sandy
               </h2>
-              <p className="text-sm" style={{ color: '#5C6879' }}>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Chief of Staff
               </p>
             </div>
@@ -188,11 +182,11 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
 
           {messages.length === 0 ? (
             <>
-              <p className="mb-4" style={{ color: '#E8ECF1', lineHeight: '1.6' }}>
+              <p className="mb-4" style={{ color: 'var(--text-primary)', lineHeight: '1.6' }}>
                 Morning Emilee. Here's what needs your attention today:
               </p>
 
-              <ul className="space-y-2 mb-8" style={{ color: '#E8ECF1' }}>
+              <ul className="space-y-2 mb-8" style={{ color: 'var(--text-primary)' }}>
                 <li className="text-sm">✓ {briefingStats.approvalsWaiting} approvals waiting</li>
                 <li className="text-sm">✓ {briefingStats.deadlinesToday} deadline{briefingStats.deadlinesToday !== 1 ? 's' : ''} today</li>
                 <li className="text-sm">✓ {briefingStats.tasksInProgress} tasks in progress across the team</li>
@@ -202,8 +196,8 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
             <div
               className="mb-6 p-4 rounded-lg space-y-3"
               style={{
-                backgroundColor: '#0A0E14',
-                borderColor: '#1E2430',
+                backgroundColor: 'var(--bg-tertiary)',
+                borderColor: 'var(--border-color)',
                 border: '1px solid',
                 maxHeight: '300px',
                 overflowY: 'auto',
@@ -220,8 +214,8 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                   <div
                     className="px-3 py-2 rounded-lg max-w-xs text-sm"
                     style={{
-                      backgroundColor: msg.sender === 'emilee' ? '#F97031' : '#1E2430',
-                      color: msg.sender === 'emilee' ? 'white' : '#E8ECF1',
+                      backgroundColor: msg.sender === 'emilee' ? 'var(--accent-orange)' : 'var(--bg-tertiary)',
+                      color: msg.sender === 'emilee' ? 'white' : 'var(--text-primary)',
                     }}
                   >
                     {msg.content}
@@ -246,21 +240,21 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                 placeholder="Tell Sandy what you need..."
                 className="flex-1 px-4 py-2 rounded-lg text-sm"
                 style={{
-                  backgroundColor: '#0A0E14',
-                  borderColor: '#1E2430',
+                  backgroundColor: 'var(--bg-tertiary)',
+                  borderColor: 'var(--border-color)',
                   border: '1px solid',
-                  color: '#E8ECF1',
+                  color: 'var(--text-primary)',
                 }}
               />
               <button
                 onClick={handleSendMessage}
                 className="px-6 py-2 rounded-lg font-medium transition-all text-sm"
                 style={{
-                  backgroundColor: '#F97031',
+                  backgroundColor: 'var(--accent-orange)',
                   color: 'white',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#E85E1F')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#F97031')}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
                 Send
               </button>
@@ -270,7 +264,7 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
               <button
                 onClick={() => setMessages([])}
                 className="text-sm font-medium transition-all"
-                style={{ color: '#F97031' }}
+                style={{ color: 'var(--accent-orange)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
@@ -280,11 +274,9 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
           </div>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-3 gap-6">
-          {/* Today's Focus */}
           <div>
-            <h3 className="text-sm font-bold mb-4" style={{ color: '#E8ECF1' }}>
+            <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               TODAY'S FOCUS
             </h3>
             <div className="space-y-3">
@@ -293,15 +285,15 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                   key={task.id}
                   className="p-4 rounded-lg"
                   style={{
-                    backgroundColor: '#0F1219',
+                    backgroundColor: 'var(--bg-secondary)',
                     borderColor: getStatusColor(task.status),
                     borderLeft: `4px solid ${getStatusColor(task.status)}`,
                   }}
                 >
-                  <p className="text-sm font-medium truncate" style={{ color: '#E8ECF1' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                     {task.status === 'waiting-john' ? '🔴' : task.status === 'in-progress' ? '🟠' : '🟡'} {task.title}
                   </p>
-                  <p className="text-xs mt-1" style={{ color: '#5C6879' }}>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                     {BRANDS[task.brand].shortName}
                   </p>
                 </div>
@@ -309,9 +301,8 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
             </div>
           </div>
 
-          {/* Waiting for Approval (Waiting for John) */}
           <div>
-            <h3 className="text-sm font-bold mb-4" style={{ color: '#E8ECF1' }}>
+            <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               WAITING FOR APPROVAL
             </h3>
             <div className="space-y-3">
@@ -320,11 +311,11 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                   key={task.id}
                   className="p-4 rounded-lg"
                   style={{
-                    backgroundColor: '#0F1219',
-                    borderColor: '#1E2430',
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-color)',
                   }}
                 >
-                  <p className="text-sm font-medium truncate" style={{ color: '#E8ECF1' }}>
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                     {task.title}
                   </p>
                   <p className="text-xs mt-1" style={{ color: '#F59E0B' }}>
@@ -335,9 +326,8 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
             </div>
           </div>
 
-          {/* Team Status */}
           <div>
-            <h3 className="text-sm font-bold mb-4" style={{ color: '#E8ECF1' }}>
+            <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               TEAM STATUS
             </h3>
             <div className="space-y-3">
@@ -346,27 +336,27 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                   key={employee.id}
                   className="p-4 rounded-lg"
                   style={{
-                    backgroundColor: '#0F1219',
-                    borderColor: '#1E2430',
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderColor: 'var(--border-color)',
                   }}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium" style={{ color: '#E8ECF1' }}>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {employee.emoji} {employee.name.split(' ')[0]}
                     </p>
                     <span style={{ color: getStatusColor(employee.status) }}>
                       {getStatusDot(employee.status)}
                     </span>
                   </div>
-                  <p className="text-xs" style={{ color: '#5C6879' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                     {employee.currentTask || 'Available'}
                   </p>
-                  <div className="mt-2 h-1.5 rounded-full" style={{ backgroundColor: '#1E2430' }}>
+                  <div className="mt-2 h-1.5 rounded-full" style={{ backgroundColor: 'var(--border-color)' }}>
                     <div
                       className="h-full rounded-full"
                       style={{
                         width: `${employee.workload}%`,
-                        background: 'linear-gradient(90deg, #F97031, #FFB067)',
+                        background: 'linear-gradient(90deg, var(--accent-orange), #FFB067)',
                       }}
                     />
                   </div>
