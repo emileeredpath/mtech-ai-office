@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { REAL_TASKS, BRANDS, EMPLOYEES, BrandId, BRAND_ORDER } from '@/data/mtechEmployees';
+import { TaskDetailPanel } from './TaskDetailPanel';
 
 interface TasksListProps {
   companyId: string;
@@ -22,6 +23,7 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
   const [selectedBrand, setSelectedBrand] = useState<BrandId | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Filter tasks based on selections
   const filteredTasks = useMemo(() => {
@@ -192,7 +194,8 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
             filteredTasks.map((task) => (
               <div
                 key={task.id}
-                className="p-4 rounded-lg"
+                onClick={() => setSelectedTaskId(task.id)}
+                className="p-4 rounded-lg cursor-pointer transition-all hover:bg-opacity-80"
                 style={{
                   backgroundColor: '#0F1219',
                   borderColor: '#1E2430',
@@ -265,6 +268,13 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
             ))
           )}
         </div>
+
+        {selectedTaskId && (
+          <TaskDetailPanel
+            taskId={selectedTaskId}
+            onClose={() => setSelectedTaskId(null)}
+          />
+        )}
       </div>
     </div>
   );
