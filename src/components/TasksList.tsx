@@ -273,6 +273,10 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
           <TaskDetailPanel
             taskId={selectedTaskId}
             onClose={() => setSelectedTaskId(null)}
+            onTaskMarkedComplete={() => {
+              // Trigger a refresh of the tasks list
+              setSelectedTaskId(null);
+            }}
           />
         )}
       </div>

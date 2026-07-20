@@ -4,11 +4,13 @@ import { REAL_TASKS, BRANDS, EMPLOYEES } from '@/data/mtechEmployees';
 interface TaskDetailPanelProps {
   taskId: string;
   onClose: () => void;
+  onTaskMarkedComplete?: (taskId: string) => void;
 }
 
-export function TaskDetailPanel({ taskId, onClose }: TaskDetailPanelProps) {
+export function TaskDetailPanel({ taskId, onClose, onTaskMarkedComplete }: TaskDetailPanelProps) {
   const task = REAL_TASKS.find((t) => t.id === taskId);
   const [showCopied, setShowCopied] = useState(false);
+  const [isMarkedComplete, setIsMarkedComplete] = useState(task?.status === 'complete');
 
   if (!task) return null;
 
@@ -114,6 +116,14 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  const handleMarkPublished = () => {
+    setIsMarkedComplete(true);
+    onTaskMarkedComplete?.(taskId);
+    setTimeout(() => {
+      onClose();
+    }, 500);
   };
 
   return (
@@ -245,8 +255,9 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
             >
               Download
             </button>
-            {task.status !== 'complete' && (
+            {!isMarkedComplete && task.status !== 'complete' && (
               <button
+                onClick={handleMarkPublished}
                 className="px-4 py-2 rounded-lg font-medium transition-all text-sm"
                 style={{
                   backgroundColor: '#1D9E75',
@@ -256,6 +267,20 @@ Our state-of-the-art radio systems are designed for teams that demand reliabilit
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1D9E75')}
               >
                 Mark Published
+              </button>
+            )}
+            {isMarkedComplete && (
+              <button
+                disabled
+                className="px-4 py-2 rounded-lg font-medium text-sm"
+                style={{
+                  backgroundColor: '#1D9E75',
+                  color: 'white',
+                  opacity: 0.6,
+                  cursor: 'default',
+                }}
+              >
+                ✓ Published
               </button>
             )}
           </div>
