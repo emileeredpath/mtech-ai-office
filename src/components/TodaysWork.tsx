@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { EMPLOYEES, REAL_TASKS, BRANDS } from '@/data/mtechEmployees';
+import { askSandy } from '@/services/sandyAI';
 
 interface TodaysWorkProps {
   companyId: string;
@@ -17,6 +18,7 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
   const [sandyInput, setSandyInput] = useState('');
   const [messages, setMessages] = useState<SandyMessage[]>([]);
   const [expandedChat, setExpandedChat] = useState(false);
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const todayDate = new Date();
@@ -122,7 +124,7 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
     return `I'm tracking this. I'll monitor the team and flag anything that needs your attention. Anything specific you'd like me to focus on?`;
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!sandyInput.trim()) return;
 
     const userMessage: SandyMessage = {
@@ -133,18 +135,40 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const userInputText = sandyInput;
     setSandyInput('');
+    setLoading(true);
+    setExpandedChat(true);
 
-    setTimeout(() => {
+    try {
+      const response = await askSandy({
+        message: userInputText,
+        context: {
+          userId: currentUserId,
+          currentRole: 'Marketing Director',
+        },
+      });
+
       const sandyResponse: SandyMessage = {
         id: `msg-${Date.now()}-response`,
         sender: 'sandy',
-        content: generateSandyResponse(sandyInput),
+        content: response.response,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, sandyResponse]);
-      setExpandedChat(true);
-    }, 300);
+    } catch (error) {
+      console.error('Error getting Sandy response:', error);
+      const errorResponse: SandyMessage = {
+        id: `msg-${Date.now()}-error`,
+        sender: 'sandy',
+        content:
+          'I encountered an error. Make sure your API key is set in Settings and you have internet connection.',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -222,6 +246,19 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                   </div>
                 </div>
               ))}
+              {loading && (
+                <div className="flex gap-3">
+                  <div
+                    className="px-3 py-2 rounded-lg text-sm"
+                    style={{
+                      backgroundColor: 'var(--bg-tertiary)',
+                      color: 'var(--text-secondary)',
+                    }}
+                  >
+                    🤖 Thinking...
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
           )}
@@ -233,30 +270,35 @@ export function TodaysWork({ companyId, currentUserId }: TodaysWorkProps) {
                 value={sandyInput}
                 onChange={(e) => setSandyInput(e.target.value)}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && !loading) {
                     handleSendMessage();
                   }
                 }}
-                placeholder="Tell Sandy what you need..."
+                disabled={loading}
+                placeholder={loading ? 'Sandy is thinking...' : 'Tell Sandy what you need...'}
                 className="flex-1 px-4 py-2 rounded-lg text-sm"
                 style={{
                   backgroundColor: 'var(--bg-tertiary)',
                   borderColor: 'var(--border-color)',
                   border: '1px solid',
                   color: 'var(--text-primary)',
+                  opacity: loading ? 0.6 : 1,
                 }}
               />
               <button
                 onClick={handleSendMessage}
+                disabled={loading}
                 className="px-6 py-2 rounded-lg font-medium transition-all text-sm"
                 style={{
                   backgroundColor: 'var(--accent-orange)',
                   color: 'white',
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? 'not-allowed' : 'pointer',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
+                onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '1')}
               >
-                Send
+                {loading ? '⏳' : 'Send'}
               </button>
             </div>
 
