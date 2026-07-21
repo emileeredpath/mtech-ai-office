@@ -9,10 +9,106 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+async function generateEmployeeResponse(employeeId: string, message: string): Promise<string> {
+  const apiKey = localStorage.getItem('anthropic_api_key');
+  if (!apiKey) {
+    return getDefaultResponse(employeeId);
+  }
+
+  const employee = Object.values(EMPLOYEES).find((e) => e.id === employeeId);
+  if (!employee) {
+    return 'Thanks for reaching out!';
+  }
+
+  const systemPrompt = `You are ${employee.name}, a ${employee.role} at MTech AI Office.
+You are professional but friendly. Keep responses concise (1-2 sentences).
+Stay in character and respond based on your role and responsibilities.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 150,
+        system: systemPrompt,
+        messages: [
+          {
+            role: 'user',
+            content: message,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      return getDefaultResponse(employeeId);
+    }
+
+    const data = await response.json();
+    return data.content[0].text;
+  } catch (error) {
+    console.error('Error generating response:', error);
+    return getDefaultResponse(employeeId);
+  }
+}
+
+function getDefaultResponse(employeeId: string): string {
+  const employee = Object.values(EMPLOYEES).find((e) => e.id === employeeId);
+  const responses: Record<string, string[]> = {
+    email_manager: [
+      'I just updated the email campaign settings. Should be good to go!',
+      'Let me check on that email list - I\'ll get back to you shortly.',
+      'Perfect timing! I was just about to send out the latest campaign.',
+    ],
+    website_manager: [
+      'The website updates are looking great. Want to do a quick review?',
+      'I\'ve made those changes to the homepage. Can you take a look?',
+      'The new page is live! Let me know what you think.',
+    ],
+    seo_ppc_manager: [
+      'The PPC performance is up 25% this month. Great results!',
+      'I\'m optimizing the ad spend right now. Should see improvements soon.',
+      'The SEO changes are starting to show in rankings. Positive trend!',
+    ],
+    social_media_manager: [
+      'The social posts are performing really well this week!',
+      'I just scheduled the week\'s content. All set!',
+      'Engagement is up! Our audience really loved that post.',
+    ],
+    proposal_writer: [
+      'I\'m finalizing the proposal now. Should have it ready tomorrow.',
+      'The client feedback has been incorporated. Ready for your review.',
+      'Great work on those revisions! The proposal looks solid now.',
+    ],
+    case_study_writer: [
+      'I\'ve gathered the case study data. Starting the write-up now.',
+      'The success metrics are impressive! This will be a strong case study.',
+      'First draft is ready for your feedback.',
+    ],
+    funding_manager: [
+      'I\'ve reviewed the budget and we\'re tracking well against targets.',
+      'Let me pull together those funding projections for you.',
+      'The funding pipeline looks solid for next quarter.',
+    ],
+  };
+
+  if (employee && responses[employee.id]) {
+    return responses[employee.id][Math.floor(Math.random() * responses[employee.id].length)];
+  }
+
+  return 'Thanks for reaching out! I\'ll help however I can. 😊';
+}
+
 export function EmployeeChat() {
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const teamMembers = useMemo(() => {
     return Object.values(EMPLOYEES).filter((e) => e.id !== 'sandy');
@@ -25,7 +121,7 @@ export function EmployeeChat() {
       .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }, [messages, selectedEmployee]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedEmployee) return;
 
     const newMessage: ChatMessage = {
@@ -38,21 +134,19 @@ export function EmployeeChat() {
 
     setMessages((prev) => [...prev, newMessage]);
     setMessageInput('');
+    setLoading(true);
 
-    // Simulate employee response after a delay
-    setTimeout(() => {
-      const employee = Object.values(EMPLOYEES).find((e) => e.id === selectedEmployee);
-      if (employee) {
-        const response: ChatMessage = {
-          id: `msg-${Date.now()}-response`,
-          sender: selectedEmployee,
-          recipient: 'emilee',
-          content: `Thanks for reaching out! I'll check on that. ${employee.emoji}`,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, response]);
-      }
-    }, 1500);
+    const responseText = await generateEmployeeResponse(selectedEmployee, messageInput);
+
+    const response: ChatMessage = {
+      id: `msg-${Date.now()}-response`,
+      sender: selectedEmployee,
+      recipient: 'emilee',
+      content: responseText,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, response]);
+    setLoading(false);
   };
 
   return (
@@ -150,6 +244,21 @@ export function EmployeeChat() {
                   </div>
                 ))
               )}
+              {loading && (
+                <div className="flex">
+                  <div
+                    className="px-4 py-2 rounded-lg text-sm"
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      color: 'var(--text-secondary)',
+                      borderColor: 'var(--border-color)',
+                      border: '1px solid',
+                    }}
+                  >
+                    Typing...
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Input */}
@@ -160,30 +269,35 @@ export function EmployeeChat() {
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !loading) {
                       handleSendMessage();
                     }
                   }}
-                  placeholder="Message..."
+                  disabled={loading}
+                  placeholder={loading ? 'Waiting for response...' : 'Message...'}
                   className="flex-1 px-3 py-2 rounded-lg text-sm"
                   style={{
                     backgroundColor: 'var(--bg-tertiary)',
                     borderColor: 'var(--border-color)',
                     border: '1px solid',
                     color: 'var(--text-primary)',
+                    opacity: loading ? 0.6 : 1,
                   }}
                 />
                 <button
                   onClick={handleSendMessage}
+                  disabled={loading}
                   className="px-4 py-2 rounded-lg font-medium text-sm transition-all"
                   style={{
                     backgroundColor: 'var(--accent-orange)',
                     color: 'white',
+                    opacity: loading ? 0.6 : 1,
+                    cursor: loading ? 'not-allowed' : 'pointer',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.opacity = '0.8')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.opacity = '1')}
                 >
-                  Send
+                  {loading ? '⏳' : 'Send'}
                 </button>
               </div>
             </div>

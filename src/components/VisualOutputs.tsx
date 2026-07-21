@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { REAL_TASKS, BRANDS } from '@/data/mtechEmployees';
+import { generateMarketingContent } from '@/services/contentGenerator';
 
 interface Output {
   id: string;
@@ -78,26 +79,26 @@ Learn how enterprises are leading the way.
     return type.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 
-  const handleGenerateOutput = (taskId: string, type: Output['type']) => {
+  const handleGenerateOutput = async (taskId: string, type: Output['type']) => {
     setGeneratingForTask(taskId);
 
-    setTimeout(() => {
-      const task = REAL_TASKS.find((t) => t.id === taskId);
-      if (!task) return;
+    const task = REAL_TASKS.find((t) => t.id === taskId);
+    if (!task) return;
 
-      const newOutput: Output = {
-        id: `out-${Date.now()}`,
-        taskId,
-        title: task.title,
-        type,
-        content: generateSampleContent(task.title, type),
-        preview: `${getTypeEmoji(type)} ${getTypeLabel(type)} Generated`,
-        created: new Date(),
-      };
+    const { content, preview } = await generateMarketingContent(taskId, type);
 
-      setOutputs((prev) => [...prev, newOutput]);
-      setGeneratingForTask(null);
-    }, 1500);
+    const newOutput: Output = {
+      id: `out-${Date.now()}`,
+      taskId,
+      title: task.title,
+      type,
+      content,
+      preview: `${getTypeEmoji(type)} ${preview}`,
+      created: new Date(),
+    };
+
+    setOutputs((prev) => [...prev, newOutput]);
+    setGeneratingForTask(null);
   };
 
   const handleDownloadOutput = (output: Output) => {
