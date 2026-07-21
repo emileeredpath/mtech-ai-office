@@ -33,11 +33,11 @@ export function SandyInterface() {
       team: 'chat',
       messages: 'chat',
       tasks: 'tasks',
-      calendar: 'calendar',
-      files: 'outputs',
-      campaigns: 'campaigns',
-      analytics: 'activity',
-      help: 'home',
+      calendar: 'home',
+      files: 'campaign-builder',
+      campaigns: 'campaign-builder',
+      analytics: 'home',
+      help: 'chat',
     };
     setTopTab(tabMap[key] || 'home');
   };
@@ -51,69 +51,11 @@ export function SandyInterface() {
           <TopBar active={topTab} onSelect={setTopTab} />
 
           <div className="flex-1 overflow-hidden">
-          {/* Home / Today's Work */}
-          {topTab === 'home' && (
-            <TodaysWork companyId={companyId} currentUserId={currentUserId} />
-          )}
-
-          {/* Projects */}
-          {topTab === 'projects' && (
-            <ProjectsList companyId={companyId} currentUserId={currentUserId} />
-          )}
-
-          {/* Tasks */}
-          {topTab === 'tasks' && (
-            <TasksList companyId={companyId} currentUserId={currentUserId} />
-          )}
-
-          {/* All Tasks */}
-          {topTab === 'all-tasks' && (
-            <AllTasksList />
-          )}
-
-          {/* Campaigns */}
-          {topTab === 'campaigns' && (
-            <CampaignsList companyId={companyId} currentUserId={currentUserId} />
-          )}
-
-          {/* Campaign Builder */}
-          {topTab === 'campaign-builder' && (
-            <CampaignBuilder />
-          )}
-
-          {/* Activity Feed */}
-          {topTab === 'activity' && (
-            <ActivityFeed />
-          )}
-
-          {/* Employee Chat */}
-          {topTab === 'chat' && (
-            <EmployeeChat />
-          )}
-
-          {/* Calendar & Scheduling */}
-          {topTab === 'calendar' && (
-            <CalendarScheduling />
-          )}
-
-          {/* Visual Outputs */}
-          {topTab === 'outputs' && (
-            <VisualOutputs />
-          )}
-
-          {/* Board Room */}
-          {topTab === 'board-room' && (
-            <BoardRoom companyId={companyId} currentUserId={currentUserId} />
-          )}
-
-          {/* Knowledge */}
-          {topTab === 'knowledge' && (
-            <KnowledgeHub companyId={companyId} currentUserId={currentUserId} />
-          )}
-
-          {/* Settings */}
-          {topTab === 'settings' && <SettingsPanel />}
-        </div>
+            {topTab === 'home' && <TodaysWork companyId={companyId} currentUserId={currentUserId} />}
+            {topTab === 'tasks' && <TasksList companyId={companyId} currentUserId={currentUserId} />}
+            {topTab === 'campaign-builder' && <CampaignBuilder />}
+            {topTab === 'chat' && <EmployeeChat />}
+          </div>
       </div>
     </div>
     </CompletedTasksProvider>
