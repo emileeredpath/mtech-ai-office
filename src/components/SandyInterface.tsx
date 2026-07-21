@@ -8,6 +8,7 @@ import { KnowledgeHub } from '@/components/KnowledgeHub';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { LeftSidebar, type NavKey } from '@/components/layout/LeftSidebar';
 import { TopBar, type TopTab } from '@/components/layout/TopBar';
+import { CompletedTasksProvider } from '@/contexts/CompletedTasksContext';
 
 export function SandyInterface() {
   const [topTab, setTopTab] = useState<TopTab>('home');
@@ -36,13 +37,14 @@ export function SandyInterface() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: '#070A0F' }}>
-      <LeftSidebar active="home" onSelect={handleNavSelect} />
+    <CompletedTasksProvider>
+      <div className="flex h-screen w-screen overflow-hidden" style={{ backgroundColor: '#070A0F' }}>
+        <LeftSidebar active="home" onSelect={handleNavSelect} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar active={topTab} onSelect={setTopTab} />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <TopBar active={topTab} onSelect={setTopTab} />
 
-        <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden">
           {/* Home / Today's Work */}
           {topTab === 'home' && (
             <TodaysWork companyId={companyId} currentUserId={currentUserId} />
@@ -78,5 +80,6 @@ export function SandyInterface() {
         </div>
       </div>
     </div>
+    </CompletedTasksProvider>
   );
 }

@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { REAL_TASKS, BRANDS, EMPLOYEES, BrandId, BRAND_ORDER } from '@/data/mtechEmployees';
 import { TaskDetailPanel } from './TaskDetailPanel';
+import { ProjectDetail } from './ProjectDetail';
+import { TeamMemberProfile } from './TeamMemberProfile';
+import { useCompletedTasks } from '@/contexts/CompletedTasksContext';
 
 interface TasksListProps {
   companyId: string;
@@ -24,6 +27,9 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedProjectBrand, setSelectedProjectBrand] = useState<BrandId | null>(null);
+  const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<string | null>(null);
+  const { isTaskComplete, toggleTaskComplete } = useCompletedTasks();
 
   // Filter tasks based on selections
   const filteredTasks = useMemo(() => {
@@ -194,26 +200,48 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
             filteredTasks.map((task) => (
               <div
                 key={task.id}
-                onClick={() => setSelectedTaskId(task.id)}
-                className="p-4 rounded-lg cursor-pointer transition-all hover:bg-opacity-80"
+                className="p-4 rounded-lg transition-all"
                 style={{
                   backgroundColor: 'var(--bg-secondary)',
                   borderColor: 'var(--border-color)',
                   border: '1px solid',
                   borderLeftColor: getStatusColor(task.status),
-                  borderLeftWidth: task.status === 'complete' ? '1px' : '4px',
-                  opacity: task.status === 'complete' ? 0.6 : 1,
+                  borderLeftWidth: isTaskComplete(task.id) ? '1px' : '4px',
+                  opacity: isTaskComplete(task.id) ? 0.6 : 1,
                 }}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
+                  <input
+                    type="checkbox"
+                    checked={isTaskComplete(task.id)}
+                    onChange={() => toggleTaskComplete(task.id)}
+                    className="w-5 h-5 mt-1 cursor-pointer flex-shrink-0"
+                    style={{ accentColor: '#F97031' }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedTaskId(task.id)}>
                     <div className="flex items-start gap-3 mb-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                        <h3
+                          className="font-semibold truncate"
+                          style={{
+                            color: 'var(--text-primary)',
+                            textDecoration: isTaskComplete(task.id) ? 'line-through' : 'none',
+                          }}
+                        >
                           {task.title}
                         </h3>
                         <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                          {BRANDS[task.brand].shortName} • {task.context}
+                          <span
+                            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProjectBrand(task.brand);
+                            }}
+                          >
+                            {BRANDS[task.brand].shortName}
+                          </span>
+                          {' '}• {task.context}
                         </p>
                       </div>
                       {task.status === 'waiting-john' && (
@@ -251,7 +279,13 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
                       </span>
 
                       {task.owner && (
-                        <span style={{ color: '#7A8997' }}>
+                        <span
+                          style={{ color: '#7A8997', cursor: 'pointer', textDecoration: 'underline' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTeamMemberId(task.owner);
+                          }}
+                        >
                           {getOwnerName(task.owner)}
                         </span>
                       )}
@@ -278,6 +312,14 @@ export function TasksList({ companyId, currentUserId }: TasksListProps) {
               setSelectedTaskId(null);
             }}
           />
+        )}
+
+        {selectedProjectBrand && (
+          <ProjectDetail brandId={selectedProjectBrand} onClose={() => setSelectedProjectBrand(null)} />
+        )}
+
+        {selectedTeamMemberId && (
+          <TeamMemberProfile employeeId={selectedTeamMemberId} onClose={() => setSelectedTeamMemberId(null)} />
         )}
       </div>
     </div>
