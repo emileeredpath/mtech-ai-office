@@ -107,7 +107,13 @@ export function CampaignDetailPanel() {
             <label>Start date</label>
             <input
               type="date"
-              value={campaign.startDate ? (typeof campaign.startDate === 'string' ? campaign.startDate : campaign.startDate.toISOString().split('T')[0]) : ''}
+              value={
+                campaign.startDate
+                  ? campaign.startDate instanceof Date
+                    ? campaign.startDate.toISOString().split('T')[0]
+                    : String(campaign.startDate).split('T')[0]
+                  : ''
+              }
               onChange={(e) =>
                 updateCampaign(campaign.id, {
                   startDate: e.target.value ? new Date(e.target.value) : new Date(),
@@ -121,7 +127,13 @@ export function CampaignDetailPanel() {
             <label>End date</label>
             <input
               type="date"
-              value={campaign.endDate ? (typeof campaign.endDate === 'string' ? campaign.endDate : campaign.endDate.toISOString().split('T')[0]) : ''}
+              value={
+                campaign.endDate
+                  ? campaign.endDate instanceof Date
+                    ? campaign.endDate.toISOString().split('T')[0]
+                    : String(campaign.endDate).split('T')[0]
+                  : ''
+              }
               onChange={(e) =>
                 updateCampaign(campaign.id, {
                   endDate: e.target.value ? new Date(e.target.value) : new Date(),

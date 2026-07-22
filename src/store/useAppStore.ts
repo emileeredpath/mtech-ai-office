@@ -62,6 +62,7 @@ const hydrateDates = (data: any) => {
       ...campaign,
       startDate: toDate(campaign.startDate) || new Date(),
       endDate: toDate(campaign.endDate) || new Date(),
+      notes: campaign.notes || '',
     })),
   };
 };
