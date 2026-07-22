@@ -36,12 +36,32 @@ const defaultState = {
   selectedTaskId: null,
 };
 
+const hydrateDates = (data: any) => {
+  if (!data.tasks) return data;
+  return {
+    ...data,
+    tasks: data.tasks.map((task: any) => ({
+      ...task,
+      deadline: task.deadline ? new Date(task.deadline) : null,
+      startDate: task.startDate ? new Date(task.startDate) : null,
+      createdAt: task.createdAt ? new Date(task.createdAt) : new Date(),
+      completedAt: task.completedAt ? new Date(task.completedAt) : null,
+    })),
+    campaigns: data.campaigns?.map((campaign: any) => ({
+      ...campaign,
+      startDate: campaign.startDate ? new Date(campaign.startDate) : new Date(),
+      endDate: campaign.endDate ? new Date(campaign.endDate) : new Date(),
+    })) || [],
+  };
+};
+
 export const useAppStore = create<AppState>((set, get) => {
   // Load from localStorage on init
   const savedData = (() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : defaultState;
+      const parsed = saved ? JSON.parse(saved) : defaultState;
+      return hydrateDates(parsed);
     } catch {
       return defaultState;
     }
