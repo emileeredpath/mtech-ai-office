@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { TaskRow } from '@/components/tasks/TaskRow';
+import { AddTaskModal } from '@/components/tasks/AddTaskModal';
 import { Brand, TaskStatus } from '@/types/index';
 
 type FilterBrand = Brand | 'all';
@@ -10,6 +11,7 @@ type FilterPriority = 'all' | 'high' | 'medium' | 'low';
 
 export function MyTasksScreen() {
   const tasks = useAppStore((s) => s.tasks);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const [filterBrand, setFilterBrand] = useState<FilterBrand>('all');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
@@ -87,7 +89,7 @@ export function MyTasksScreen() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-text-primary">My Tasks</h1>
-          <button className="btn btn-primary flex items-center gap-2">
+          <button onClick={() => setShowAddModal(true)} className="btn btn-primary flex items-center gap-2">
             <Plus size={18} />
             Add task
           </button>
@@ -172,6 +174,8 @@ export function MyTasksScreen() {
           )}
         </div>
       </div>
+
+      {showAddModal && <AddTaskModal onClose={() => setShowAddModal(false)} />}
     </div>
   );
 }
