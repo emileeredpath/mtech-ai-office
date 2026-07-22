@@ -38,19 +38,7 @@ export function CampaignsScreen() {
                 <div
                   key={campaign.id}
                   className="card cursor-pointer hover:shadow-lg transition-shadow"
-                  style={{ cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => {
-                    console.log('Clicked campaign:', campaign.id);
-                    selectCampaign(campaign.id);
-                    alert(`Selected: ${campaign.name}`);
-                  }}
-                  onMouseEnter={(e) => {
-                    console.log('Mouse enter on:', campaign.id);
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                  }}
+                  onClick={() => alert('test click')}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
