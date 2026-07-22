@@ -14,6 +14,12 @@ export function CampaignDetailPanel() {
   const tasks = useAppStore((s) => s.tasks);
 
   const campaign = selectedCampaignId ? getCampaignById(selectedCampaignId) : null;
+
+  useEffect(() => {
+    console.log('CampaignDetailPanel - selectedCampaignId:', selectedCampaignId);
+    console.log('CampaignDetailPanel - campaign:', campaign);
+  }, [selectedCampaignId, campaign]);
+
   const campaignTasks = campaign ? tasks.filter((t) => t.campaignId === campaign.id) : [];
 
   const [notes, setNotes] = useState(campaign?.notes || '');
@@ -24,7 +30,10 @@ export function CampaignDetailPanel() {
     }
   }, [selectedCampaignId, campaign]);
 
-  if (!campaign) return null;
+  if (!campaign) {
+    console.log('CampaignDetailPanel - no campaign found');
+    return null;
+  }
 
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newNotes = e.target.value;
