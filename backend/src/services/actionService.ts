@@ -125,7 +125,7 @@ function getIdempotentResponse(requestId: string | undefined): ActionResult | nu
   if (!requestId) return null;
   const row = db
     .prepare('SELECT response FROM idempotency_keys WHERE request_id = ?')
-    .get(requestId) as { response: string } | undefined;
+    .get(requestId) as unknown as { response: string } | undefined;
   return row ? (JSON.parse(row.response) as ActionResult) : null;
 }
 

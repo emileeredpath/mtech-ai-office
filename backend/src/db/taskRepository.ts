@@ -48,19 +48,19 @@ function rowToRecord(row: TaskRow): TaskRecord {
 }
 
 export function getAllTasks(): TaskRecord[] {
-  const rows = db.prepare('SELECT * FROM tasks ORDER BY created_at DESC').all() as TaskRow[];
+  const rows = db.prepare('SELECT * FROM tasks ORDER BY created_at DESC').all() as unknown as TaskRow[];
   return rows.map(rowToRecord);
 }
 
 export function getTaskById(id: string): TaskRecord | undefined {
-  const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | undefined;
+  const row = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as unknown as TaskRow | undefined;
   return row ? rowToRecord(row) : undefined;
 }
 
 export function findTasksByTitle(title: string): TaskRecord[] {
   const rows = db
     .prepare('SELECT * FROM tasks WHERE lower(title) LIKE lower(?)')
-    .all(`%${title}%`) as TaskRow[];
+    .all(`%${title}%`) as unknown as TaskRow[];
   return rows.map(rowToRecord);
 }
 
@@ -85,6 +85,9 @@ export function updateTaskRow(id: string, updates: Partial<TaskRecord>): TaskRec
   if (!existing) return undefined;
 
   const merged: TaskRecord = { ...existing, ...updates };
+  // node:sqlite (unlike better-sqlite3) throws on named parameters present in
+  // the bound object but not referenced in the SQL, so only pass exactly the
+  // fields this UPDATE statement uses — not the full merged record.
   db.prepare(
     `UPDATE tasks SET
       title = @title, notes = @notes, brand = @brand, status = @status, priority = @priority,
@@ -94,16 +97,29 @@ export function updateTaskRow(id: string, updates: Partial<TaskRecord>): TaskRec
       last_brief_generated = @lastBriefGenerated
     WHERE id = @id`
   ).run({
-    ...merged,
+    id: merged.id,
+    title: merged.title,
+    notes: merged.notes,
+    brand: merged.brand,
+    status: merged.status,
+    priority: merged.priority,
+    deadline: merged.deadline,
+    startDate: merged.startDate,
+    campaignId: merged.campaignId,
+    completedAt: merged.completedAt,
+    previousStatus: merged.previousStatus,
     history: JSON.stringify(merged.history),
     approvalRequired: merged.approvalRequired ? 1 : 0,
+    approver: merged.approver,
+    blockerReason: merged.blockerReason,
+    lastBriefGenerated: merged.lastBriefGenerated,
   });
 
   return getTaskById(id);
 }
 
 export function taskCountByStatus(status: string): number {
-  const row = db.prepare('SELECT COUNT(*) as count FROM tasks WHERE status = ?').get(status) as {
+  const row = db.prepare('SELECT COUNT(*) as count FROM tasks WHERE status = ?').get(status) as unknown as {
     count: number;
   };
   return row.count;
