@@ -238,9 +238,19 @@ function doUpdateTask(payload: unknown, source: ActionSource | undefined, reques
   if (input.campaign_id !== undefined) updates.campaignId = input.campaign_id;
   if (input.status !== undefined) {
     updates.status = input.status;
-    if (input.status !== 'complete') {
+    if (input.status !== 'complete' && existing.status === 'complete') {
+      // Reopening: clear completion state and record it in history, same as
+      // the dashboard's own reopenTask does for local-only tasks.
       updates.completedAt = null;
       updates.previousStatus = null;
+      const historyEntry: TaskHistoryEntry = {
+        id: `hist-${nanoid(8)}`,
+        action: 'reopened',
+        timestamp: new Date().toISOString(),
+        previousStatus: 'complete',
+        newStatus: input.status,
+      };
+      updates.history = [...existing.history, historyEntry];
     }
   }
 
