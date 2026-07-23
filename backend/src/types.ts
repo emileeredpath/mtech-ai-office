@@ -1,0 +1,68 @@
+export type Brand = 'mtech' | 'brentwood' | 'radio-links' | 'capcom' | 'ircl';
+
+export type TaskStatus =
+  | 'backlog'
+  | 'not-started'
+  | 'in-progress'
+  | 'waiting-approval'
+  | 'waiting-john'
+  | 'waiting-customer'
+  | 'approved-ready'
+  | 'blocked'
+  | 'complete';
+
+export type TaskPriority = 'high' | 'medium' | 'low';
+
+export interface TaskHistoryEntry {
+  id: string;
+  action: 'completed' | 'reopened';
+  timestamp: string;
+  previousStatus: TaskStatus;
+  newStatus: TaskStatus;
+}
+
+export interface TaskRecord {
+  id: string;
+  title: string;
+  notes: string;
+  brand: Brand;
+  status: TaskStatus;
+  priority: TaskPriority;
+  deadline: string | null;
+  startDate: string | null;
+  campaignId: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  previousStatus: TaskStatus | null;
+  history: TaskHistoryEntry[];
+  approvalRequired: boolean;
+  approver: 'john' | 'lydia' | 'customer' | null;
+  blockerReason: string | null;
+  lastBriefGenerated: string | null;
+  source: string | null;
+  sourceConversationId: string | null;
+}
+
+export interface ActionSource {
+  type: string;
+  conversationId?: string;
+}
+
+export interface ActionRequest {
+  action: string;
+  payload: Record<string, unknown>;
+  source?: ActionSource;
+  request_id?: string;
+  confirmed?: boolean;
+}
+
+export interface ActionResult<T = unknown> {
+  success: boolean;
+  action: string;
+  result?: T;
+  message: string;
+  requires_confirmation?: boolean;
+  preview?: unknown;
+  possible_duplicates?: unknown[];
+  error?: string;
+}

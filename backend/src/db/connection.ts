@@ -1,28 +1,84 @@
-import pg from 'pg';
+import Database from 'better-sqlite3';
+import { mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
-const { Pool } = pg;
+const DB_PATH = process.env.DATABASE_PATH || './data/ai-office.db';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/ai_office',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+mkdirSync(dirname(DB_PATH), { recursive: true });
 
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-});
+export const db = new Database(DB_PATH);
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
-export const query = (text: string, params?: any[]) => {
-  return pool.query(text, params);
-};
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tasks (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    notes TEXT NOT NULL DEFAULT '',
+    brand TEXT NOT NULL DEFAULT 'mtech',
+    status TEXT NOT NULL DEFAULT 'not-started',
+    priority TEXT NOT NULL DEFAULT 'medium',
+    deadline TEXT,
+    start_date TEXT,
+    campaign_id TEXT,
+    created_at TEXT NOT NULL,
+    completed_at TEXT,
+    previous_status TEXT,
+    history TEXT NOT NULL DEFAULT '[]',
+    approval_required INTEGER NOT NULL DEFAULT 0,
+    approver TEXT,
+    blocker_reason TEXT,
+    last_brief_generated TEXT,
+    source TEXT,
+    source_conversation_id TEXT
+  );
 
-export const getClient = async () => {
-  return pool.connect();
-};
+  CREATE TABLE IF NOT EXISTS campaigns (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    brand TEXT NOT NULL DEFAULT 'mtech',
+    primary_industry TEXT NOT NULL DEFAULT '',
+    secondary_industry TEXT NOT NULL DEFAULT '',
+    theme TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'planning',
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    budget REAL,
+    spend REAL NOT NULL DEFAULT 0,
+    conversions INTEGER NOT NULL DEFAULT 0,
+    leads INTEGER NOT NULL DEFAULT 0,
+    engagement REAL NOT NULL DEFAULT 0,
+    colour TEXT NOT NULL DEFAULT '#3B82F6',
+    reactive INTEGER NOT NULL DEFAULT 0,
+    notes TEXT NOT NULL DEFAULT ''
+  );
 
-export const closePool = async () => {
-  await pool.end();
-};
+  CREATE TABLE IF NOT EXISTS audit_log (
+    id TEXT PRIMARY KEY,
+    action TEXT NOT NULL,
+    resource_type TEXT NOT NULL,
+    resource_id TEXT,
+    previous_value TEXT,
+    new_value TEXT,
+    source TEXT NOT NULL,
+    source_conversation_id TEXT,
+    request_id TEXT,
+    confirmed INTEGER NOT NULL DEFAULT 1,
+    automatic INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  );
 
-export default pool;
+  CREATE TABLE IF NOT EXISTS idempotency_keys (
+    request_id TEXT PRIMARY KEY,
+    action TEXT NOT NULL,
+    response TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_tasks_campaign_id ON tasks(campaign_id);
+  CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+  CREATE INDEX IF NOT EXISTS idx_audit_log_resource ON audit_log(resource_type, resource_id);
+  CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at);
+`);
+
+export default db;

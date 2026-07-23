@@ -4,6 +4,13 @@ node_modules/
 # Build
 dist/
 
+# Backend local database
+backend/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
 # Playwright
 test-results/
 playwright-report/
