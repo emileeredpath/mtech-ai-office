@@ -3,6 +3,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import actionsRouter from './routes/actions.js';
 import tasksRouter from './routes/tasks.js';
+import mcpRouter from './routes/mcp.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -33,6 +34,7 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.use('/api/actions', actionsRouter);
 app.use('/api/tasks', tasksRouter);
+app.use('/mcp', mcpRouter);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, message: 'Not found' });
