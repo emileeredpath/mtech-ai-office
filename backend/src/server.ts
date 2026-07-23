@@ -56,4 +56,5 @@ app.use((err: Error & { type?: string; status?: number }, _req: Request, res: Re
 
 app.listen(PORT, () => {
   console.log(`AI Office Actions API listening on port ${PORT}`);
+  console.log(`API Key configured: ${process.env.API_KEY ? 'yes' : 'no'}`);
 });
