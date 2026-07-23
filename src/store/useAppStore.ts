@@ -1,16 +1,19 @@
 import { create } from 'zustand';
-import { Task, Campaign } from '@/types/index';
+import { Task, Campaign, TaskHistoryEntry } from '@/types/index';
 import { seedTasks, seedCampaigns } from '@/data/seed';
 
 interface AppState {
   tasks: Task[];
   campaigns: Campaign[];
   selectedTaskId: string | null;
+  selectedCampaignId: string | null;
 
   // Task operations
   addTask: (task: Task) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
+  completeTask: (id: string) => void;
+  reopenTask: (id: string) => void;
   selectTask: (id: string | null) => void;
   getTaskById: (id: string) => Task | undefined;
 
@@ -19,6 +22,7 @@ interface AppState {
   updateCampaign: (id: string, updates: Partial<Campaign>) => void;
   deleteCampaign: (id: string) => void;
   getCampaignById: (id: string) => Campaign | undefined;
+  selectCampaign: (id: string | null) => void;
 
   // Derived data
   getTasksForToday: () => Task[];
@@ -34,6 +38,44 @@ const defaultState = {
   tasks: seedTasks,
   campaigns: seedCampaigns,
   selectedTaskId: null,
+  selectedCampaignId: null,
+};
+
+const hydrateDates = (data: any) => {
+  if (!data.tasks) return data;
+
+  const toDate = (val: any): Date | null => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    if (typeof val === 'string') return new Date(val);
+    return null;
+  };
+
+  return {
+    ...data,
+    tasks: data.tasks.map((task: any) => ({
+      ...task,
+      deadline: toDate(task.deadline),
+      startDate: toDate(task.startDate),
+      createdAt: toDate(task.createdAt) || new Date(),
+      completedAt: toDate(task.completedAt),
+      previousStatus: task.previousStatus ?? null,
+      history: (task.history || []).map((entry: any) => ({
+        ...entry,
+        timestamp: toDate(entry.timestamp) || new Date(),
+      })),
+    })),
+    campaigns: (data.campaigns || []).map((campaign: any) => ({
+      ...campaign,
+      startDate: toDate(campaign.startDate) || new Date(),
+      endDate: toDate(campaign.endDate) || new Date(),
+      spend: campaign.spend || 0,
+      conversions: campaign.conversions || 0,
+      leads: campaign.leads || 0,
+      engagement: campaign.engagement || 0,
+      notes: campaign.notes || '',
+    })),
+  };
 };
 
 export const useAppStore = create<AppState>((set, get) => {
@@ -41,7 +83,8 @@ export const useAppStore = create<AppState>((set, get) => {
   const savedData = (() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : defaultState;
+      const parsed = saved ? JSON.parse(saved) : defaultState;
+      return hydrateDates(parsed);
     } catch {
       return defaultState;
     }
@@ -49,6 +92,8 @@ export const useAppStore = create<AppState>((set, get) => {
 
   return {
     ...savedData,
+    selectedTaskId: savedData.selectedTaskId || null,
+    selectedCampaignId: savedData.selectedCampaignId || null,
 
     addTask: (task: Task) => {
       set((state) => {
@@ -75,6 +120,61 @@ export const useAppStore = create<AppState>((set, get) => {
           ...state,
           tasks: state.tasks.filter((t) => t.id !== id),
           selectedTaskId: state.selectedTaskId === id ? null : state.selectedTaskId,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+        return newState;
+      });
+    },
+
+    completeTask: (id: string) => {
+      set((state) => {
+        const newState = {
+          ...state,
+          tasks: state.tasks.map((t) => {
+            if (t.id !== id || t.status === 'complete') return t;
+            const entry: TaskHistoryEntry = {
+              id: `hist-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              action: 'completed',
+              timestamp: new Date(),
+              previousStatus: t.status,
+              newStatus: 'complete',
+            };
+            return {
+              ...t,
+              previousStatus: t.status,
+              status: 'complete' as const,
+              completedAt: new Date(),
+              history: [...t.history, entry],
+            };
+          }),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+        return newState;
+      });
+    },
+
+    reopenTask: (id: string) => {
+      set((state) => {
+        const newState = {
+          ...state,
+          tasks: state.tasks.map((t) => {
+            if (t.id !== id || t.status !== 'complete') return t;
+            const restoredStatus = t.previousStatus || 'not-started';
+            const entry: TaskHistoryEntry = {
+              id: `hist-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              action: 'reopened',
+              timestamp: new Date(),
+              previousStatus: 'complete',
+              newStatus: restoredStatus,
+            };
+            return {
+              ...t,
+              status: restoredStatus,
+              completedAt: null,
+              previousStatus: null,
+              history: [...t.history, entry],
+            };
+          }),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
         return newState;
@@ -121,6 +221,10 @@ export const useAppStore = create<AppState>((set, get) => {
 
     getCampaignById: (id: string) => {
       return get().campaigns.find((c) => c.id === id);
+    },
+
+    selectCampaign: (id: string | null) => {
+      set({ selectedCampaignId: id });
     },
 
     getTasksForToday: () => {

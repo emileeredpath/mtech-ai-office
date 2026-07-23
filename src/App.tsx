@@ -1,30 +1,35 @@
 import { useState } from 'react';
-import { Home, CheckSquare, FolderOpen, Calendar, BarChart3, Settings } from 'lucide-react';
+import { Home, CheckSquare, FolderOpen, Calendar, BarChart3, Workflow, Settings } from 'lucide-react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TaskDetailPanel } from '@/components/tasks/TaskDetailPanel';
+import { CampaignDetailPanel } from '@/components/campaigns/CampaignDetailPanel';
 import { HomeScreen } from '@/screens/HomeScreen';
 import { MyTasksScreen } from '@/screens/MyTasksScreen';
 import { CampaignsScreen } from '@/screens/CampaignsScreen';
 import { CalendarScreen } from '@/screens/CalendarScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
+import { PipelineScreen } from '@/screens/PipelineScreen';
+import { MetricsScreen } from '@/screens/MetricsScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 import { useAppStore } from '@/store/useAppStore';
 import '@/styles/main.css';
 
-type Screen = 'home' | 'tasks' | 'campaigns' | 'calendar' | 'dashboard' | 'settings';
+type Screen = 'home' | 'tasks' | 'campaigns' | 'calendar' | 'dashboard' | 'pipeline' | 'metrics' | 'settings';
 
 const NAVIGATION_ITEMS = [
   { id: 'home' as Screen, icon: Home, label: 'Home' },
   { id: 'tasks' as Screen, icon: CheckSquare, label: 'My Tasks' },
   { id: 'campaigns' as Screen, icon: FolderOpen, label: 'Campaigns' },
+  { id: 'pipeline' as Screen, icon: Workflow, label: 'Pipeline' },
+  { id: 'metrics' as Screen, icon: BarChart3, label: 'Metrics' },
   { id: 'calendar' as Screen, icon: Calendar, label: 'Calendar' },
-  { id: 'dashboard' as Screen, icon: BarChart3, label: 'Dashboard' },
   { id: 'settings' as Screen, icon: Settings, label: 'Settings' },
 ];
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const selectedTaskId = useAppStore((s) => s.selectedTaskId);
+  const selectedCampaignId = useAppStore((s) => s.selectedCampaignId);
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -34,6 +39,10 @@ export default function App() {
         return <MyTasksScreen />;
       case 'campaigns':
         return <CampaignsScreen />;
+      case 'pipeline':
+        return <PipelineScreen />;
+      case 'metrics':
+        return <MetricsScreen />;
       case 'calendar':
         return <CalendarScreen />;
       case 'dashboard':
@@ -54,7 +63,8 @@ export default function App() {
       />
       <main className="flex-1 overflow-hidden flex">
         <div className="flex-1 overflow-y-auto">{renderScreen()}</div>
-        {selectedTaskId && <TaskDetailPanel />}
+        {selectedCampaignId && <CampaignDetailPanel />}
+        {selectedTaskId && !selectedCampaignId && <TaskDetailPanel />}
       </main>
     </div>
   );

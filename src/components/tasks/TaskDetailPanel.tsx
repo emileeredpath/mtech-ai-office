@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, MoreVertical } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, MoreVertical, CheckCircle2, RotateCcw } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { BriefGenerator } from '@/components/tasks/BriefGenerator';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -9,16 +9,26 @@ import '@/styles/taskDetailPanel.css';
 
 export function TaskDetailPanel() {
   const selectedTaskId = useAppStore((s) => s.selectedTaskId);
-  const getTaskById = useAppStore((s) => s.getTaskById);
+  const task = useAppStore((s) =>
+    s.selectedTaskId ? s.tasks.find((t) => t.id === s.selectedTaskId) ?? null : null
+  );
   const updateTask = useAppStore((s) => s.updateTask);
+  const completeTask = useAppStore((s) => s.completeTask);
+  const reopenTask = useAppStore((s) => s.reopenTask);
   const selectTask = useAppStore((s) => s.selectTask);
   const getCampaignById = useAppStore((s) => s.getCampaignById);
+  const campaigns = useAppStore((s) => s.campaigns);
 
-  const task = selectedTaskId ? getTaskById(selectedTaskId) : null;
   const campaign = task?.campaignId ? getCampaignById(task.campaignId) : null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [notes, setNotes] = useState(task?.notes || '');
+
+  useEffect(() => {
+    if (task) {
+      setNotes(task.notes || '');
+    }
+  }, [selectedTaskId, task]);
 
   if (!task) return null;
 
@@ -31,6 +41,18 @@ export function TaskDetailPanel() {
     }, 500);
   };
 
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStatus = e.target.value;
+    if (newStatus === 'complete') {
+      completeTask(task.id);
+    } else if (task.status === 'complete') {
+      // Leaving 'complete' via the dropdown reopens into the chosen status
+      updateTask(task.id, { status: newStatus as any, completedAt: null, previousStatus: null });
+    } else {
+      updateTask(task.id, { status: newStatus as any });
+    }
+  };
+
   return (
     <div className="task-detail-panel">
       {/* Header */}
@@ -38,15 +60,39 @@ export function TaskDetailPanel() {
         <button className="btn-close" onClick={() => selectTask(null)}>
           <X size={20} />
         </button>
-        <button className="btn-more">
-          <MoreVertical size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          {task.status === 'complete' ? (
+            <button
+              onClick={() => reopenTask(task.id)}
+              className="btn btn-secondary flex items-center gap-2"
+              title="Reopen task"
+            >
+              <RotateCcw size={16} />
+              Reopen
+            </button>
+          ) : (
+            <button
+              onClick={() => completeTask(task.id)}
+              className="btn btn-primary flex items-center gap-2"
+              title="Mark complete"
+            >
+              <CheckCircle2 size={16} />
+              Mark complete
+            </button>
+          )}
+          <button className="btn-more">
+            <MoreVertical size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Content */}
       <div className="task-detail-content">
         {/* Title */}
         <h1 className="task-detail-title">{task.title}</h1>
+        {task.status === 'complete' && task.completedAt && (
+          <p className="text-sm text-success mb-2">Completed {formatDate(task.completedAt)}</p>
+        )}
 
         {/* Field Row 1 */}
         <div className="task-detail-fields">
@@ -54,7 +100,7 @@ export function TaskDetailPanel() {
             <label>Status</label>
             <select
               value={task.status}
-              onChange={(e) => updateTask(task.id, { status: e.target.value as any })}
+              onChange={handleStatusChange}
               className="input"
             >
               <option value="not-started">Not Started</option>
@@ -88,7 +134,7 @@ export function TaskDetailPanel() {
             <label>Due date</label>
             <input
               type="date"
-              value={task.deadline ? task.deadline.toISOString().split('T')[0] : ''}
+              value={task.deadline ? (typeof task.deadline === 'string' ? task.deadline : task.deadline.toISOString().split('T')[0]) : ''}
               onChange={(e) =>
                 updateTask(task.id, {
                   deadline: e.target.value ? new Date(e.target.value) : null,
@@ -115,7 +161,7 @@ export function TaskDetailPanel() {
           </div>
 
           <div className="task-detail-field">
-            <label>Campaign</label>
+            <label>Campaign {campaign && <span className="text-accent font-semibold">✓</span>}</label>
             <select
               value={task.campaignId || ''}
               onChange={(e) =>
@@ -124,9 +170,14 @@ export function TaskDetailPanel() {
                 })
               }
               className="input"
+              style={campaign ? { borderColor: '#3b82f6', borderWidth: '2px' } : {}}
             >
               <option value="">None</option>
-              {/* TODO: render available campaigns */}
+              {campaigns.map((campaign) => (
+                <option key={campaign.id} value={campaign.id}>
+                  {campaign.name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -160,6 +211,11 @@ export function TaskDetailPanel() {
           <p className="text-text-secondary text-sm">
             Task created on {formatDate(task.createdAt)}
           </p>
+          {[...task.history].reverse().map((entry) => (
+            <p key={entry.id} className="text-text-secondary text-sm mt-1">
+              {entry.action === 'completed' ? 'Marked complete' : 'Reopened'} on {formatDate(entry.timestamp)}
+            </p>
+          ))}
         </div>
       </div>
     </div>

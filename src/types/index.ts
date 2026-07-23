@@ -29,6 +29,14 @@ export type AISkill =
   | 'Case Study Writer'
   | 'Funding & Rewards Manager';
 
+export interface TaskHistoryEntry {
+  id: string;
+  action: 'completed' | 'reopened';
+  timestamp: Date;
+  previousStatus: TaskStatus;
+  newStatus: TaskStatus;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -41,6 +49,8 @@ export interface Task {
   campaignId: string | null;
   createdAt: Date;
   completedAt: Date | null;
+  previousStatus: TaskStatus | null;
+  history: TaskHistoryEntry[];
   approvalRequired: boolean;
   approver: 'john' | 'lydia' | 'customer' | null;
   blockerReason: string | null;
@@ -58,9 +68,14 @@ export interface Campaign {
   startDate: Date;
   endDate: Date;
   budget: number | null;
+  spend: number; // actual spend to date
+  conversions: number;
+  leads: number;
+  engagement: number; // percentage or count
   colour: string;
   tasks: string[];
   reactive: boolean;
+  notes: string;
 }
 
 export interface BriefGeneratorState {
