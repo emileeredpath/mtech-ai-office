@@ -9,6 +9,7 @@ import {
   getDailyDashboardSnapshot,
   saveDailyDashboardSnapshot,
 } from '../db/marketingOsRepository.js';
+import { generateDailyDashboard } from '../services/dashboardGenerationService.js';
 import { nanoid } from 'nanoid';
 
 const router = Router();
@@ -185,6 +186,27 @@ router.post('/dashboard/save', (req: Request, res: Response) => {
   } catch (err) {
     console.error('Error saving dashboard:', err);
     res.status(500).json({ success: false, message: 'Failed to save dashboard' });
+  }
+});
+
+// Generate today's dashboard using Claude
+router.post('/dashboard/generate', async (req: Request, res: Response) => {
+  const { date } = req.body;
+  if (!date) {
+    res.status(400).json({ success: false, message: 'Date is required' });
+    return;
+  }
+
+  try {
+    const result = await generateDailyDashboard({ date });
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (err) {
+    console.error('Error generating dashboard:', err);
+    res.status(500).json({ success: false, message: 'Failed to generate dashboard' });
   }
 });
 

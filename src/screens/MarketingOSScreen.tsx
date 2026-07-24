@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, TrendingUp, Lightbulb, CheckCircle2, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useMarketingOSStore } from '@/store/useMarketingOSStore';
+import { DashboardContextForm } from '@/components/marketingos/DashboardContextForm';
+import { BusinessObjectivesManager } from '@/components/marketingos/BusinessObjectivesManager';
 
 interface BusinessObjective {
   id: string;
@@ -42,6 +44,7 @@ export function MarketingOSScreen() {
   const [dashboard, setDashboard] = useState<DailyDashboard | null>(null);
   const [loading, setLoading] = useState(false);
   const [showContextForm, setShowContextForm] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const marketingStore = useMarketingOSStore();
 
@@ -66,9 +69,49 @@ export function MarketingOSScreen() {
   };
 
   const generateDashboard = async () => {
-    // This will call Claude to generate the dashboard
-    // For now, placeholder
     setShowContextForm(true);
+  };
+
+  const handleContextSubmit = async (context: {
+    userProvidedContext: string;
+    currentTasks: string[];
+    recentActivity: string[];
+    salesFeedback: string[];
+    performanceObservations: string[];
+    decisionsAwaiting: string[];
+  }) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      // Save context
+      await fetch('/api/marketingos/dashboard/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: today, ...context }),
+      });
+
+      // Generate dashboard
+      setGenerating(true);
+      const response = await fetch('/api/marketingos/dashboard/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: today }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Reload dashboard
+        await loadTodaysDashboard();
+      } else {
+        console.error('Failed to generate dashboard:', data.error);
+        alert(`Failed to generate dashboard: ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Failed to generate dashboard');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -121,6 +164,15 @@ export function MarketingOSScreen() {
         {activeTab === 'opportunities' && <OpportunitiesTab />}
         {activeTab === 'brain' && <MarketingBrainTab />}
       </div>
+
+      {/* Context Form Modal */}
+      {showContextForm && (
+        <DashboardContextForm
+          date={new Date().toISOString().split('T')[0]}
+          onSubmit={handleContextSubmit}
+          onClose={() => setShowContextForm(false)}
+        />
+      )}
     </div>
   );
 }
@@ -346,11 +398,7 @@ function TodayTab({
 }
 
 function ObjectivesTab() {
-  return (
-    <div className="text-center py-12">
-      <p className="text-gray-600">Objectives module coming soon</p>
-    </div>
-  );
+  return <BusinessObjectivesManager />;
 }
 
 function DecisionsTab() {
