@@ -44,12 +44,12 @@ app.use('/mcp', mcpRouter);
 // Serve frontend static files in production
 const distPath = path.join(__dirname, '../../dist');
 console.log(`Serving static files from: ${distPath}`);
-app.use(express.static(distPath));
+app.use('/ai-office', express.static(distPath));
 
-// SPA fallback: serve index.html for all non-API routes
-app.get('*', (_req: Request, res: Response) => {
+// SPA fallback: serve index.html for non-API routes under /ai-office/
+app.get('/ai-office/*', (_req: Request, res: Response) => {
   const indexPath = path.join(distPath, 'index.html');
-  console.log(`SPA fallback: attempting to serve ${indexPath}`);
+  console.log(`SPA fallback: attempting to serve ${indexPath} for path ${_req.path}`);
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error(`Error serving index.html: ${err.message}`);
