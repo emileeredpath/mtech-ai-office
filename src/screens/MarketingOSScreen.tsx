@@ -40,6 +40,9 @@ export function MarketingOSScreen() {
     competitors: '',
   });
 
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskLoading, setTaskLoading] = useState(false);
+
   const handleCreateObjective = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -109,6 +112,37 @@ export function MarketingOSScreen() {
       alert('Error generating dashboard. Check your API key and Anthropic account.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateTask = async () => {
+    if (!taskTitle.trim() || !selectedObjective) return;
+    setTaskLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: taskTitle,
+          notes: `Marketing task for: ${selectedObjective.title}`,
+          brand: 'mtech',
+          status: 'not-started',
+          priority: 'high',
+          campaignId: selectedObjective.id,
+          source: 'marketingos',
+        }),
+      });
+
+      const data = await response.json() as any;
+      if (data.result) {
+        setTaskTitle('');
+        alert('✓ Task added to your dashboard!');
+      }
+    } catch (error) {
+      console.error('Error creating task:', error);
+      alert('Error creating task');
+    } finally {
+      setTaskLoading(false);
     }
   };
 
@@ -311,6 +345,27 @@ export function MarketingOSScreen() {
                         ✓ Strategy generated successfully
                       </div>
                     )}
+
+                    <div className="mt-6 pt-6 border-t border-slate-200">
+                      <h5 className="font-medium text-slate-900 mb-3">Add to Dashboard</h5>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={taskTitle}
+                          onChange={(e) => setTaskTitle(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleCreateTask()}
+                          placeholder="e.g., Launch LinkedIn campaign..."
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                        />
+                        <button
+                          onClick={handleCreateTask}
+                          disabled={taskLoading || !taskTitle.trim()}
+                          className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-400 transition text-sm font-medium"
+                        >
+                          {taskLoading ? '...' : '✓ Add'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
