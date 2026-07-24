@@ -4,6 +4,7 @@ import 'dotenv/config';
 import actionsRouter from './routes/actions.js';
 import tasksRouter from './routes/tasks.js';
 import mcpRouter from './routes/mcp.js';
+import marketingosRouter from './routes/marketingos.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,6 +35,7 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.use('/api/actions', actionsRouter);
 app.use('/api/tasks', tasksRouter);
+app.use('/api/marketingos', marketingosRouter);
 app.use('/mcp', mcpRouter);
 
 app.use((req: Request, res: Response) => {

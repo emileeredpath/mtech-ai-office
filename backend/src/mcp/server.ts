@@ -1,7 +1,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { executeAction } from '../services/actionService.js';
+import {
+  getAllBusinessObjectives,
+  getDashboardContextForDate,
+  getDailyDashboardSnapshot,
+  saveDailyDashboardSnapshot,
+} from '../db/marketingOsRepository.js';
 import type { ActionResult } from '../types.js';
+import { nanoid } from 'nanoid';
 
 // The MCP tools are thin wrappers around the exact same executeAction() used
 // by POST /api/actions — same validation, same duplicate detection, same
@@ -149,6 +156,133 @@ export function createAiOfficeMcpServer(): McpServer {
         payload: {},
       });
       return toToolResult(result);
+    }
+  );
+
+  // MarketingOS Tools
+  server.registerTool(
+    'marketingos_get_objectives',
+    {
+      title: 'Get business objectives from MarketingOS',
+      description:
+        'Retrieve all business objectives for the current year. Use this before generating dashboards or making marketing recommendations. Read-only.',
+      inputSchema: {},
+    },
+    async () => {
+      try {
+        const objectives = getAllBusinessObjectives();
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ success: true, result: objectives }, null, 2) }],
+          isError: false,
+        };
+      } catch (err) {
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: String(err) }) }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    'marketingos_get_context',
+    {
+      title: 'Get context for generating a dashboard',
+      description:
+        'Retrieve the user-provided context for a specific date. This includes current tasks, recent activity, sales feedback, performance observations, and decisions awaiting attention. Use this when generating a daily dashboard.',
+      inputSchema: {
+        date: z.string().describe('ISO date string (YYYY-MM-DD)'),
+      },
+    },
+    async ({ date }) => {
+      try {
+        const context = getDashboardContextForDate(date);
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ success: true, result: context }, null, 2) }],
+          isError: false,
+        };
+      } catch (err) {
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: String(err) }) }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.registerTool(
+    'marketingos_generate_dashboard',
+    {
+      title: 'Generate today\'s dashboard',
+      description:
+        'Analyze business objectives, context, and recent activity to generate today\'s priorities, identify risks and opportunities, and provide a strategic recommendation. This saves the dashboard snapshot to MarketingOS. Use only after the user has provided context.',
+      inputSchema: {
+        date: z.string().describe('ISO date string (YYYY-MM-DD)'),
+        analysis: z.object({
+          businessObjectiveStatus: z.array(
+            z.object({
+              objectiveId: z.string(),
+              title: z.string(),
+              status: z.enum(['on-track', 'at-risk', 'off-track']),
+              progress: z.number().min(0).max(100),
+              risks: z.array(z.string()),
+            })
+          ),
+          priorities: z.array(
+            z.object({
+              rank: z.number().int().min(1).max(5),
+              action: z.string(),
+              why: z.string(),
+              objectiveSupported: z.string(),
+              deadline: z.string().optional(),
+              expectedImpact: z.string(),
+              confidence: z.number().min(0).max(1),
+              evidence: z.array(z.string()),
+            })
+          ),
+          needsAttention: z.array(z.string()),
+          opportunities: z.array(z.string()),
+          claudeRecommendation: z.object({
+            recommendation: z.string(),
+            reasoning: z.string(),
+            evidence: z.array(z.string()),
+            expectedOutcome: z.string(),
+          }),
+          confidenceNotes: z.string(),
+          sourcesUsed: z.array(z.string()),
+        }),
+      },
+    },
+    async ({ date, analysis }) => {
+      try {
+        saveDailyDashboardSnapshot({
+          id: nanoid(),
+          date,
+          businessObjectiveStatus: analysis.businessObjectiveStatus,
+          priorities: analysis.priorities,
+          needsAttention: analysis.needsAttention,
+          opportunities: analysis.opportunities,
+          claudeRecommendation: analysis.claudeRecommendation,
+          confidenceNotes: analysis.confidenceNotes,
+          generatedAt: new Date().toISOString(),
+          sourcesUsed: analysis.sourcesUsed,
+        });
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({ success: true, message: 'Dashboard generated and saved' }, null, 2),
+            },
+          ],
+          isError: false,
+        };
+      } catch (err) {
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ success: false, error: String(err) }) }],
+          isError: true,
+        };
+      }
     }
   );
 
