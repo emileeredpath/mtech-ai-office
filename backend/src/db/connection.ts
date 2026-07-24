@@ -78,10 +78,63 @@ db.exec(`
     created_at TEXT NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS business_objectives (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    success_statement TEXT NOT NULL,
+    metrics TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'on-track',
+    progress_percentage INTEGER NOT NULL DEFAULT 0,
+    risk_level TEXT NOT NULL DEFAULT 'none',
+    risk_notes TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS dashboard_context (
+    id TEXT PRIMARY KEY,
+    date TEXT NOT NULL UNIQUE,
+    user_provided_context TEXT NOT NULL,
+    current_tasks TEXT NOT NULL DEFAULT '[]',
+    recent_activity TEXT NOT NULL DEFAULT '[]',
+    sales_feedback TEXT NOT NULL DEFAULT '[]',
+    performance_observations TEXT NOT NULL DEFAULT '[]',
+    decisions_awaiting TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS daily_dashboard_snapshot (
+    id TEXT PRIMARY KEY,
+    date TEXT NOT NULL UNIQUE,
+    business_objective_status TEXT NOT NULL,
+    priorities TEXT NOT NULL,
+    needs_attention TEXT NOT NULL DEFAULT '[]',
+    opportunities TEXT NOT NULL DEFAULT '[]',
+    claude_recommendation TEXT NOT NULL,
+    confidence_notes TEXT,
+    generated_at TEXT NOT NULL,
+    sources_used TEXT NOT NULL DEFAULT '[]'
+  );
+
+  CREATE TABLE IF NOT EXISTS quick_capture_items (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    content TEXT NOT NULL,
+    category TEXT,
+    source TEXT,
+    status TEXT NOT NULL DEFAULT 'new',
+    created_at TEXT NOT NULL
+  );
+
   CREATE INDEX IF NOT EXISTS idx_tasks_campaign_id ON tasks(campaign_id);
   CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
   CREATE INDEX IF NOT EXISTS idx_audit_log_resource ON audit_log(resource_type, resource_id);
   CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at);
+  CREATE INDEX IF NOT EXISTS idx_dashboard_context_date ON dashboard_context(date);
+  CREATE INDEX IF NOT EXISTS idx_daily_dashboard_date ON daily_dashboard_snapshot(date);
+  CREATE INDEX IF NOT EXISTS idx_quick_capture_created ON quick_capture_items(created_at);
 `);
 
 export default db;

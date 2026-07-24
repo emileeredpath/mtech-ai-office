@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, CheckSquare, FolderOpen, Calendar, BarChart3, Workflow, Settings } from 'lucide-react';
+import { Home, CheckSquare, FolderOpen, Calendar, BarChart3, Workflow, Settings, Brain } from 'lucide-react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TaskDetailPanel } from '@/components/tasks/TaskDetailPanel';
 import { CampaignDetailPanel } from '@/components/campaigns/CampaignDetailPanel';
@@ -11,10 +11,11 @@ import { DashboardScreen } from '@/screens/DashboardScreen';
 import { PipelineScreen } from '@/screens/PipelineScreen';
 import { MetricsScreen } from '@/screens/MetricsScreen';
 import { SettingsScreen } from '@/screens/SettingsScreen';
+import { MarketingOSScreen } from '@/screens/MarketingOSScreen';
 import { useAppStore } from '@/store/useAppStore';
 import '@/styles/main.css';
 
-type Screen = 'home' | 'tasks' | 'campaigns' | 'calendar' | 'dashboard' | 'pipeline' | 'metrics' | 'settings';
+type Screen = 'home' | 'tasks' | 'campaigns' | 'calendar' | 'dashboard' | 'pipeline' | 'metrics' | 'marketingos' | 'settings';
 
 const NAVIGATION_ITEMS = [
   { id: 'home' as Screen, icon: Home, label: 'Home' },
@@ -22,6 +23,7 @@ const NAVIGATION_ITEMS = [
   { id: 'campaigns' as Screen, icon: FolderOpen, label: 'Campaigns' },
   { id: 'pipeline' as Screen, icon: Workflow, label: 'Pipeline' },
   { id: 'metrics' as Screen, icon: BarChart3, label: 'Metrics' },
+  { id: 'marketingos' as Screen, icon: Brain, label: 'MarketingOS' },
   { id: 'calendar' as Screen, icon: Calendar, label: 'Calendar' },
   { id: 'settings' as Screen, icon: Settings, label: 'Settings' },
 ];
@@ -47,6 +49,8 @@ export default function App() {
         return <CalendarScreen />;
       case 'dashboard':
         return <DashboardScreen />;
+      case 'marketingos':
+        return <MarketingOSScreen />;
       case 'settings':
         return <SettingsScreen />;
       default:
