@@ -180,6 +180,7 @@ router.post('/dashboard/save', (req: Request, res: Response) => {
     const snapshot = {
       id: nanoid(),
       ...parsed.data,
+      generatedAt: new Date().toISOString(),
     };
     saveDailyDashboardSnapshot(snapshot);
     res.json({ success: true, result: snapshot });

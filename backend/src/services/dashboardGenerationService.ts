@@ -4,11 +4,6 @@ import {
   saveDailyDashboardSnapshot,
 } from '../db/marketingOsRepository.js';
 import { nanoid } from 'nanoid';
-import Anthropic from '@anthropic-ai/sdk';
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 interface DashboardGenerationRequest {
   date: string;
@@ -39,16 +34,42 @@ export async function generateDailyDashboard(req: DashboardGenerationRequest) {
   const prompt = buildPrompt(objectives, context, date);
 
   try {
-    const message = await client.messages.create({
-      model: 'claude-opus-4-8',
-      max_tokens: 4000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      return {
+        success: false,
+        error: 'ANTHROPIC_API_KEY environment variable not set',
+      };
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-4-8',
+        max_tokens: 4000,
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      }),
     });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return {
+        success: false,
+        error: `API error: ${response.status} - ${error}`,
+      };
+    }
+
+    const message = await response.json() as any;
 
     // Extract the text response
     const responseText =

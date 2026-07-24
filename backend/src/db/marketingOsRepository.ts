@@ -118,7 +118,7 @@ export function upsertBusinessObjective(objective: Partial<BusinessObjective>): 
       objective.status || existing.status,
       objective.progressPercentage ?? existing.progressPercentage,
       objective.riskLevel || existing.riskLevel,
-      objective.riskNotes || existing.riskNotes,
+      objective.riskNotes ?? existing.riskNotes ?? '',
       now,
       id
     );
@@ -164,7 +164,7 @@ export function getDashboardContextForDate(date: string): DashboardContext | nul
   };
 }
 
-export function upsertDashboardContext(context: Omit<DashboardContext, 'createdAt' | 'updatedAt'>): DashboardContext {
+export function upsertDashboardContext(context: Omit<DashboardContext, 'id' | 'createdAt' | 'updatedAt'>): DashboardContext {
   const now = new Date().toISOString();
   const existing = getDashboardContextForDate(context.date);
 
