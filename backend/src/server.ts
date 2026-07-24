@@ -1,11 +1,16 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import 'dotenv/config';
 import actionsRouter from './routes/actions.js';
 import tasksRouter from './routes/tasks.js';
 import mcpRouter from './routes/mcp.js';
+import marketingosRouter from './routes/marketingos.js';
+import { initMarketingTables } from './db/marketingRepository.js';
 
 const app = express();
+initMarketingTables();
 const PORT = process.env.PORT || 3001;
 
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
@@ -34,7 +39,22 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.use('/api/actions', actionsRouter);
 app.use('/api/tasks', tasksRouter);
+app.use('/api/marketingos', marketingosRouter);
 app.use('/mcp', mcpRouter);
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distPath = path.join(__dirname, '../../dist');
+app.use('/ai-office', express.static(distPath));
+
+app.get('/ai-office/*', (_req: Request, res: Response) => {
+  const indexPath = path.join(distPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error(`Error serving index.html: ${err.message}`);
+      res.status(404).json({ success: false, message: 'Not found' });
+    }
+  });
+});
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ success: false, message: 'Not found' });
