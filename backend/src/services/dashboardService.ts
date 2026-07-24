@@ -105,7 +105,7 @@ async function callClaude(prompt: string): Promise<string> {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'claude-opus-4-1',
+      model: 'claude-opus-4-8',
       max_tokens: 2048,
       messages: [
         {
