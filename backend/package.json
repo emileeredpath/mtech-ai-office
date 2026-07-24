@@ -1,6 +1,6 @@
 {
   "name": "ai-office-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI Office Actions API - the controlled service layer Claude calls to read/write AI Office data",
   "type": "module",
   "main": "dist/server.js",
