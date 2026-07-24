@@ -47,7 +47,7 @@ router.post('/', rateLimit, (req, res) => {
   }
 });
 
-router.get('/audit-log', requireApiKey, (req, res) => {
+router.get('/audit-log', (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 200);
   res.json({ success: true, result: getAuditLog(limit) });
 });
